@@ -1,0 +1,9 @@
+# Environment for the #29 live drill
+main: 82b602f
+project: ax-demo42 (API :8092, shard A :25591, shard B :25592), recreated from current main with volumes kept
+image: sha256:94344bb98995b19c826f939739672481abaab8c25710e3910b48bdb7cf5b3b8d
+server: 18.6 (Debian 18.6-1.pgdg12+2) / pg_trickle 0.108.3
+host: macOS 27.2, Apple M1, 8 GB; Docker 29.9.2, VM 4106604544 bytes
+approval: https://github.com/surajgojanur/AgrregateX/issues/29#issuecomment-6550442553
+baseline (writer paused): oracle 0/0 x3 on both shards; A=5,881 B=5,911 rows
+note: the first dry run refused because a stopped writer is not a network member; the drill ran as designed with the writer running
