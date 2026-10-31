@@ -1,0 +1,6 @@
+{"via": "API", "tenant": 5, "shard": "b", "timed_out": true, "lag_ms": null, "visible": {"st_day_category_status": 197.2}}
+{"via": "API", "tenant": 2, "shard": "b", "timed_out": true, "lag_ms": null, "visible": {}}
+{"via": "API", "tenant": 1, "shard": "a", "timed_out": false, "lag_ms": 1051.8, "visible": {"st_day_product_status": 780.3, "st_hour_category_status": 993.0, "st_day_category_status": 1051.8}}
+{"via": "API", "tenant": 3, "shard": "a", "timed_out": false, "lag_ms": 1363.8, "visible": {"st_day_product_status": 1129.0, "st_day_category_status": 1279.8, "st_hour_category_status": 1363.8}}
+{"via":"standalone","interval_s": 0.025, "trial": 0, "visible_ms": {"st_day_category_status": 4085, "st_hour_category_status": 4300, "st_day_product_status": 4368}, "all3": true, "elapsed_ms": 4396, "polls": 137, "refreshes_during": 3}
+{"via":"standalone","interval_s": 0.025, "trial": 1, "visible_ms": {"st_day_category_status": 1009, "st_hour_category_status": 1223, "st_day_product_status": 1391}, "all3": true, "elapsed_ms": 1421, "polls": 41, "refreshes_during": 3}

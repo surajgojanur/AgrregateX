@@ -1,0 +1,27 @@
+19:36:49.457|110|postgres|pg_trickle scheduler|||Extension:Extension||
+last_refresh|19:36:46.492
+jobs|SUCCEEDED|34
+
+19:36:52.524|110|postgres|pg_trickle scheduler|||Extension:Extension||
+last_refresh|19:36:46.492
+jobs|SUCCEEDED|28
+
+19:36:55.601|110|postgres|pg_trickle scheduler|||Extension:Extension||
+last_refresh|19:36:46.492
+jobs|SUCCEEDED|22
+
+19:36:58.676|110|postgres|pg_trickle scheduler|||Extension:Extension||
+last_refresh|19:36:46.492
+jobs|SUCCEEDED|16
+
+19:37:02.078|110|postgres|pg_trickle scheduler|||Extension:Extension||
+last_refresh|19:36:46.492
+jobs|SUCCEEDED|9
+
+19:37:05.334|110|postgres|pg_trickle scheduler|||Extension:Extension||
+last_refresh|19:36:46.492
+jobs|SUCCEEDED|3
+
+19:37:08.401|110|postgres|pg_trickle scheduler|||Extension:Extension||
+last_refresh|19:36:46.492
+

@@ -1,0 +1,6 @@
+{"interval_s": 0.025, "trial": 0, "visible_ms": {"st_day_product_status": 676, "st_day_category_status": 912, "st_hour_category_status": 1071}, "all3": true, "elapsed_ms": 1102, "polls": 31, "refreshes_during": 3}
+{"interval_s": 0.025, "trial": 1, "visible_ms": {"st_day_product_status": 1150, "st_day_category_status": 1362, "st_hour_category_status": 1441}, "all3": true, "elapsed_ms": 1471, "polls": 44, "refreshes_during": 3}
+{"interval_s": 0.25, "trial": 0, "visible_ms": {"st_day_product_status": 834, "st_day_category_status": 1088, "st_hour_category_status": 1088}, "all3": true, "elapsed_ms": 1346, "polls": 5, "refreshes_during": 3}
+{"interval_s": 0.25, "trial": 1, "visible_ms": {"st_day_product_status": 787, "st_day_category_status": 1041, "st_hour_category_status": 1041}, "all3": true, "elapsed_ms": 1298, "polls": 5, "refreshes_during": 3}
+{"interval_s": 1.0, "trial": 0, "visible_ms": {"st_day_product_status": 1040, "st_day_category_status": 1041, "st_hour_category_status": 1041}, "all3": true, "elapsed_ms": 2072, "polls": 2, "refreshes_during": 3}
+{"interval_s": 1.0, "trial": 1, "visible_ms": {"st_day_product_status": 1022, "st_hour_category_status": 1022, "st_day_category_status": 2028}, "all3": true, "elapsed_ms": 3033, "polls": 3, "refreshes_during": 6}

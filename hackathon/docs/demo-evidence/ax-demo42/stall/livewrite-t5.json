@@ -1,0 +1,1 @@
+{"tenant_id":5,"shard":"b","committed":true,"order_id":200000270,"action":"insert","status":"paid","committed_at":"2026-10-31T19:36:46.216788+00:00","groups_checked":["paid"],"visible_after_ms":{"st_day_product_status":329.4},"timed_out":true,"lag_ms":null,"visibility_error":null}curl done 19:37:16

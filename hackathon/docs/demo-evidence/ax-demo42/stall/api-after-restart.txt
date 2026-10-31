@@ -1,0 +1,5 @@
+1 timed_out= False lag_ms= 1466.7
+2 timed_out= False lag_ms= 1404.5
+3 timed_out= False lag_ms= 1408.6
+4 timed_out= False lag_ms= 1394.8
+5 timed_out= False lag_ms= 1495.2

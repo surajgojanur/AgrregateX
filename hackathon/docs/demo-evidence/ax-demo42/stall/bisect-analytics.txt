@@ -1,0 +1,8 @@
+after GET summary?from=2026-10-01T00:00:00Z&to=2026-11-01T00:00:00Z -> 200
+   live-write t5: timed_out= False lag_ms= 1607.9
+after GET trends?from=2026-10-01T00:00:00Z&to=2026-11-01T00:00:00Z&grain=day -> 200
+   live-write t5: timed_out= False lag_ms= 1416.1
+after GET top-products?from=2026-10-01T00:00:00Z&to=2026-11-01T00:00:00Z -> 200
+   live-write t5: timed_out= False lag_ms= 1344.6
+after GET breakdown?from=2026-10-01T00:00:00Z&to=2026-11-01T00:00:00Z -> 200
+   live-write t5: timed_out= False lag_ms= 1461.2

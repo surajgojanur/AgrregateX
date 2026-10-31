@@ -1,0 +1,2 @@
+live-write t5 WITH concurrent /freshness every 2s: timed_out= False lag_ms= 1221.6
+live-write t5 afterwards, no concurrency: timed_out= False lag_ms= 1407.7
