@@ -1,0 +1,9 @@
+ragguard-pgdata
+ragguard_ragguard-pgdata
+ragguard_ragguard-uploads
+b497f4ad7205631019f2ee081e068c2879b44eb10611d7b45cb87d5d6b61ef97
+0edea67cbed2f65bb884c55f9f5c66dc3f1a25b4fcb1eefe510403cace4badcc
+pgtrickle-ecommerce_pgdata
+agrregatex_data
+aggregatex_round1_data
+Emulate Docker CLI using podman. Create /etc/containers/nodocker to quiet msg.

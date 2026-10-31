@@ -1,0 +1,34 @@
+test_booleans_cannot_verify_functional_requirements (test_acceptance.AcceptanceTests.test_booleans_cannot_verify_functional_requirements) ... ok
+test_cli_unqualified_exit_one_is_intentional (test_acceptance.AcceptanceTests.test_cli_unqualified_exit_one_is_intentional) ... ok
+test_fast_incomplete_or_invalid_samples_fail (test_acceptance.AcceptanceTests.test_fast_incomplete_or_invalid_samples_fail) ... ok
+test_flat_oracle_does_not_prove_three_tables (test_acceptance.AcceptanceTests.test_flat_oracle_does_not_prove_three_tables) ... ok
+test_g3_reports_throughput_and_latency_separately (test_acceptance.AcceptanceTests.test_g3_reports_throughput_and_latency_separately) ... ok
+test_live_artifact_and_exact_oracle_coverage (test_acceptance.AcceptanceTests.test_live_artifact_and_exact_oracle_coverage) ... ok
+test_missing_is_not_pass (test_acceptance.AcceptanceTests.test_missing_is_not_pass) ... ok
+test_old_growth_pair_cannot_establish_matched_runs (test_acceptance.AcceptanceTests.test_old_growth_pair_cannot_establish_matched_runs) ... ok
+test_representative_or_fabricated_flags_never_qualify (test_acceptance.AcceptanceTests.test_representative_or_fabricated_flags_never_qualify) ... ok
+test_freshness_needs_all_mutations_under_writes (test_acceptance.CoverageTests.test_freshness_needs_all_mutations_under_writes) ... ok
+test_functional_boolean_objects_cannot_verify (test_acceptance.CoverageTests.test_functional_boolean_objects_cannot_verify) ... ok
+test_growth_recomputes_from_matched_full_scale_samples (test_acceptance.CoverageTests.test_growth_recomputes_from_matched_full_scale_samples) ... ok
+test_latency_rejects_representative_dataset (test_acceptance.CoverageTests.test_latency_rejects_representative_dataset) ... ok
+test_latency_requires_each_scenario_and_200_samples (test_acceptance.CoverageTests.test_latency_requires_each_scenario_and_200_samples) ... ok
+test_malformed_evidence_fails_without_false_success (test_acceptance.CoverageTests.test_malformed_evidence_fails_without_false_success) ... ok
+test_safety_duplicate_pairs_cannot_verify (test_acceptance.CoverageTests.test_safety_duplicate_pairs_cannot_verify) ... ok
+test_bad_responses_and_wrong_tenant (test_http_baseline.BaselineTests.test_bad_responses_and_wrong_tenant) ... ok
+test_http_errors_timeout (test_http_baseline.BaselineTests.test_http_errors_timeout) ... ok
+test_matrix_reuses_acceptance (test_http_baseline.BaselineTests.test_matrix_reuses_acceptance) ... ok
+test_metadata_fails_closed (test_http_baseline.BaselineTests.test_metadata_fails_closed) ... ok
+test_oracle_missing_duplicate_and_drift (test_http_baseline.BaselineTests.test_oracle_missing_duplicate_and_drift) ... ok
+test_percentiles (test_http_baseline.BaselineTests.test_percentiles) ... ok
+test_report_missing_checksum_and_no_false_pass (test_http_baseline.BaselineTests.test_report_missing_checksum_and_no_false_pass) ... ok
+test_smoke_cannot_qualify (test_http_baseline.BaselineTests.test_smoke_cannot_qualify) ... ok
+test_target (test_http_baseline.BaselineTests.test_target) ... ok
+
+----------------------------------------------------------------------
+Ran 25 tests in 0.070s
+
+OK
+bash: just: command not found
+bash: just: command not found
+
+Offline bundle checks PASS: all seven deliverables present; approval/resource failure remains fail-closed; runtime oracle counts UNKNOWN; six EXCEPT ALL directions; wrong-database guards; missing-temp rollback/exit; original SQL mount resolves; principal fixture82<=100; pinned memory/CPU/port/image; previous proposal manifest unchanged. Prepared SQL was not executed or PostgreSQL syntax-validated. No new runtime defect confirmation.

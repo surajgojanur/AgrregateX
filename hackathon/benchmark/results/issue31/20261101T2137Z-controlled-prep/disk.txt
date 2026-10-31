@@ -1,0 +1,2 @@
+Filesystem        1B-blocks         Used    Available Use% Mounted on
+/dev/nvme0n1p4 370869796864 125999439872 244173201408  35% /home
