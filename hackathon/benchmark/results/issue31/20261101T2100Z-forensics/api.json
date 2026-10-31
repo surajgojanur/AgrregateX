@@ -1,0 +1,233 @@
+[
+  {
+    "utc": "2026-10-31T21:00:54.142589+00:00",
+    "path": "/api/tenants/2/summary?from=2026-10-31T00%3A00%3A00Z&to=2026-11-01T00%3A00%3A00Z",
+    "status": 200,
+    "payload": {
+      "tenant_id": 2,
+      "shard": "default",
+      "from": "2026-10-31T00:00:00+00:00",
+      "to": "2026-11-01T00:00:00+00:00",
+      "source": {
+        "stream_table_range": [
+          "2026-10-31T00:00:00+00:00",
+          "2026-11-01T00:00:00+00:00"
+        ],
+        "raw_edge_ranges": []
+      },
+      "freshness": {
+        "verified_at": "2026-10-31T21:00:52.833080+00:00",
+        "age_s": 1.31,
+        "healthy": true,
+        "stream_tables": 3,
+        "rule": "oldest stream table's last completed refresh"
+      },
+      "summary": {
+        "orders": 2,
+        "sale_orders": 1,
+        "units_sold": 1,
+        "sales_cents": 14094,
+        "avg_order_cents": 14094,
+        "cancelled_or_refunded": 1,
+        "cancel_rate": 0.5,
+        "by_status": {
+          "cancelled": {
+            "orders": 1,
+            "units": 1,
+            "gross_cents": 14094
+          },
+          "paid": {
+            "orders": 1,
+            "units": 1,
+            "gross_cents": 14094
+          }
+        }
+      }
+    },
+    "ms": 14.251289001549594
+  },
+  {
+    "utc": "2026-10-31T21:00:54.145241+00:00",
+    "path": "/api/tenants/2/trends?from=2026-10-31T00%3A00%3A00Z&to=2026-11-01T00%3A00%3A00Z&grain=day",
+    "status": 200,
+    "payload": {
+      "tenant_id": 2,
+      "shard": "default",
+      "from": "2026-10-31T00:00:00+00:00",
+      "to": "2026-11-01T00:00:00+00:00",
+      "source": {
+        "stream_table_range": [
+          "2026-10-31T00:00:00+00:00",
+          "2026-11-01T00:00:00+00:00"
+        ],
+        "raw_edge_ranges": []
+      },
+      "freshness": {
+        "verified_at": "2026-10-31T21:00:52.833080+00:00",
+        "age_s": 1.31,
+        "healthy": true,
+        "stream_tables": 3,
+        "rule": "oldest stream table's last completed refresh"
+      },
+      "grain": "day",
+      "points": [
+        {
+          "bucket": "2026-10-31T00:00:00+00:00",
+          "orders": 1,
+          "sales_cents": 0,
+          "cancelled_or_refunded": 1
+        }
+      ]
+    },
+    "ms": 2.6034399998025037
+  },
+  {
+    "utc": "2026-10-31T21:00:54.147430+00:00",
+    "path": "/api/tenants/2/trends?from=2026-10-31T00%3A00%3A00Z&to=2026-11-01T00%3A00%3A00Z&grain=hour",
+    "status": 200,
+    "payload": {
+      "tenant_id": 2,
+      "shard": "default",
+      "from": "2026-10-31T00:00:00+00:00",
+      "to": "2026-11-01T00:00:00+00:00",
+      "source": {
+        "stream_table_range": [
+          "2026-10-31T00:00:00+00:00",
+          "2026-11-01T00:00:00+00:00"
+        ],
+        "raw_edge_ranges": []
+      },
+      "freshness": {
+        "verified_at": "2026-10-31T21:00:52.833080+00:00",
+        "age_s": 1.31,
+        "healthy": true,
+        "stream_tables": 3,
+        "rule": "oldest stream table's last completed refresh"
+      },
+      "grain": "hour",
+      "points": [
+        {
+          "bucket": "2026-10-31T10:00:00+00:00",
+          "orders": 1,
+          "sales_cents": 0,
+          "cancelled_or_refunded": 1
+        }
+      ]
+    },
+    "ms": 2.1542350004892796
+  },
+  {
+    "utc": "2026-10-31T21:00:54.150069+00:00",
+    "path": "/api/tenants/2/top-products?from=2026-10-31T00%3A00%3A00Z&to=2026-11-01T00%3A00%3A00Z&limit=10",
+    "status": 200,
+    "payload": {
+      "tenant_id": 2,
+      "shard": "default",
+      "from": "2026-10-31T00:00:00+00:00",
+      "to": "2026-11-01T00:00:00+00:00",
+      "source": {
+        "stream_table_range": [
+          "2026-10-31T00:00:00+00:00",
+          "2026-11-01T00:00:00+00:00"
+        ],
+        "raw_edge_ranges": []
+      },
+      "freshness": {
+        "verified_at": "2026-10-31T21:00:52.833080+00:00",
+        "age_s": 1.31,
+        "healthy": true,
+        "stream_tables": 3,
+        "rule": "oldest stream table's last completed refresh"
+      },
+      "limit": 10,
+      "products": [
+        {
+          "rank": 1,
+          "product_id": 116,
+          "name": "product-2-116",
+          "category_id": 9,
+          "sales_cents": 14094,
+          "units_sold": 1,
+          "orders": 1
+        }
+      ]
+    },
+    "ms": 2.621036001073662
+  },
+  {
+    "utc": "2026-10-31T21:00:54.152339+00:00",
+    "path": "/api/tenants/2/breakdown?from=2026-10-31T00%3A00%3A00Z&to=2026-11-01T00%3A00%3A00Z&by=status",
+    "status": 200,
+    "payload": {
+      "tenant_id": 2,
+      "shard": "default",
+      "from": "2026-10-31T00:00:00+00:00",
+      "to": "2026-11-01T00:00:00+00:00",
+      "source": {
+        "stream_table_range": [
+          "2026-10-31T00:00:00+00:00",
+          "2026-11-01T00:00:00+00:00"
+        ],
+        "raw_edge_ranges": []
+      },
+      "freshness": {
+        "verified_at": "2026-10-31T21:00:52.833080+00:00",
+        "age_s": 1.31,
+        "healthy": true,
+        "stream_tables": 3,
+        "rule": "oldest stream table's last completed refresh"
+      },
+      "by": "status",
+      "rows": [
+        {
+          "key": "cancelled",
+          "orders": 1,
+          "units": 1,
+          "gross_cents": 14094
+        },
+        {
+          "key": "paid",
+          "orders": 1,
+          "units": 1,
+          "gross_cents": 14094
+        }
+      ]
+    },
+    "ms": 2.2397310021915473
+  },
+  {
+    "utc": "2026-10-31T21:00:54.154632+00:00",
+    "path": "/api/tenants/2/breakdown?from=2026-10-31T00%3A00%3A00Z&to=2026-11-01T00%3A00%3A00Z&by=category",
+    "status": 200,
+    "payload": {
+      "tenant_id": 2,
+      "shard": "default",
+      "from": "2026-10-31T00:00:00+00:00",
+      "to": "2026-11-01T00:00:00+00:00",
+      "source": {
+        "stream_table_range": [
+          "2026-10-31T00:00:00+00:00",
+          "2026-11-01T00:00:00+00:00"
+        ],
+        "raw_edge_ranges": []
+      },
+      "freshness": {
+        "verified_at": "2026-10-31T21:00:52.833080+00:00",
+        "age_s": 1.31,
+        "healthy": true,
+        "stream_tables": 3,
+        "rule": "oldest stream table's last completed refresh"
+      },
+      "by": "category",
+      "rows": [
+        {
+          "key": 9,
+          "orders": 1,
+          "units": 0,
+          "sales_cents": 0
+        }
+      ]
+    },
+    "ms": 2.2655889988527633
+  }
+]

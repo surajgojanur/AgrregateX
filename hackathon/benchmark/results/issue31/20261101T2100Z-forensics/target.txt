@@ -1,0 +1,4 @@
+round1-db d5e41efc17b181254b5874235f863e1359f7b5293b9bc93755f58d86c19a482e 2a061b8dd6b5d184ebdcb0d40c616aeb434a13245e78f43f3c1098a1e694e737 {"5432/tcp":[{"HostIp":"127.0.0.1","HostPort":"25560"}]}
+Emulate Docker CLI using podman. Create /etc/containers/nodocker to quiet msg.
+8093 200
+8094 200

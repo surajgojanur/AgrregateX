@@ -1,0 +1,36 @@
+{"utc" : "2026-10-31T21:00:31.626682", "snapshot" : "1148923:1148923:"}
+[{"order_id":100000000,"tenant_id":2,"product_id":116,"status":"cancelled","quantity":1,"unit_price_cents":14094,"recomputed_cents":14094,"line_cents":14094,"created_at":"2026-10-31T10:38:56.233003+00:00","updated_at":"2026-10-31T10:39:26.275213+00:00","utc_day":"2026-10-31T00:00:00","utc_hour":"2026-10-31T10:00:00"}]
+{"paid_count" : 0, "paid_units" : 0, "paid_sales_cents" : 0}
+[{"status":"cancelled","count":1,"units":1,"cents":14094}]
+[{"tenant_id":2,"utc_day":"2026-10-31T00:00:00","product_id":116,"status":"cancelled","order_count":1,"units":1,"sales_cents":14094},
+ {"tenant_id":2,"utc_day":"2026-10-31T00:00:00","product_id":116,"status":"paid","order_count":1,"units":1,"sales_cents":14094}]
+[{"tenant_id":2,"product_id":116,"category_id":9}]
+[{"side":"source","category_id":9,"status":"cancelled","order_count":1,"units":1,"sales_cents":14094},
+ {"side":"stream","category_id":9,"status":"cancelled","order_count":1,"units":1,"sales_cents":14094}]
+[{"side":"source","utc_hour":"2026-10-31T10:00:00","category_id":9,"status":"cancelled","order_count":1,"units":1,"sales_cents":14094},
+ {"side":"stream","utc_hour":"2026-10-31T10:00:00","category_id":9,"status":"cancelled","order_count":1,"units":1,"sales_cents":14094}]
+[{"table_name":"orders","column_name":"created_at","data_type":"timestamp with time zone"},
+ {"table_name":"orders","column_name":"line_cents","data_type":"bigint"},
+ {"table_name":"orders","column_name":"status","data_type":"text"},
+ {"table_name":"orders","column_name":"utc_day","data_type":"timestamp without time zone"},
+ {"table_name":"orders","column_name":"utc_hour","data_type":"timestamp without time zone"},
+ {"table_name":"st_day_category_status","column_name":"order_count","data_type":"bigint"},
+ {"table_name":"st_day_category_status","column_name":"sales_cents","data_type":"numeric"},
+ {"table_name":"st_day_category_status","column_name":"status","data_type":"text"},
+ {"table_name":"st_day_category_status","column_name":"units","data_type":"bigint"},
+ {"table_name":"st_day_category_status","column_name":"utc_day","data_type":"timestamp without time zone"},
+ {"table_name":"st_day_product_status","column_name":"order_count","data_type":"bigint"},
+ {"table_name":"st_day_product_status","column_name":"sales_cents","data_type":"numeric"},
+ {"table_name":"st_day_product_status","column_name":"status","data_type":"text"},
+ {"table_name":"st_day_product_status","column_name":"units","data_type":"bigint"},
+ {"table_name":"st_day_product_status","column_name":"utc_day","data_type":"timestamp without time zone"},
+ {"table_name":"st_hour_category_status","column_name":"order_count","data_type":"bigint"},
+ {"table_name":"st_hour_category_status","column_name":"sales_cents","data_type":"numeric"},
+ {"table_name":"st_hour_category_status","column_name":"status","data_type":"text"},
+ {"table_name":"st_hour_category_status","column_name":"units","data_type":"bigint"},
+ {"table_name":"st_hour_category_status","column_name":"utc_hour","data_type":"timestamp without time zone"}]
+[{"pgt_name":"st_day_category_status","defining_query":"\n        SELECT o.tenant_id, o.utc_day, p.category_id, o.status,\n               COUNT(*)            AS order_count,\n               SUM(o.quantity)     AS units,\n               SUM(o.line_cents)   AS sales_cents\n        FROM ax.orders o\n        JOIN ax.products p ON p.tenant_id = o.tenant_id AND p.product_id = o.product_id\n        GROUP BY o.tenant_id, o.utc_day, p.category_id, o.status\n    ","created_at":"2026-10-31T10:38:14.759538+00:00","updated_at":"2026-10-31T21:00:30.50492+00:00"},
+ {"pgt_name":"st_day_product_status","defining_query":"\n        SELECT o.tenant_id, o.utc_day, o.product_id, o.status,\n               COUNT(*)            AS order_count,\n               SUM(o.quantity)     AS units,\n               SUM(o.line_cents)   AS sales_cents\n        FROM ax.orders o\n        GROUP BY o.tenant_id, o.utc_day, o.product_id, o.status\n    ","created_at":"2026-10-31T10:38:14.703485+00:00","updated_at":"2026-10-31T21:00:31.559516+00:00"},
+ {"pgt_name":"st_hour_category_status","defining_query":"\n        SELECT o.tenant_id, o.utc_hour, p.category_id, o.status,\n               COUNT(*)            AS order_count,\n               SUM(o.quantity)     AS units,\n               SUM(o.line_cents)   AS sales_cents\n        FROM ax.orders o\n        JOIN ax.products p ON p.tenant_id = o.tenant_id AND p.product_id = o.product_id\n        GROUP BY o.tenant_id, o.utc_hour, p.category_id, o.status\n    ","created_at":"2026-10-31T10:38:14.81134+00:00","updated_at":"2026-10-31T21:00:30.476377+00:00"}]
+{"bad_day" : 0, "bad_hour" : 0, "bad_cents" : 0}
+Emulate Docker CLI using podman. Create /etc/containers/nodocker to quiet msg.
