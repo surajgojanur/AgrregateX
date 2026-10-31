@@ -3,7 +3,7 @@
 > **Owner:** OPUS. Only OPUS edits this file; Codex and humans communicate through Issue #12.
 > **Purpose:** survive context compaction, restarts and new sessions. **Reload at every session start,
 > then re-sync from GitHub** (GitHub is the source of truth; this file can be stale).
-> **Last updated:** 2026-10-31 ~13:00 UTC by OPUS (Claude Code session on the Opus Mac).
+> **Last updated:** 2026-10-31 ~13:10 UTC by OPUS (Claude Code session on the Opus Mac).
 
 ## Session-start checklist
 1. Read this file.
@@ -15,9 +15,9 @@
 7. Resume the highest-priority authorised task (§F).
 
 **Last processed** (do not re-answer):
-- #12 up to `IC_kwDOVd5KA88AAAABhgZyLQ` (CODEX P0 audit, 12:46Z) and OPUS 6543601773 (P3 fix STARTED)
-- PR #22 reviews up to 12:47:27Z (HUMAN "P0 review correction")
-- PR #21 comments up to 12:28:21Z
+- #12 up to HUMAN fast-track directive (12:54:00Z) and OPUS DONE_WAITING_REVIEW 6543706376 (~13:05Z)
+- PR #22 reviews/comments up to 12:53:57Z (fast-track copy); body rewritten at head d79fa55
+- PR #21 comments up to OPUS contract v2 6543690282
 
 ---
 
@@ -49,7 +49,8 @@
 | P1 engine spike | merged #15 | `docs/handoffs/opus.md` |
 | API + dashboard (single DB) | merged #18 (c38cd33) as an integration baseline, **not** a judge-ready approval | #18 review checklist still open |
 | P3 sharding | PR #22 **HOLD** (review requested follow-up) | `docs/handoffs/opus-sharding.md`, `sharding/results/` |
-| PR #22 review fixes | **in progress on `feat/opus-p3-sharding`** (this session) | see §F |
+| PR #22 review fixes | **DONE_WAITING_REVIEW** at head `d79fa55` (fail-closed partition script, image comment, login on) | #12 6543706376; fixture tests 11/11 + 7/7; live run NOT RUN |
+| CI | **BLOCKED by billing**: Actions jobs are not started ("recent account payments have failed or spending limit") | check annotations on d79fa55 |
 | Frontend PS conversion + new logo | **staged, uncommitted** on local branch `feat/aggregatex-logo` (worktree `~/Downloads/mitigata/AgrregateX-sharding`); 107 files, Revelio product removed. Waiting for the user's OK to commit/PR | lint OK, 3/3 tests, build OK; no browser QA |
 
 **Latest verified results (M1, n=1, REPRESENTATIVE 10k orders total):**
@@ -109,11 +110,12 @@
 | 10-31 | P3: two physical shards, directory v1, fail-closed 503, no failover | judges + approved design #19 | HUMAN | #19 | #22 |
 | 10-31 | Image comment corrected: multi-arch, not arm64-only | Codex manifest audit, re-verified by OPUS | CODEX + OPUS | #12 12:46Z | yes (this session) |
 | 10-31 | Sharded compose login ON by default | review #22 item 2 | HUMAN review | #22 12:37Z | yes (this session) |
-| 10-31 | OPUS is the single writer of `partition_demo.sh` | review asked for one writer | OPUS claim | #12 6543601773 | — |
+| 10-31 | OPUS is the single writer of `partition_demo.sh` (released at DONE) | review asked for one writer | OPUS claim | #12 6543601773 | done d79fa55 |
+| 10-31 | **Fast-track:** ship a working demo; defer 10M/G1–G5, replicas, polish; G-3 stays a disclosed FAIL; merge #22 as a P3 dev baseline after the minimum gates; #21 separate until v2-aligned | hackathon timeline | HUMAN (user directive) | #12 12:54Z | gates 1–3 met at d79fa55; gate 4 blocked by CI billing |
 
 ## F. Next actions (ordered)
-1. **OPUS:** finish the PR #22 fixes, push, post DONE_WAITING_REVIEW on #12 + PR #22. **Accept:** static + simulated tests pass; docs corrected.
-2. **OPUS:** post contract v2 on PR #21 (cookie auth, host probes, ports, A-only network). **Accept:** posted.
+1. ~~OPUS: PR #22 fixes~~ DONE (d79fa55). ~~OPUS: contract v2 on #21~~ DONE.
+2. **HUMAN:** fix the Actions billing/spending limit; review and merge #22 as a P3 dev baseline.
 3. **HUMAN:** go/no-go for a **live** hardened partition run on a host passing the memory gate (Opus Mac: Docker must be running; Fedora: RAM currently too low).
 4. **OPUS:** browser QA of Dashboard/Shards/Engine + outage banner (needs Docker).
 5. **OPUS:** commit/PR the frontend PS conversion once the user OKs it (local branch `feat/aggregatex-logo`).
