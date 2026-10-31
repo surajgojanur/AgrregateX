@@ -13,7 +13,7 @@ The extension view in the checked-in source is `SELECT st.*, ... FROM pgtrickle.
 ## Guarded change
 
 * `hackathon/sql/25_app_roles.sql` grants the view to `ax_monitor` on **new** installations.
-* `hackathon/sql/migrations/002_monitor_health_view.sql` is the **explicit/manual** migration for the already initialized Fedora database; it requires DB=`aggregatex`, migrating as trusted `postgres`, exactly installed `pg_trickle 0.108.3`, the trusted catalog-only view dependency, unchanged non-superuser monitor role and negative raw-fact permissions. SQL runs in one transaction with 2s lock and 10s statement timeouts, checks postconditions, and commits only the view-specific `GRANT SELECT`.
+* `hackathon/sql/migrations/002_monitor_health_view.sql` is the **explicit/manual** migration for the already initialized Fedora database; it requires DB=`aggregatex`, PostgreSQL 18.6, migrating as trusted `postgres`, exactly installed `pg_trickle 0.108.3`, the reviewed view-definition fingerprint and dependency allowlist, unchanged non-superuser monitor role and negative raw-fact permissions (including no `SET ROLE` path to source/elevated roles). SQL runs in one transaction with 2s lock and 10s statement timeouts, checks postconditions, and commits only the view-specific `GRANT SELECT`.
 * `002_monitor_health_view_verify.sql` verifies as the **real monitor login** using read-only SQL, not a superuser pretending to be the monitor.
 * `002_monitor_health_view_rollback.sql` is a manual, guarded `REVOKE SELECT`; use ONLY if pre-migration effective view access was absent. An already-present or inherited grant must not be removed casually.
 
@@ -30,8 +30,16 @@ BEGIN READ ONLY;
 SET LOCAL statement_timeout = '2s';
 SELECT current_database(), current_user,
        (SELECT extversion FROM pg_extension WHERE extname = 'pg_trickle') AS pg_trickle_version;
-SELECT rolname, rolsuper, rolbypassrls, rolcanlogin
+SELECT rolname, rolsuper, rolbypassrls, rolcreatedb, rolcreaterole, rolinherit, rolcanlogin
   FROM pg_roles WHERE rolname IN ('postgres', 'ax_monitor');
+SELECT pg_get_userbyid(roleid) AS granted_role, admin_option
+  FROM pg_auth_members WHERE member = 'ax_monitor'::regrole ORDER BY 1;
+SELECT r.rolname, r.rolsuper, r.rolbypassrls,
+       pg_has_role('ax_monitor', r.oid, 'SET') AS monitor_can_set_role
+  FROM pg_roles r
+ WHERE r.rolsuper OR r.rolbypassrls
+    OR has_table_privilege(r.oid, 'ax.orders', 'SELECT')
+    OR has_table_privilege(r.oid, 'ax.products', 'SELECT');
 SELECT n.nspname, c.relname, c.relkind, c.reloptions,
        pg_get_userbyid(c.relowner) AS view_owner,
        pg_get_viewdef(c.oid, true) AS view_definition
@@ -40,6 +48,7 @@ SELECT n.nspname, c.relname, c.relkind, c.reloptions,
 SELECT has_schema_privilege('ax_monitor','pgtrickle','USAGE') AS monitor_schema,
        has_table_privilege('ax_monitor','pgtrickle.pgt_stream_tables','SELECT') AS monitor_catalog,
        has_table_privilege('ax_monitor','pgtrickle.stream_tables_info','SELECT') AS monitor_view_before,
+       has_function_privilege('ax_monitor','pgtrickle.parse_duration_seconds(text)','EXECUTE') AS duration_function,
        has_function_privilege('ax_monitor','pgtrickle.health_check()','EXECUTE') AS health_execute,
        has_table_privilege('ax_monitor','ax.orders','SELECT') AS raw_orders,
        has_table_privilege('ax_monitor','ax.products','SELECT') AS raw_products;
@@ -92,4 +101,4 @@ Recheck the effective ACL and live monitoring status; an `UNKNOWN` after rollbac
 4. `round1-db` source data, existing single `DEFAULT` shard counts, RLS, other pages, containers and port 8093 are preserved.
 5. If real Fedora connection, human approval, or suitable privileges are unavailable, label the migration **NOT APPLIED / BLOCKED** rather than saying it fixed the live application.
 
-**Version note:** the checked-in source tree may be ahead of installed v0.108.3. The hard version guard intentionally refuses unknown extensions; new installations with a different extension version require a fresh view/ACL review first.
+**Version note:** the checked-in source tree may be ahead of installed v0.108.3. The hard guard intentionally targets only the observed PostgreSQL 18.6 / pg_trickle 0.108.3 pair and the SHA-128 fingerprint of its whitespace-normalized `pg_get_viewdef`. A mismatch stops the migration; it is not a reason to weaken the check. New installations with a different PostgreSQL or extension version require a fresh view/ACL review first.

@@ -8,10 +8,38 @@ BEGIN
     IF current_database() <> 'aggregatex' OR current_user <> 'ax_monitor' THEN
         RAISE EXCEPTION 'Verification must connect directly as ax_monitor to aggregatex';
     END IF;
+    IF NOT EXISTS (
+        SELECT 1 FROM pg_roles
+         WHERE rolname = current_user AND rolcanlogin
+           AND NOT rolsuper AND NOT rolbypassrls AND NOT rolcreatedb AND NOT rolcreaterole
+    ) THEN
+        RAISE EXCEPTION 'Monitor role has unexpected elevated attributes';
+    END IF;
     IF NOT has_table_privilege(current_user,'pgtrickle.stream_tables_info','SELECT')
        OR has_table_privilege(current_user,'ax.orders','SELECT')
        OR has_table_privilege(current_user,'ax.products','SELECT') THEN
         RAISE EXCEPTION 'Monitor view privilege missing or raw-order/product privilege leaked';
+    END IF;
+    IF has_table_privilege('ax_api','pgtrickle.stream_tables_info','SELECT')
+       OR has_table_privilege('ax_writer','pgtrickle.stream_tables_info','SELECT')
+       OR EXISTS (
+            SELECT 1 FROM pg_class c
+            CROSS JOIN LATERAL aclexplode(COALESCE(c.relacl, acldefault('r', c.relowner))) a
+             WHERE c.oid = 'pgtrickle.stream_tables_info'::regclass
+               AND a.grantee = 0 AND a.privilege_type = 'SELECT'
+       )
+    THEN
+        RAISE EXCEPTION 'Monitor view access leaked to API, writer, or PUBLIC';
+    END IF;
+    IF EXISTS (
+        SELECT 1 FROM pg_roles r
+         WHERE r.rolname <> current_user
+           AND (r.rolsuper OR r.rolbypassrls
+             OR has_table_privilege(r.oid, 'ax.orders', 'SELECT')
+             OR has_table_privilege(r.oid, 'ax.products', 'SELECT'))
+           AND pg_has_role(current_user, r.oid, 'SET')
+    ) THEN
+        RAISE EXCEPTION 'Monitor can SET ROLE to a source-reading or elevated role';
     END IF;
 END
 $check$;
