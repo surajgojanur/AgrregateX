@@ -1,0 +1,57 @@
+{
+ "pairs": [
+  {
+   "pair": 1,
+   "B_vs_A_tps_pct": 4.1,
+   "B_vs_A_p95_pct": 1546.5,
+   "A_vs_C_tps_pct": 5.2,
+   "A_vs_C_p95_pct": 56.9
+  }
+ ],
+ "summary": {
+  "B_vs_A_tps_pct": {
+   "median": 4.1,
+   "min": 4.1,
+   "max": 4.1
+  },
+  "B_vs_A_p95_pct": {
+   "median": 1546.5,
+   "min": 1546.5,
+   "max": 1546.5
+  },
+  "A_vs_C_tps_pct": {
+   "median": 5.2,
+   "min": 5.2,
+   "max": 5.2
+  },
+  "A_vs_C_p95_pct": {
+   "median": 56.9,
+   "min": 56.9,
+   "max": 56.9
+  }
+ },
+ "seed": 4201,
+ "median_tps": {
+  "A": 189.3,
+  "B": 197.0,
+  "C": 180.0
+ },
+ "median_p95_ms": {
+  "A": 10.97,
+  "B": 180.62,
+  "C": 6.99
+ },
+ "fixture_rows_per_arm": {
+  "A": [
+   5037
+  ],
+  "B": [
+   5064
+  ],
+  "C": [
+   5021
+  ]
+ },
+ "fallbacks_A_B": 1,
+ "oracle_quiesced": "st_day_category_status=0/0 st_day_product_status=0/0 st_hour_category_status=0/0"
+}
