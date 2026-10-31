@@ -1,0 +1,5 @@
+# Exact versions tested on 2026-10-31 (python:3.14-slim, arm64)
+fastapi==0.162.0
+uvicorn[standard]==0.54.0
+psycopg[binary,pool]==3.3.6
+psycopg-pool==3.3.3

@@ -48,7 +48,7 @@ function AccountMenu({ user, onLogout }) {
               <span className="mono faint">{user.email}</span>
             </div>
           </div>
-          <p className="account__note faint">Signed in on this machine. Logging out also clears the unsaved draft in this browser.</p>
+          <p className="account__note faint">Demo session (HttpOnly cookie). Data access is enforced again in the database by row-level security.</p>
           <div className="account__foot">
             <button type="button" className="btn btn--ghost btn--sm" disabled={busy}
               onClick={() => { setBusy(true); onLogout() }}>
@@ -62,7 +62,7 @@ function AccountMenu({ user, onLogout }) {
 }
 
 const Topbar = ({ title, eyebrow, onMenu }) => {
-  const { activeCase, notifications, clearNotifications, health, user, logout } = useApp()
+  const { notifications, clearNotifications, health, user, logout } = useApp()
   const [open, setOpen] = useState(false)
   const ref = useRef(null)
   useDismiss(open, setOpen, ref)
@@ -80,17 +80,14 @@ const Topbar = ({ title, eyebrow, onMenu }) => {
       </div>
 
       <div className="topbar__right">
-        <div className={`case-chip ${activeCase ? 'is-active' : ''}`} title="Active case">
-          <span className="label">Case</span>
-          <span className="mono case-chip__id">
-            {activeCase?.id ? activeCase.id : activeCase?.draft ? 'UNSAVED DRAFT' : 'NONE ACTIVE'}
-          </span>
-          {activeCase?.revision ? <span className="mono faint">R{activeCase.revision}</span> : null}
+        <div className="case-chip is-active" title="Signed-in scope">
+          <span className="label">Scope</span>
+          <span className="mono case-chip__id">{user?.role === 'admin' ? 'ALL TENANTS (OPERATOR)' : `TENANT ${user?.tenant_id}`}</span>
         </div>
 
-        <div className="topbar__engine" title={health ? 'Local engine reachable' : 'Local engine not reachable'}>
+        <div className="topbar__engine" title={health ? 'API reachable' : 'API not reachable'}>
           <span className={`dot ${health ? 'dot--ok' : 'dot--err'}`} />
-          <span className="mono">{health ? 'LOCAL' : 'OFFLINE'}</span>
+          <span className="mono">{health ? 'LIVE' : 'OFFLINE'}</span>
         </div>
 
         <CaseClock />

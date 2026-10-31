@@ -1,8 +1,5 @@
-// Sidebar destinations (also used by the router).
+// Sidebar destinations (also used by the router). `admin: true` = operator only.
 export const NAV = [
-  { id: 'workspace', label: 'Investigation Workspace', short: 'Workspace', icon: 'workspace' },
-  { id: 'new', label: 'New Sketch', short: 'New Sketch', icon: 'newSketch' },
-  { id: 'library', label: 'Sketch Library', short: 'Library', icon: 'library' },
-  { id: 'compare', label: 'Compare Sketches', short: 'Compare', icon: 'compare' },
-  { id: 'settings', label: 'Settings', short: 'Settings', icon: 'settings' },
+  { id: 'dashboard', label: 'Tenant Dashboard', short: 'Dashboard', icon: 'workspace' },
+  { id: 'engine', label: 'pg_trickle Engine', short: 'Engine', icon: 'cpu', admin: true },
 ]

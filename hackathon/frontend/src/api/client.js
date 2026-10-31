@@ -64,7 +64,26 @@ export const assetUrl = (path) => {
   return BASE.replace(/\/api$/, '') + path
 }
 
+const range = (r = {}) => {
+  const q = new URLSearchParams()
+  for (const [k, v] of Object.entries(r)) if (v != null && v !== '') q.set(k, v)
+  const qs = q.toString()
+  return qs ? `?${qs}` : ''
+}
+const T = (id) => `/tenants/${encodeURIComponent(id)}`
+
 export const api = {
+  // ── AgrregateX analytics (hackathon/app) ──
+  tenants: () => request('/tenants'),
+  summary: (t, r, signal) => request(`${T(t)}/summary${range(r)}`, { signal }),
+  trends: (t, r, signal) => request(`${T(t)}/trends${range(r)}`, { signal }),
+  topProducts: (t, r, signal) => request(`${T(t)}/top-products${range(r)}`, { signal }),
+  breakdown: (t, r, signal) => request(`${T(t)}/breakdown${range(r)}`, { signal }),
+  freshness: (t, signal) => request(`${T(t)}/freshness`, { signal }),
+  liveWrite: (t, body) => request(`${T(t)}/live-write`, { method: 'POST', body }),
+  engine: (signal) => request('/engine', { signal }),
+
+  // ── legacy Revelio endpoints (no longer served) ──
   me: () => request('/auth/me'),
   register: (name, email, password) => request('/auth/register', { method: 'POST', body: { name, email, password } }),
   login: (email, password) => request('/auth/login', { method: 'POST', body: { email, password } }),

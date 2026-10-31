@@ -1,26 +1,21 @@
-import { witnessMode } from '../../api/witnesstrace'
 import { useApp } from '../../state/AppContext'
 import { BrandLogo } from '../brand/Logo'
 import Icon from '../ui/Icon'
-import { NAV } from '../../lib/nav'
 
-
-const providerDot = (p) => (p?.available ? 'dot--ok' : p?.state === 'disabled' || p?.state === 'not_installed' ? 'dot--idle' : 'dot--warn')
-
-const Sidebar = ({ current, open, onNavigate, onClose }) => {
-  const { health, providers, engineError, wt } = useApp()
+const Sidebar = ({ current, items, open, onNavigate, onClose }) => {
+  const { health, engineError, user } = useApp()
   return (
     <>
       <div className={`sidebar-scrim ${open ? 'is-open' : ''}`} onClick={onClose} aria-hidden="true" />
       <aside className={`sidebar ${open ? 'is-open' : ''}`} aria-label="Primary">
         <div className="sidebar__brand">
           <BrandLogo height={44} />
-          <span className="sidebar__tag">Forensic composite workspace</span>
+          <span className="sidebar__tag">Multi-tenant analytics · pg_trickle</span>
         </div>
 
         <nav className="sidebar__nav">
           <span className="label sidebar__section">Navigation</span>
-          {NAV.map((item, i) => (
+          {items.map((item, i) => (
             <a
               key={item.id}
               href={`#/${item.id}`}
@@ -40,25 +35,17 @@ const Sidebar = ({ current, open, onNavigate, onClose }) => {
           <div className="status-card">
             <div className="status-card__row">
               <span className={`dot ${health ? 'dot--ok dot--pulse' : 'dot--err'}`} />
-              <span>{health ? 'Local engine online' : 'Local engine offline'}</span>
+              <span>{health ? 'API + database online' : 'API offline'}</span>
             </div>
             <div className="status-card__meta mono">
-              {health ? `v${health.version} · 127.0.0.1` : engineError ? 'unreachable' : 'checking…'}
+              {health ? `api v${health.version} · pg_trickle ${health.pg_trickle_version || '?'}` : engineError ? 'unreachable' : 'checking…'}
             </div>
-            {witnessMode ? <p className="status-card__meta mono">WitnessTrace: {wt.connection ? 'CONNECTED' : 'OFFLINE'}<br />Codex CLI: {wt.connection?.codex_installed ? 'INSTALLED' : 'UNAVAILABLE'}</p> : health && (
-              <ul className="status-card__providers">
-                {['offline', 'local', 'hosted'].map((id) => (
-                  <li key={id} title={providers[id]?.reason}>
-                    <span className={`dot ${providerDot(providers[id])}`} />
-                    <span>{providers[id]?.label}</span>
-                    <span className="mono faint">{providers[id]?.available ? 'READY' : (providers[id]?.state || '').replace('_', ' ').toUpperCase()}</span>
-                  </li>
-                ))}
-              </ul>
-            )}
           </div>
           <p className="sidebar__note">
-            <Icon name="shield" /> {witnessMode ? 'Local interface. Codex generation uses the authenticated external service; no alternative provider is used.' : 'Processing is local by default. Nothing leaves this device unless Hosted AI is configured and chosen.'}
+            <Icon name="shield" />{' '}
+            {user?.role === 'admin'
+              ? 'Operator session: you may switch tenants. Every query still runs as the RLS-bound ax_api role.'
+              : `Tenant session: the API and row-level security both restrict you to tenant ${user?.tenant_id}.`}
           </p>
         </div>
       </aside>

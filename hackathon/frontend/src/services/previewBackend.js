@@ -10,7 +10,8 @@
 //
 // Set VITE_BACKEND_ENABLED=1 (and add a dev proxy in vite.config.js) to talk to a real backend.
 
-export const previewMode = import.meta.env?.VITE_BACKEND_ENABLED !== '1'
+// The AgrregateX API now exists (hackathon/app). Preview mode is opt-in: VITE_BACKEND_ENABLED=0.
+export const previewMode = import.meta.env?.VITE_BACKEND_ENABLED === '0'
 
 export const NO_BACKEND = 'No backend connected. The AggregateX backend has not been implemented yet, so this is unavailable in preview mode.'
 

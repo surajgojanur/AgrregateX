@@ -1,6 +1,7 @@
 // Same-origin, authenticated gateway. No arbitrary upstream URLs or browser credentials.
 import { previewFetch, previewMode } from '../services/previewBackend.js'
-export const witnessMode = import.meta.env?.VITE_WITNESSTRACE_LOCAL !== '0'
+// Legacy Revelio/WitnessTrace client: off unless explicitly enabled.
+export const witnessMode = import.meta.env?.VITE_WITNESSTRACE_LOCAL === '1'
 const BASE = '/wt-api'
 const ID = /^[a-f0-9]{32}$/
 const identifier = (id) => { if (!ID.test(id)) throw new WitnessError(400, 'Invalid record identifier.'); return id }
