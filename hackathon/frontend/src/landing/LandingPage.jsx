@@ -47,9 +47,9 @@ const SCORE = [
 ]
 
 const BONUS = [
-  ['B-1', 'Shows how fresh the data is', 'In the dashboard', true],
-  ['B-2', 'Rebuild all numbers from scratch', 'Not built yet', false],
-  ['B-3', 'Limit heavy queries per tenant', 'Not built yet', false],
+  ['B-1', 'Shows how fresh the data is', 'Every response + dashboard badge', true],
+  ['B-2', 'Rebuild all numbers from scratch', 'Operator CLI, oracle-verified', true],
+  ['B-3', 'Limit heavy queries per tenant', 'Per-tenant limit (429)', true],
   ['B-4', 'New metric from a config file', 'Not built yet', false],
   ['B-5', 'Monitoring page: query time and data lag', 'Engine and Shards pages', true],
 ]
