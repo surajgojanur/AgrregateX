@@ -10,7 +10,7 @@ import sys
 import time
 from urllib.error import HTTPError, URLError
 from urllib.parse import urlsplit
-from urllib.request import Request, urlopen
+from urllib.request import HTTPRedirectHandler, ProxyHandler, Request, build_opener
 
 TIMEOUT_S = 4
 DEFAULT_BASE = "http://127.0.0.1:8093"
@@ -51,6 +51,48 @@ def routes(tenant_id: int) -> tuple[str, ...]:
     )
 
 
+def _safe_opener():
+    """Never use environment proxies or follow redirects outside localhost."""
+    class NoRedirect(HTTPRedirectHandler):
+        def redirect_request(self, request, fp, code, msg, headers, newurl):
+            return None
+    return build_opener(ProxyHandler({}), NoRedirect())
+
+
+def _valid_payload(path: str, body: object) -> bool:
+    """Small smoke contract; HTTP 200 or syntactically valid JSON is not enough."""
+    if not isinstance(body, dict):
+        return False
+    if path == "/api/health":
+        return isinstance(body.get("status"), str) and isinstance(body.get("shards"), dict)
+    if path == "/api/shards":
+        shards = body.get("shards")
+        return (type(body.get("complete")) is bool and isinstance(shards, list)
+                and "total_orders" in body
+                and all(isinstance(shard, dict) and isinstance(shard.get("stream_tables"), list)
+                        and all(isinstance(st, dict) for st in shard["stream_tables"])
+                        for shard in shards))
+    if path == "/api/tenants":
+        return isinstance(body.get("tenants"), list)
+    if path == "/api/engine":
+        return isinstance(body.get("stream_tables"), list) and "health" in body
+    if path == "/api/monitoring":
+        return isinstance(body.get("shards"), list) and isinstance(body.get("api"), dict)
+    if path == "/api/limits":
+        return "tenants" in body and "max_concurrent_per_tenant" in body
+    if path.endswith("/summary"):
+        return type(body.get("tenant_id")) is int and isinstance(body.get("summary"), dict)
+    if path.endswith("/trends"):
+        return isinstance(body.get("points"), list) and "grain" in body
+    if path.endswith("/top-products"):
+        return isinstance(body.get("products"), list) and "limit" in body
+    if "/breakdown?" in path:
+        return isinstance(body.get("rows"), list) and "by" in body
+    if path.endswith("/freshness"):
+        return isinstance(body.get("stream_tables"), list) and "healthy" in body
+    return False
+
+
 def _summary(path: str, body: object) -> dict:
     if not isinstance(body, dict):
         return {"shape": type(body).__name__}
@@ -74,28 +116,35 @@ def _summary(path: str, body: object) -> dict:
 def run(base: str, tenant_id: int) -> tuple[list[dict], bool]:
     base = validate_base_url(base)
     report = []
+    opener = _safe_opener()
     for path in routes(tenant_id):
         started = time.monotonic()
         row = {"method": "GET", "path": path}
         try:
             request = Request(base + path, method="GET", headers={"Accept": "application/json"})
-            with urlopen(request, timeout=TIMEOUT_S) as response:
+            with opener.open(request, timeout=TIMEOUT_S) as response:
                 payload = response.read(128 * 1024)
                 row.update(status=response.status, latency_ms=round((time.monotonic() - started) * 1000, 1))
             try:
                 body = json.loads(payload)
             except (UnicodeDecodeError, json.JSONDecodeError):
                 body = None
-            row.update(response=_summary(path, body))
+            valid = _valid_payload(path, body)
+            row["response_schema_valid"] = valid
+            row.update(response=_summary(path, body) if valid else {"shape": type(body).__name__})
+            if not valid:
+                row["error"] = "invalid_json_or_schema"
         except HTTPError as exc:
             row.update(status=exc.code, latency_ms=round((time.monotonic() - started) * 1000, 1),
-                       error="http_error")
+                       error="redirect_blocked" if 300 <= exc.code < 400 else "http_error")
+            exc.close()
         except (TimeoutError, URLError, OSError) as exc:
             timed_out = isinstance(exc, TimeoutError) or "timed out" in str(exc).lower()
             row.update(status=None, latency_ms=round((time.monotonic() - started) * 1000, 1),
                        error="timeout" if timed_out else "connection_error")
         report.append(row)
-    ok = all(isinstance(row.get("status"), int) and 200 <= row["status"] < 300 for row in report)
+    ok = all(type(row.get("status")) is int and 200 <= row["status"] < 300
+             and row.get("response_schema_valid") is True for row in report)
     return report, ok
 
 
