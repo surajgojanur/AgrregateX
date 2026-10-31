@@ -4,6 +4,7 @@
 **Branch:** `test/prd-benchmark-suite`
 **Scope:** `benchmarks/**`, `docs/BENCHMARK_PLAN.md`, `docs/BENCHMARK_TEST_REPORT.md`, this status/handoff directory.
 **Coordination:** [Issue #1](https://github.com/surajgojanur/AgrregateX/issues/1)
+**Pull request:** [#2](https://github.com/surajgojanur/AgrregateX/pull/2), open and awaiting review.
 
 Implemented a bounded acceptance orchestrator, explicit 10M growth evidence gate, request-error capture, and stable-source correctness oracle. Ran the full bounded suite on 1,000,000 representative orders / 10 tenants. Functional checks: 150/150; HTTP: 720/720, maximum 63.16 ms; API/source comparisons: 65/65; rollup mismatches: zero; freshness: 30/30, worst 0.423 sec; 100 API identities passed. Baseline source and rollup counts were unchanged.
 

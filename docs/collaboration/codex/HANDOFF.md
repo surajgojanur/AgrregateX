@@ -5,7 +5,7 @@
 ## Branch and delivery
 
 - Branch: `test/prd-benchmark-suite`
-- PR: pending publication
+- PR: https://github.com/surajgojanur/AgrregateX/pull/2 (open, review requested through Issue #1)
 - Issue #1: https://github.com/surajgojanur/AgrregateX/issues/1
 
 ## Evidence
