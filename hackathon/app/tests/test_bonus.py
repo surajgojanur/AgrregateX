@@ -19,6 +19,8 @@ from fastapi.testclient import TestClient  # noqa: E402
 
 from axapi import db, engine, limits, main, queries, rebuild  # noqa: E402
 
+engine._ORIG_BRIEF = engine.freshness_brief
+
 BRIEF = {"verified_at": "2026-10-31T13:00:00+00:00", "age_s": 0.8, "healthy": True, "stream_tables": 3,
          "rule": "oldest stream table's last completed refresh"}
 
@@ -106,6 +108,74 @@ class TestB3Limiter(FakeDB):
         row = next(x for x in self.client.get("/api/limits").json()["tenants"] if x["tenant_id"] == 3)
         self.assertGreaterEqual(row["rejected_429"], 1)
         self.assertEqual(row["in_flight"], 0)
+
+
+GOOD_ST = [{"name": n, "rebuild_status": "COMPLETED", "status_after": "ACTIVE"} for n in rebuild.ST_NAMES]
+GOOD_ORACLE = [{"stream_table": n.split(".")[1], "missing": 0, "extra": 0} for n in rebuild.ST_NAMES]
+
+
+class TestB2VerifyFailClosed(unittest.TestCase):
+    """PR #24 review: success needs EXACTLY the 3 stream tables, no duplicates, all counts 0."""
+
+    def test_clean_exact_set_passes(self):
+        self.assertEqual(rebuild.verify(GOOD_ST, GOOD_ORACLE), (True, True, []))
+
+    def test_zero_oracle_rows_is_not_clean(self):
+        rebuilt, clean, problems = rebuild.verify(GOOD_ST, [])
+        self.assertFalse(clean)
+        self.assertTrue(any("no rows" in p for p in problems))
+        self.assertFalse(rebuild.verify(GOOD_ST, None)[1])
+
+    def test_missing_oracle_row_is_not_clean(self):
+        self.assertFalse(rebuild.verify(GOOD_ST, GOOD_ORACLE[:2])[1])
+
+    def test_duplicate_oracle_row_is_not_clean(self):
+        dup = GOOD_ORACLE[:2] + [GOOD_ORACLE[0]]
+        self.assertFalse(rebuild.verify(GOOD_ST, dup)[1])
+
+    def test_unexpected_oracle_row_is_not_clean(self):
+        self.assertFalse(rebuild.verify(GOOD_ST, GOOD_ORACLE + [{"stream_table": "st_other", "missing": 0, "extra": 0}])[1])
+
+    def test_nonzero_counts_are_not_clean(self):
+        for k in ("missing", "extra"):
+            bad = [dict(GOOD_ORACLE[0], **{k: 1})] + GOOD_ORACLE[1:]
+            self.assertFalse(rebuild.verify(GOOD_ST, bad)[1], k)
+
+    def test_rebuild_must_complete_for_every_table(self):
+        self.assertFalse(rebuild.verify(GOOD_ST[:2], GOOD_ORACLE)[0])                       # one table missing
+        timeout = [dict(GOOD_ST[0], rebuild_status="TIMEOUT")] + GOOD_ST[1:]
+        self.assertFalse(rebuild.verify(timeout, GOOD_ORACLE)[0])
+        suspended = [dict(GOOD_ST[0], status_after="SUSPENDED")] + GOOD_ST[1:]
+        self.assertFalse(rebuild.verify(suspended, GOOD_ORACLE)[0])
+
+
+class TestB1SingleFlight(unittest.TestCase):
+    def test_concurrent_misses_run_one_query(self):
+        calls = []
+        orig = db.monitor
+
+        class FakeConn:
+            def execute(self, *_a):
+                calls.append(1)
+                time.sleep(0.2)
+                return self
+
+            def fetchall(self):
+                return [{"verified_at": None, "age_s": None, "status": "ACTIVE"}]
+
+        @contextmanager
+        def fake_monitor(_shard):
+            yield FakeConn()
+
+        db.monitor = fake_monitor
+        engine._brief_cache.clear()
+        try:
+            shard = next(iter(db.SHARDS.values()))
+            with ThreadPoolExecutor(20) as ex:
+                list(ex.map(lambda _: engine._ORIG_BRIEF(shard), range(20)))
+        finally:
+            db.monitor = orig
+        self.assertEqual(len(calls), 1)
 
 
 class TestB2RebuildCli(unittest.TestCase):

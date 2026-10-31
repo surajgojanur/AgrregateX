@@ -739,7 +739,7 @@ cancelled and refunded orders. Each is configurable and labelled in API response
 
 ## 18. Final Evaluation Checklist
 
-> **Status as of 2026-10-31** (checked against the repository on branch `feat/opus-p3-sharding` / PR #22).
+> **Status as of 2026-10-31 ~13:25 UTC** (checked against the repository: `main` @ b632bd9 with P3 sharding merged (#22), plus PR #24 (B-1/B-2/B-3) and PR #25 (frontend conversion) under review).
 > ✅ = done **with evidence in the repo**. ⚠️ = done with a caveat. ❌ = not done.
 > **All measurements are on REPRESENTATIVE data (10k orders sharded, 100k single-DB) on one Apple M1 laptop, n=1.**
 > They are **not** the PRD's 1M/10 and 10M/100 datasets, so no scorecard target is ticked yet.
@@ -771,9 +771,9 @@ cancelled and refunded orders. Each is configurable and labelled in API response
 | Growth (< 5x / < 2x slower at 10M) | [ ] | [ ] | **not measured** | — |
 
 ### Bonus [PRD, optional]
-- [x] ✅ **B-1** freshness shown: **every analytics response** carries `freshness.verified_at` / `age_s` (oldest stream table's last completed refresh), and the dashboard shows "Updated N s ago" (amber > 30 s). The per-table detail stays at `/api/tenants/{id}/freshness`. Unit-tested on all 4 endpoints (`hackathon/app/tests/test_bonus.py`). *Live check pending a running stack.*
-- [x] ⚠️ **B-2** rebuild everything from scratch: **built** as the operator CLI `python -m axapi.rebuild --shard all`. It reinitializes all 3 stream tables per shard (full recompute from source), waits for completion, then **requires oracle 0/0**; exit 0 only if rebuilt and verified. A CLI rather than an endpoint, because pg_trickle allows only the owner (superuser) and the API must not hold superuser credentials. *Caveat:* argument handling unit-tested; **the live database run is NOT done yet** (Docker unavailable during the build).
-- [x] ✅ **B-3** per-tenant limit on concurrent heavy queries: ≤ `AX_TENANT_MAX_CONCURRENT` (default 4) per tenant; excess → **429** + `Retry-After: 1`; counters at operator `/api/limits` and on the Engine page. Unit-tested: exact cap (2 of 6 admitted at limit 2), 429 + header, a flooding tenant does not block another tenant, slot released on error (`hackathon/app/tests/test_bonus.py`). *Scope: per API process. Live check pending a running stack.*
+- [x] ✅ **B-1** freshness shown: **every analytics response** carries `freshness.verified_at` / `age_s` / `healthy` (oldest stream table's last completed refresh; single-flight cache ≤ 1 query per shard per second), and the dashboard shows "Updated N s ago" (amber > 30 s). **Live-verified** on a disposable two-shard stack: all 4 endpoints, operator and tenant sessions, `age_s` 0.8–1.3 s (`hackathon/app/tests/results/live-bonus-20261031T132216Z.txt`). Unit tests in `hackathon/app/tests/test_bonus.py`.
+- [x] ✅ **B-2** rebuild everything from scratch: operator CLI `python -m axapi.rebuild --shard all`. It reinitializes all 3 stream tables per shard (full recompute from source), waits for the completed rebuild, then requires the oracle to cover **exactly** the 3 stream tables with 0/0. Exit 0 only if rebuilt **and** verified (fail-closed after review: empty, partial or duplicate oracle results fail). **Live-verified** on a disposable two-shard stack **with live writes running**: both shards rebuilt in 8.6 s; pg_trickle history shows `REINITIALIZE:COMPLETED` for all 6 stream tables; an independent oracle is 0/0 on both shards before and after; a wrong owner password fails closed (`live-bonus-20261031T132216Z.txt`). It is a CLI, not an endpoint, by design: pg_trickle authorises only the stream-table owner (it checks the outer session user), and the web API must not hold superuser credentials.
+- [x] ✅ **B-3** per-tenant limit on concurrent heavy queries: ≤ `AX_TENANT_MAX_CONCURRENT` (default 4) per tenant; excess → **429** + `Retry-After: 1`; counters at operator-only `/api/limits` and on the Engine page. **Live-verified** (limit set to 1 for the test): a 16-request flood on tenant 1 → 3 × 200 + 13 × 429, all with `Retry-After: 1`; tenant 2 meanwhile `[200, 200, 200]`; counters match; `/api/limits` returns 403 for tenants. Also unit-tested (exact cap, fairness, slot release on error). *Scope: per API process (one uvicorn worker in the demo).*
 - [ ] ❌ **B-4** new metric via configuration file: not built
 - [x] ⚠️ **B-5** monitoring page: the **Engine** page (refresh counts, p50/p95/max refresh time, fallbacks, CDC backlog, health checks), the **Shards** page (per-shard health and freshness) and per-panel HTTP time on the Dashboard. *Caveat:* query time is measured in the browser; there is no server-side latency history.
 
@@ -784,11 +784,12 @@ cancelled and refunded orders. Each is configurable and labelled in API response
 - [ ] ❌ No unverified claims in the demo or README: **pending a final review.** There is no project README yet, and the converted landing page is not committed or visually checked.
 
 ### Other open work (not PRD checklist items)
-- [ ] Live run of the hardened partition script (only simulated tests so far)
+- [ ] Live run of the **hardened** partition script (18 simulated tests pass; the live partition demo used the earlier revision)
 - [ ] Browser/visual QA of the Dashboard, Shards, Engine and outage banner
 - [ ] Fedora/amd64 runtime test (manifest verified only)
 - [ ] Decision on the upstream pg_trickle patch (PROPOSAL P1), the main path to fixing database safety
-- [ ] CI cannot run until the GitHub Actions billing/spending limit is fixed
+- [ ] CI cannot run until the GitHub Actions billing/spending limit is fixed (jobs are refused before starting)
+- [ ] B-4 config-driven metric (the only bonus not built)
 - [ ] Failover / replication (explicitly out of scope for now)
 
 ---
