@@ -81,6 +81,36 @@ def ensure_nost():
                         *extra, "-f", f], check=True, capture_output=True)
 
 
+# Base fixture = every order that is NOT a pgbench row (seed + demo-writer rows). Earlier evidence
+# compared A = 5,585 rows with a stale C = 64,501 rows (ax_nost was reused from another run), so the
+# A-vs-C maintenance comparison was invalid. Now C is re-synchronised from A before every pair and
+# both fingerprints are recorded per arm; a mismatch aborts the run.
+FIXTURE_SQL = ("select count(*) || ':' || coalesce(md5(string_agg(order_id || status || quantity || unit_price_cents"
+               " || created_at::text, ',' order by tenant_id, order_id)), '') from ax.orders where order_id < 300000000")
+DIM_SQL = "select (select count(*) from ax.tenants) || ':' || (select count(*) from ax.products) || ':' || (select count(*) from ax.customers)"
+
+
+def sync_fixture():
+    """Copy arm A's current base rows into ax_nost (no stream tables there, so no CDC side effects)."""
+    if psql("aggregatex", DIM_SQL) != psql("ax_nost", DIM_SQL):
+        raise RuntimeError("tenants/products/customers differ between aggregatex and ax_nost")
+    cols = "tenant_id, order_id, customer_id, product_id, status, quantity, unit_price_cents, created_at, updated_at"
+    dump = subprocess.run(["psql", "-h", "127.0.0.1", "-p", str(args.port), "-U", "postgres", "-d", "aggregatex", "-XAtq",
+                           "-v", "ON_ERROR_STOP=1", "-c",
+                           f"\\copy (select {cols} from ax.orders where order_id < 300000000) to stdout"],
+                          capture_output=True, env=ENV, check=True).stdout
+    r = subprocess.run(["psql", "-h", "127.0.0.1", "-p", str(args.port), "-U", "postgres", "-d", "ax_nost", "-XAtq",
+                        "-v", "ON_ERROR_STOP=1", "-c", "delete from ax.orders", "-c", f"\\copy ax.orders ({cols}) from stdin"],
+                       input=dump, capture_output=True, env=ENV)
+    if r.returncode:
+        raise RuntimeError(f"fixture sync failed: {r.stderr.decode()[:300]}")
+    psql("ax_nost", "vacuum (analyze) ax.orders")
+    a, c = psql("aggregatex", FIXTURE_SQL), psql("ax_nost", FIXTURE_SQL)
+    if a != c:
+        raise RuntimeError(f"fixture mismatch after sync: aggregatex={a} ax_nost={c}")
+    return a
+
+
 # ── HTTP dashboard load at a FIXED offered rate ──────────────────────────────
 PATHS = [f"/api/tenants/{t}/{e}?from=2026-08-01T00:00:00Z" for t in (1, 3, 4)
          for e in ("summary", "trends", "top-products", "breakdown")]
@@ -191,6 +221,7 @@ def reset(db):
 def run_arm(pair, arm, op):
     db = "ax_nost" if arm == "C" else "aggregatex"
     reset(db)
+    fixture_rows = int(psql(db, "select count(*) from ax.orders where order_id < 300000000"))
     tmp = tempfile.mkdtemp(prefix=f"g3-{arm}-")
     prefix = os.path.join(tmp, "tx")
     stop = threading.Event()
@@ -238,7 +269,7 @@ def run_arm(pair, arm, op):
             hist[a] = {"n": int(n), "fallbacks": int(fb), "failed": int(fl)}
     hl = [x[0] for x in http if 200 <= x[1] < 300]
     res = {
-        "pair": pair, "arm": arm, "db": db, "start": t_start, "seconds_measured": round(meas_s, 1),
+        "pair": pair, "arm": arm, "db": db, "fixture_rows": fixture_rows, "start": t_start, "seconds_measured": round(meas_s, 1),
         "pgbench_exit": pb.returncode, "pgbench_failed_line": next((l for l in pb.stdout.splitlines() if "failed" in l), ""),
         "tps": round(len(lat) / meas_s, 1) if meas_s > 0 else None,
         "oltp_offered_tps": args.oltp_rate or None,
@@ -273,6 +304,14 @@ def main():
     for p in range(1, args.pairs + 1):
         order = ["A", "B", "C"]
         rng.shuffle(order)
+        # Pause the demo writer for the 1-2 s copy so both fingerprints come from one state
+        # (the first matched run aborted at pair 3 on a 1-row race: 5,392 vs 5,391).
+        subprocess.run(["docker", "stop", f"{args.project}-writer-1"], capture_output=True)
+        try:
+            meta.setdefault("fixture_per_pair", {})[p] = sync_fixture()
+        finally:
+            subprocess.run(["docker", "start", f"{args.project}-writer-1"], capture_output=True)
+        json.dump(meta, open(os.path.join(args.out, "meta.json"), "w"), indent=1)
         for arm in order:
             results.append(run_arm(p, arm, op))
     by = {a: [r for r in results if r["arm"] == a] for a in "ABC"}
@@ -286,9 +325,24 @@ def main():
                       "A_vs_C_p95_pct": round((a["lat_ms"]["p95"] - c["lat_ms"]["p95"]) / c["lat_ms"]["p95"] * 100, 1)})
     summ = {k: {"median": statistics.median(x[k] for x in pairs), "min": min(x[k] for x in pairs), "max": max(x[k] for x in pairs)}
             for k in ("B_vs_A_tps_pct", "B_vs_A_p95_pct", "A_vs_C_tps_pct", "A_vs_C_p95_pct")}
+    # Quiesced exact oracle of all three stream tables (writer paused, then restored).
+    writer = f"{args.project}-writer-1"
+    subprocess.run(["docker", "stop", writer], capture_output=True)
+    try:
+        reset("aggregatex")
+        time.sleep(10)
+        oracle = psql("aggregatex", "select string_agg(stream_table || '=' || missing_in_st || '/' || extra_in_st, ' '"
+                                    " order by stream_table) from ax.oracle_mismatches()")
+    finally:
+        subprocess.run(["docker", "start", writer], capture_output=True)
+    fixture_rows = {x: sorted({r["fixture_rows"] for r in by[x]}) for x in "ABC"}
     out = {"pairs": pairs, "summary": summ, "seed": args.seed,
            "median_tps": {x: statistics.median(r["tps"] for r in by[x]) for x in "ABC"},
-           "median_p95_ms": {x: statistics.median(r["lat_ms"]["p95"] for r in by[x]) for x in "ABC"}}
+           "median_p95_ms": {x: statistics.median(r["lat_ms"]["p95"] for r in by[x]) for x in "ABC"},
+           "fixture_rows_per_arm": fixture_rows,
+           "fallbacks_A_B": sum(v["fallbacks"] for r in by["A"] + by["B"] for v in (r.get("refresh_history") or {}).values()
+                                if isinstance(v, dict)),
+           "oracle_quiesced": oracle}
     json.dump(out, open(os.path.join(args.out, "summary.json"), "w"), indent=1)
     print(json.dumps(out, indent=1))
 
