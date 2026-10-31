@@ -1,0 +1,264 @@
+{
+  "mode": "sequential_get_only",
+  "timeout_s": 4,
+  "auth": "uses current local demo mode; does not log in",
+  "writes": false,
+  "checks": [
+    {
+      "method": "GET",
+      "path": "/api/health",
+      "status": 200,
+      "latency_ms": 8.5,
+      "response": {
+        "keys": [
+          "database",
+          "directory_version",
+          "pg_trickle_version",
+          "shards",
+          "status",
+          "version"
+        ],
+        "status": "ok",
+        "pg_trickle_version": "0.108.3",
+        "shards": [
+          "default"
+        ]
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/api/tenants",
+      "status": 200,
+      "latency_ms": 3.9,
+      "response": {
+        "keys": [
+          "directory_version",
+          "tenants"
+        ]
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/api/tenants/1/summary",
+      "status": 200,
+      "latency_ms": 5.7,
+      "response": {
+        "keys": [
+          "freshness",
+          "from",
+          "shard",
+          "source",
+          "summary",
+          "tenant_id",
+          "to"
+        ]
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/api/tenants/1/trends",
+      "status": 200,
+      "latency_ms": 5.2,
+      "response": {
+        "keys": [
+          "freshness",
+          "from",
+          "grain",
+          "points",
+          "shard",
+          "source",
+          "tenant_id",
+          "to"
+        ]
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/api/tenants/1/top-products",
+      "status": 200,
+      "latency_ms": 6.2,
+      "response": {
+        "keys": [
+          "freshness",
+          "from",
+          "limit",
+          "products",
+          "shard",
+          "source",
+          "tenant_id",
+          "to"
+        ]
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/api/tenants/1/breakdown?by=status",
+      "status": 200,
+      "latency_ms": 4.8,
+      "response": {
+        "keys": [
+          "by",
+          "freshness",
+          "from",
+          "rows",
+          "shard",
+          "source",
+          "tenant_id",
+          "to"
+        ]
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/api/tenants/1/breakdown?by=category",
+      "status": 200,
+      "latency_ms": 4.6,
+      "response": {
+        "keys": [
+          "by",
+          "freshness",
+          "from",
+          "rows",
+          "shard",
+          "source",
+          "tenant_id",
+          "to"
+        ]
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/api/tenants/1/freshness",
+      "status": 200,
+      "latency_ms": 3.0,
+      "response": {
+        "keys": [
+          "healthy",
+          "note",
+          "shard",
+          "stream_tables",
+          "tenant_id",
+          "verified_age_s"
+        ],
+        "healthy": true,
+        "verified_age_s": 3.52,
+        "stream_tables": [
+          {
+            "name": "st_day_category_status",
+            "refresh_mode": "DIFFERENTIAL",
+            "effective_refresh_mode": "NO_DATA",
+            "status": "ACTIVE",
+            "schedule": "1s",
+            "consecutive_errors": 0,
+            "verified_at": "2026-10-31T15:48:30.956906+00:00",
+            "last_action": "NO_DATA",
+            "age_s": 3.29
+          },
+          {
+            "name": "st_day_product_status",
+            "refresh_mode": "DIFFERENTIAL",
+            "effective_refresh_mode": "NO_DATA",
+            "status": "ACTIVE",
+            "schedule": "1s",
+            "consecutive_errors": 0,
+            "verified_at": "2026-10-31T15:48:30.927881+00:00",
+            "last_action": "NO_DATA",
+            "age_s": 3.32
+          },
+          {
+            "name": "st_hour_category_status",
+            "refresh_mode": "DIFFERENTIAL",
+            "effective_refresh_mode": "NO_DATA",
+            "status": "ACTIVE",
+            "schedule": "1s",
+            "consecutive_errors": 0,
+            "verified_at": "2026-10-31T15:48:30.721410+00:00",
+            "last_action": "NO_DATA",
+            "age_s": 3.52
+          }
+        ]
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/api/shards",
+      "status": 200,
+      "latency_ms": 3.8,
+      "response": {
+        "keys": [
+          "complete",
+          "directory_version",
+          "missing_shards",
+          "partial_total_orders",
+          "shards",
+          "total_orders"
+        ],
+        "complete": true,
+        "total_orders": 1002,
+        "shards": [
+          {
+            "name": "default",
+            "available": true,
+            "orders": 1002,
+            "seed_orders": 1000,
+            "stream_tables": [
+              "st_day_category_status",
+              "st_day_product_status",
+              "st_hour_category_status"
+            ]
+          }
+        ]
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/api/engine",
+      "status": 200,
+      "latency_ms": 20.8,
+      "response": {
+        "keys": [
+          "change_buffers",
+          "health",
+          "pg_trickle_version",
+          "recent_refreshes",
+          "refresh_stats_5m",
+          "scheduler_running",
+          "settings",
+          "shard",
+          "shards",
+          "stream_tables"
+        ]
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/api/monitoring",
+      "status": 200,
+      "latency_ms": 21.7,
+      "response": {
+        "keys": [
+          "api",
+          "cache_ttl_s",
+          "observed_at",
+          "query_limits",
+          "scope",
+          "shards"
+        ]
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/api/limits",
+      "status": 200,
+      "latency_ms": 2.3,
+      "response": {
+        "keys": [
+          "max_concurrent_per_tenant",
+          "queue_wait_s",
+          "scope",
+          "tenants"
+        ]
+      }
+    }
+  ]
+}
