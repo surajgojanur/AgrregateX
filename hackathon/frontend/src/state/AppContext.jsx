@@ -1,22 +1,17 @@
 import { createContext, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react'
 import { api } from '../api/client'
-import { witnessMode } from '../api/witnesstrace'
-import useWitnessCases from './useWitnessCases'
 import { safeStorage } from '../lib/format'
 
 const AppContext = createContext(null)
 
-const PREFS_KEY = 'revelio.prefs'
+const PREFS_KEY = 'aggregatex.prefs'
 
 export function AppProvider({ user = null, children }) {
-  const wt = useWitnessCases()
-  const [catalog, setCatalog] = useState(null)
-  const [health, setHealth] = useState(null) // null = unknown yet
+  const [health, setHealth] = useState(null) // null = unknown / unreachable
   const [engineError, setEngineError] = useState(null)
   const [toasts, setToasts] = useState([])
   const [notifications, setNotifications] = useState([])
-  const [activeCase, setActiveCase] = useState(null) // { id, title, revision } | { draft: true }
-  const [prefs, setPrefs] = useState(() => ({ scanEffect: true, reduceMotion: false, ...safeStorage.get(PREFS_KEY, {}) }))
+  const [prefs, setPrefs] = useState(() => ({ reduceMotion: false, ...safeStorage.get(PREFS_KEY, {}) }))
   const toastId = useRef(0)
 
   const refreshHealth = useCallback(async () => {
@@ -32,20 +27,12 @@ export function AppProvider({ user = null, children }) {
     }
   }, [])
 
-  const loadCatalog = useCallback(async () => {
-    const c = await api.catalog()
-    setCatalog(c)
-    return c
-  }, [])
-
-  // Ends the session and drops this browser's unsaved draft, so the next person at this machine can't read it.
   const logout = useCallback(async () => {
     try {
       await api.logout()
     } catch {
-      /* the session cookie is cleared server-side when reachable; leave either way */
+      /* cookie is cleared server-side when reachable; leave either way */
     }
-    safeStorage.remove('revelio.draft')
     window.location.assign('/login')
   }, [])
 
@@ -76,26 +63,20 @@ export function AppProvider({ user = null, children }) {
     document.documentElement.classList.toggle('reduce-motion', Boolean(prefs.reduceMotion))
   }, [prefs.reduceMotion])
 
-  // Re-check engine status every 30 s (cheap local call).
   useEffect(() => {
+    const first = setTimeout(refreshHealth, 0)
     const id = setInterval(refreshHealth, 30000)
-    return () => clearInterval(id)
+    return () => { clearTimeout(first); clearInterval(id) }
   }, [refreshHealth])
-
-  const providers = useMemo(() => {
-    const map = {}
-    for (const p of health?.providers || []) map[p.id] = p
-    return map
-  }, [health])
 
   const value = useMemo(
     () => ({
-      wt, catalog, loadCatalog, health, providers, engineError, refreshHealth,
-      toasts, notify, dismissToast, notifications, clearNotifications: () => setNotifications([]),
-      activeCase: witnessMode ? wt.record : activeCase, setActiveCase, prefs, updatePrefs, user, logout,
+      health, engineError, refreshHealth, toasts, notify, dismissToast, notifications,
+      clearNotifications: () => setNotifications([]), prefs, updatePrefs, user, logout,
+      // kept for shared shell components
+      activeCase: null, providers: {},
     }),
-    [wt, user, logout, catalog, loadCatalog, health, providers, engineError, refreshHealth, toasts, notify, dismissToast,
-      notifications, activeCase, prefs, updatePrefs],
+    [health, engineError, refreshHealth, toasts, notify, dismissToast, notifications, prefs, updatePrefs, user, logout],
   )
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>
 }

@@ -34,7 +34,7 @@ if ((pathname === '/' || pathname === '') && hash.startsWith('#/')) {
 
 const isApp = pathname === '/app' || pathname.startsWith('/app/')
 const authMode = { '/login': 'login', '/register': 'register' }[pathname.replace(/\/$/, '')]
-document.title = isApp ? 'Revelio — Forensic Composite Workspace' : 'Revelio — From Witness Description to Forensic Sketch'
+document.title = isApp ? 'AgrregateX — Tenant Analytics' : 'AgrregateX — Multi-tenant analytics on pg_trickle'
 
 let page = <LandingPage />
 if (isApp) page = <App />

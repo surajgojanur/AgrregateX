@@ -4,7 +4,7 @@ import { useEffect, useState } from 'react'
 const parse = () => {
   const raw = window.location.hash.replace(/^#\/?/, '')
   const [path, query = ''] = raw.split('?')
-  return { path: path || 'workspace', params: Object.fromEntries(new URLSearchParams(query)) }
+  return { path: path || 'dashboard', params: Object.fromEntries(new URLSearchParams(query)) }
 }
 
 export const navigate = (path, params = {}) => {

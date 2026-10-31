@@ -1,0 +1,49 @@
+# AgrregateX demo stack: pg_trickle DB (seeded) + live writer + API serving the dashboard UI.
+#   cd hackathon && docker compose up -d --build      ->  http://127.0.0.1:8090
+# Credentials below are LOCAL DEMO DEFAULTS. Override via environment/.env for anything shared.
+name: aggregatex
+x-roles: &roles
+  AX_API_PASSWORD: ${AX_API_PASSWORD:-local-demo-api}
+  AX_WRITER_PASSWORD: ${AX_WRITER_PASSWORD:-local-demo-writer}
+  AX_MONITOR_PASSWORD: ${AX_MONITOR_PASSWORD:-local-demo-monitor}
+services:
+  db:
+    image: ghcr.io/trickle-labs/pg_trickle:latest   # PG 18.6 + pg_trickle 0.108.3 (see handoff §0)
+    environment:
+      <<: *roles
+      POSTGRES_PASSWORD: ${AX_DB_SUPERUSER_PASSWORD:-local-demo-superuser}
+      POSTGRES_DB: aggregatex
+      AX_SEED_ORDERS: ${AX_SEED_ORDERS:-100000}
+      AX_SEED_TENANTS: 10
+    volumes:
+      - ./sql:/ax/sql:ro
+      - ./integration/seed.sql:/ax/seed.sql:ro
+      - ./app/db/init.sh:/docker-entrypoint-initdb.d/10-aggregatex.sh:ro
+      - dbdata:/var/lib/postgresql
+    ports: ["127.0.0.1:25560:5432"]
+    mem_limit: 2g
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d aggregatex && psql -U postgres -d aggregatex -tAc \"select 1 from pg_roles where rolname='ax_monitor'\" | grep -q 1"]
+      interval: 3s
+      retries: 60
+  api:
+    build: { context: ., dockerfile: app/Dockerfile }
+    environment:
+      <<: *roles
+      AX_DB_HOST: db
+      AX_DB_NAME: aggregatex
+      AX_DEMO_PASSWORD: ${AX_DEMO_PASSWORD:-demo1234}
+      AX_ENABLE_DEMO_WRITES: "1"
+    ports: ["127.0.0.1:8090:8000"]
+    depends_on: { db: { condition: service_healthy } }
+  writer:
+    build: { context: ., dockerfile: app/Dockerfile }
+    command: ["python", "-m", "axapi.writer"]
+    environment:
+      <<: *roles
+      AX_DB_HOST: db
+      AX_DB_NAME: aggregatex
+      AX_WRITER_RATE: ${AX_WRITER_RATE:-5}
+    depends_on: { db: { condition: service_healthy } }
+volumes:
+  dbdata:
