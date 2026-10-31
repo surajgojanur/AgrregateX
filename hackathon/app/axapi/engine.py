@@ -8,6 +8,7 @@ computed from raw ax.orders. (An LSN rule is unreliable: pg_trickle's frontier r
 of the last consumed change, which is below the commit LSN and does not move while idle.)
 """
 import random
+import psycopg
 import threading
 import time
 from datetime import datetime, timezone
@@ -254,21 +255,31 @@ def shard_status(shard: db.Shard) -> dict:
         out["seed_orders"] = sum(r["seed_orders"] for r in counts)
         stray = sorted({r["tenant_id"] for r in counts} - set(out["tenants"] or []))
         out["directory_violations"] = stray if db.DIRECTORY else []
-        out["healthy"] = all(t["status"] == "ACTIVE" for t in out["stream_tables"]) and not out["directory_violations"]
-    except db.ShardUnavailable as exc:
-        out.update(available=False, error=exc.reason)
+        out["metadata_ok"] = True
+        out["healthy"] = bool(out["stream_tables"]) and all(t["status"] == "ACTIVE" for t in out["stream_tables"]) and not out["directory_violations"]
+    except db.ShardUnavailable:
+        out.update(available=False, healthy=False, metadata_ok=False, error="Shard connection unavailable.")
+    except psycopg.Error as exc:
+        diagnostic = ("Monitoring helper is missing; operator must apply migration 001_tenant_order_counts."
+                      if exc.sqlstate == "42883" else
+                      "Monitoring permissions are incomplete; operator must verify helper EXECUTE and catalog grants."
+                      if exc.sqlstate == "42501" else
+                      "Monitoring metadata query failed; operator must check database compatibility.")
+        out.update(healthy=False, metadata_ok=False, configuration_error=diagnostic)
     return out
 
 
 def shards_overview() -> dict:
     shards = [shard_status(s) for s in db.SHARDS.values()]
     missing = [s["shard"] for s in shards if not s["available"]]
-    complete = not missing
-    total = sum(s.get("orders", 0) for s in shards if s["available"])
+    metadata_errors = [s["shard"] for s in shards if s["available"] and not s.get("metadata_ok", True)]
+    complete = not missing and not metadata_errors
+    total = sum(s["orders"] for s in shards if s["available"] and s.get("metadata_ok", True))
     return {
         "directory_version": db.DIRECTORY_VERSION,
         "complete": complete,
         "missing_shards": missing,
+        "metadata_error_shards": metadata_errors,
         # A global total is only reported when EVERY shard answered; otherwise it is explicitly partial.
         "total_orders": total if complete else None,
         "partial_total_orders": None if complete else total,
