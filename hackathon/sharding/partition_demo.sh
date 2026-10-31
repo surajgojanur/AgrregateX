@@ -16,7 +16,24 @@ HERE=$(cd "$(dirname "$0")" && pwd)
 OUT="$HERE/results/partition-$(date -u +%Y%m%dT%H%M%SZ).txt"
 JAR=$(mktemp)
 mkdir -p "$HERE/results"
-trap 'docker network connect "$NET" "$API" 2>/dev/null; docker network connect "$NET" "$WRITER" 2>/dev/null; rm -f "$JAR"' EXIT
+docker info >/dev/null 2>&1 || { echo "ABORT: Docker daemon not reachable; nothing was changed"; exit 2; }
+for c in "$API" "$WRITER" aggregatex-sharded-shard_a-1 aggregatex-sharded-shard_b-1; do
+  docker inspect "$c" >/dev/null 2>&1 || { echo "ABORT: container $c not found; nothing was changed"; exit 2; }
+done
+attached() { docker inspect -f "{{json .NetworkSettings.Networks}}" "$1" | grep -q "\"$NET\""; }
+# Safety: shard B must NOT be on the network we cut, and the API must have another route (net_b).
+docker inspect -f '{{json .NetworkSettings.Networks}}' aggregatex-sharded-shard_b-1 | grep -q "\"$NET\"" && { echo "ABORT: shard B is attached to $NET"; exit 2; }
+docker inspect -f '{{json .NetworkSettings.Networks}}' "$API" | grep -q '"aggregatex-sharded_net_b"' || { echo "ABORT: API has no route to shard B"; exit 2; }
+DETACHED=()
+restore() {  # re-attach only what we detached; report (never swallow) failures
+  local rc=0
+  for c in "${DETACHED[@]}"; do
+    attached "$c" || docker network connect "$NET" "$c" || { echo "RESTORE FAILED for $c on $NET" >&2; rc=1; }
+    attached "$c" || { echo "RESTORE NOT VERIFIED for $c" >&2; rc=1; }
+  done
+  DETACHED=(); return $rc
+}
+trap 'restore; rm -f "$JAR"' EXIT
 
 log() { echo "$*" | tee -a "$OUT"; }
 req() {  # method path [json] -> "<code> <ms>"
@@ -38,7 +55,8 @@ A_ROWS0=$($PSQL_A -c "select count(*) from ax.orders")
 log "shard A rows: $A_ROWS0"
 
 log "## 1. partition: detach $API and $WRITER from $NET"
-docker network disconnect "$NET" "$API" && docker network disconnect "$NET" "$WRITER"
+docker network disconnect "$NET" "$API" && DETACHED+=("$API")
+docker network disconnect "$NET" "$WRITER" && DETACHED+=("$WRITER")
 T0=$(date +%s)
 for i in 1 2 3; do
   log "tenant 1 (A) summary #$i: $(req GET /api/tenants/1/summary)"; [ $i = 1 ] && log "  body: $(body 260)"
@@ -62,12 +80,15 @@ log "tenant 1 (A) summary after ${HOLD}s: $(req GET /api/tenants/1/summary)"
 log "writer log during partition: $(docker logs --since "$(( $(date +%s) - T0 + 5 ))s" "$WRITER" 2>&1 | grep 'writer stats' | tail -1)"
 
 log "## 2. restore: re-attach to $NET"
-docker network connect "$NET" "$API" && docker network connect "$NET" "$WRITER"
+restore || { log "RECOVERY FAILED: network not restored"; exit 1; }
 TR=$(date +%s)
 for i in $(seq 1 40); do
   r=$(req GET /api/tenants/1/summary); [ "${r%% *}" = 200 ] && break; sleep 0.5
 done
 log "tenant 1 (A) summary after restore: $r  (recovered within $(( $(date +%s) - TR ))s)"
+[ "${r%% *}" = 200 ] || { log "RECOVERY FAILED: tenant 1 still not served"; exit 1; }
+req GET /api/shards >/dev/null; python3 -c "import json,sys;d=json.load(open('/tmp/ax_body.$$'));sys.exit(0 if d['complete'] else 1)" \
+  && log "/api/shards complete=true after restore" || { log "RECOVERY FAILED: /api/shards still partial"; exit 1; }
 log "partition duration: $(( TR - T0 ))s"
 
 log "## 3. catch-up + oracle (writer paused)"

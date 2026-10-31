@@ -11,7 +11,9 @@ x-roles: &roles
   AX_MONITOR_PASSWORD: ${AX_MONITOR_PASSWORD:-local-demo-monitor}
 
 x-shard: &shard
-  image: ghcr.io/trickle-labs/pg_trickle:latest      # PG 18.6 + pg_trickle 0.108.3
+  # Digest-pinned (PG 18.6 + pg_trickle 0.108.3). NOTE: this OCI index contains ONLY linux/arm64.
+  # On amd64 (e.g. Fedora) set AX_PG_TRICKLE_IMAGE to an amd64 build/digest; never silently float to :latest.
+  image: ${AX_PG_TRICKLE_IMAGE:-ghcr.io/trickle-labs/pg_trickle@sha256:94344bb98995b19c826f939739672481abaab8c25710e3910b48bdb7cf5b3b8d}
   # Small footprint: the host is memory constrained (see docs/handoffs/opus-sharding.md).
   command: ["postgres", "-c", "shared_buffers=64MB", "-c", "max_connections=40", "-c", "work_mem=8MB",
             "-c", "maintenance_work_mem=32MB", "-c", "effective_cache_size=256MB"]
