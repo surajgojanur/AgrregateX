@@ -70,7 +70,7 @@ def _valid_payload(path: str, body: object) -> bool:
         return (type(body.get("complete")) is bool and isinstance(shards, list)
                 and "total_orders" in body
                 and all(isinstance(shard, dict) and isinstance(shard.get("stream_tables"), list)
-                        and all(isinstance(st, dict) for st in shard["stream_tables"])
+                        and all(isinstance(st, dict) and isinstance(st.get("name"), str) for st in shard["stream_tables"])
                         for shard in shards))
     if path == "/api/tenants":
         return isinstance(body.get("tenants"), list)
