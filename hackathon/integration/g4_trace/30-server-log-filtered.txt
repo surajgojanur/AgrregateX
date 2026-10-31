@@ -1,0 +1,79 @@
+2026-10-31 22:52:33.151 UTC [118] WARNING:  pg_trickle_ddl_tracker: ST 2 suspended (SOURCE_DEPENDENCY_AMBIGUOUS) after source DDL on ax.orders
+2026-10-31 22:52:33.152 UTC [118] WARNING:  pg_trickle_ddl_tracker: ST 3 suspended (SOURCE_DEPENDENCY_AMBIGUOUS) after source DDL on ax.orders
+2026-10-31 22:52:33.152 UTC [118] WARNING:  pg_trickle_ddl_tracker: ST 1 suspended (SOURCE_DEPENDENCY_AMBIGUOUS) after source DDL on ax.orders
+2026-10-31 22:52:33.154 UTC [118] WARNING:  pg_trickle_ddl_tracker: ALTER TABLE on ax.orders → 3 ST(s) suspended
+2026-10-31 22:52:33.155 UTC [118] WARNING:  pg_trickle_ddl_tracker: ST 2 suspended (SOURCE_DEPENDENCY_AMBIGUOUS) after source DDL on ax.orders
+2026-10-31 22:52:33.155 UTC [118] WARNING:  pg_trickle_ddl_tracker: ST 3 suspended (SOURCE_DEPENDENCY_AMBIGUOUS) after source DDL on ax.orders
+2026-10-31 22:52:33.156 UTC [118] WARNING:  pg_trickle_ddl_tracker: ST 1 suspended (SOURCE_DEPENDENCY_AMBIGUOUS) after source DDL on ax.orders
+2026-10-31 22:52:33.157 UTC [118] WARNING:  pg_trickle_ddl_tracker: ALTER TABLE on ax.orders → 3 ST(s) suspended
+2026-10-31 22:52:33.158 UTC [118] WARNING:  pg_trickle_ddl_tracker: ST 2 suspended (SOURCE_DEPENDENCY_AMBIGUOUS) after source DDL on tenant_read on ax.orders
+2026-10-31 22:52:33.158 UTC [118] WARNING:  pg_trickle_ddl_tracker: ST 3 suspended (SOURCE_DEPENDENCY_AMBIGUOUS) after source DDL on tenant_read on ax.orders
+2026-10-31 22:52:33.158 UTC [118] WARNING:  pg_trickle_ddl_tracker: ST 1 suspended (SOURCE_DEPENDENCY_AMBIGUOUS) after source DDL on tenant_read on ax.orders
+2026-10-31 22:52:33.159 UTC [118] LOG:  pg_trickle_ddl_tracker: policy change on tenant_read on ax.orders → 3 ST(s) suspended
+2026-10-31 22:52:33.160 UTC [118] WARNING:  pg_trickle_ddl_tracker: ST 2 suspended (SOURCE_DEPENDENCY_AMBIGUOUS) after source DDL on ax.products
+2026-10-31 22:52:33.160 UTC [118] WARNING:  pg_trickle_ddl_tracker: ST 3 suspended (SOURCE_DEPENDENCY_AMBIGUOUS) after source DDL on ax.products
+2026-10-31 22:52:33.162 UTC [118] WARNING:  pg_trickle_ddl_tracker: ALTER TABLE on ax.products → 2 ST(s) suspended
+2026-10-31 22:52:33.163 UTC [118] WARNING:  pg_trickle_ddl_tracker: ST 2 suspended (SOURCE_DEPENDENCY_AMBIGUOUS) after source DDL on ax.products
+2026-10-31 22:52:33.164 UTC [118] WARNING:  pg_trickle_ddl_tracker: ST 3 suspended (SOURCE_DEPENDENCY_AMBIGUOUS) after source DDL on ax.products
+2026-10-31 22:52:33.165 UTC [118] WARNING:  pg_trickle_ddl_tracker: ALTER TABLE on ax.products → 2 ST(s) suspended
+2026-10-31 22:52:33.165 UTC [118] WARNING:  pg_trickle_ddl_tracker: ST 2 suspended (SOURCE_DEPENDENCY_AMBIGUOUS) after source DDL on tenant_read on ax.products
+2026-10-31 22:52:33.165 UTC [118] WARNING:  pg_trickle_ddl_tracker: ST 3 suspended (SOURCE_DEPENDENCY_AMBIGUOUS) after source DDL on tenant_read on ax.products
+2026-10-31 22:52:33.166 UTC [118] LOG:  pg_trickle_ddl_tracker: policy change on tenant_read on ax.products → 2 ST(s) suspended
+2026-10-31 22:52:33.169 UTC [118] ERROR:  invalid argument: stream table ax.st_day_product_status is suspended ; use pgtrickle.resume_stream_table('ax.st_day_product_status') first
+2026-10-31 22:53:07.270 UTC [172] INFO:  repair_stream_table(ax.st_day_product_status): window state reset: scheduled protected rebuild; frontier reset: scheduled full refresh on next cycle; cdc_infrastructure: verified OK; status reset: ACTIVE, errors cleared
+2026-10-31 22:53:07.284 UTC [172] INFO:  repair_stream_table(ax.st_day_category_status): window state reset: scheduled protected rebuild; frontier reset: scheduled full refresh on next cycle; cdc_infrastructure: verified OK; status reset: ACTIVE, errors cleared
+2026-10-31 22:53:07.293 UTC [172] INFO:  repair_stream_table(ax.st_hour_category_status): window state reset: scheduled protected rebuild; frontier reset: scheduled full refresh on next cycle; cdc_infrastructure: verified OK; status reset: ACTIVE, errors cleared
+2026-10-31 22:53:14.262 UTC [189] INFO:  Stream table ax.st_day_product_status refreshed (FULL)
+2026-10-31 22:53:14.287 UTC [189] INFO:  Stream table ax.st_day_category_status refreshed (FULL)
+2026-10-31 22:53:14.300 UTC [189] INFO:  Stream table ax.st_hour_category_status refreshed (FULL)
+2026-10-31 22:53:31.651 UTC [241] DEBUG:  [pg_trickle] MT-8 fallback=partition_or_trigger_apply_constraint for ax.st_day_product_status
+2026-10-31 22:53:31.654 UTC [241] INFO:  [PGS_PROFILE] decision=2.90ms generate+build=3.69ms merge_exec=4.39ms cleanup_enqueue=0.00ms total=10.98ms affected=1 phantom_cleanup=0 delta_est=1 mode=INCR path=cache_miss hints=none strategy=merge
+2026-10-31 22:53:31.655 UTC [241] INFO:  Stream table ax.st_day_product_status refreshed (DIFFERENTIAL: +1 -0)
+2026-10-31 22:53:31.768 UTC [248] DEBUG:  [pg_trickle] MT-8 fallback=partition_or_trigger_apply_constraint for ax.st_day_category_status
+2026-10-31 22:53:31.779 UTC [248] INFO:  [PGS_PROFILE] decision=2.74ms generate+build=4.51ms merge_exec=12.22ms cleanup_enqueue=0.00ms total=19.48ms affected=1 phantom_cleanup=0 delta_est=1 mode=INCR path=cache_miss hints=none strategy=merge
+2026-10-31 22:53:31.780 UTC [248] INFO:  Stream table ax.st_day_category_status refreshed (DIFFERENTIAL: +1 -0)
+2026-10-31 22:53:31.890 UTC [255] DEBUG:  [pg_trickle] MT-8 fallback=partition_or_trigger_apply_constraint for ax.st_hour_category_status
+2026-10-31 22:53:31.897 UTC [255] INFO:  [PGS_PROFILE] decision=2.43ms generate+build=3.95ms merge_exec=8.41ms cleanup_enqueue=0.00ms total=14.79ms affected=1 phantom_cleanup=0 delta_est=1 mode=INCR path=cache_miss hints=none strategy=merge
+2026-10-31 22:53:31.898 UTC [255] INFO:  Stream table ax.st_hour_category_status refreshed (DIFFERENTIAL: +1 -0)
+2026-10-31 22:53:32.309 UTC [283] DEBUG:  [pg_trickle] DELTA SQL for ax.st_day_product_status (pgt_id=1):
+2026-10-31 22:53:32.310 UTC [283] DEBUG:  [pg_trickle] MT-8 fallback=partition_or_trigger_apply_constraint for ax.st_day_product_status
+2026-10-31 22:53:32.312 UTC [283] INFO:  [PGS_PROFILE] decision=1.65ms generate+build=1.22ms merge_exec=2.97ms cleanup_enqueue=0.00ms total=5.84ms affected=2 phantom_cleanup=0 delta_est=2 mode=INCR path=cache_miss hints=none strategy=merge
+2026-10-31 22:53:32.313 UTC [283] INFO:  Stream table ax.st_day_product_status refreshed (DIFFERENTIAL: +2 -0)
+2026-10-31 22:53:32.316 UTC [283] ERROR:  column "t" does not exist at character 109
+2026-10-31 22:53:32.438 UTC [290] DEBUG:  [pg_trickle] DELTA SQL for ax.st_day_category_status (pgt_id=2):
+2026-10-31 22:53:32.440 UTC [290] DEBUG:  [pg_trickle] MT-8 fallback=partition_or_trigger_apply_constraint for ax.st_day_category_status
+2026-10-31 22:53:32.455 UTC [290] INFO:  [PGS_PROFILE] decision=2.58ms generate+build=3.03ms merge_exec=17.09ms cleanup_enqueue=0.00ms total=22.71ms affected=2 phantom_cleanup=0 delta_est=2 mode=INCR path=cache_miss hints=none strategy=merge
+2026-10-31 22:53:32.456 UTC [290] INFO:  Stream table ax.st_day_category_status refreshed (DIFFERENTIAL: +2 -0)
+2026-10-31 22:53:32.460 UTC [290] ERROR:  column "t" does not exist at character 109
+2026-10-31 22:53:32.585 UTC [297] DEBUG:  [pg_trickle] DELTA SQL for ax.st_hour_category_status (pgt_id=3):
+2026-10-31 22:53:32.587 UTC [297] DEBUG:  [pg_trickle] MT-8 fallback=partition_or_trigger_apply_constraint for ax.st_hour_category_status
+2026-10-31 22:53:32.594 UTC [297] INFO:  [PGS_PROFILE] decision=2.49ms generate+build=2.93ms merge_exec=8.79ms cleanup_enqueue=0.00ms total=14.21ms affected=2 phantom_cleanup=0 delta_est=2 mode=INCR path=cache_miss hints=none strategy=merge
+2026-10-31 22:53:32.595 UTC [297] INFO:  Stream table ax.st_hour_category_status refreshed (DIFFERENTIAL: +2 -0)
+2026-10-31 22:53:32.598 UTC [297] ERROR:  column "t" does not exist at character 109
+2026-10-31 22:53:32.942 UTC [325] DEBUG:  [pg_trickle] DELTA SQL for ax.st_day_product_status (pgt_id=1):
+2026-10-31 22:53:32.944 UTC [325] DEBUG:  [pg_trickle] MT-8 fallback=partition_or_trigger_apply_constraint for ax.st_day_product_status
+2026-10-31 22:53:32.946 UTC [325] INFO:  [PGS_PROFILE] decision=1.97ms generate+build=1.59ms merge_exec=3.94ms cleanup_enqueue=0.00ms total=7.50ms affected=4 phantom_cleanup=0 delta_est=5 mode=INCR path=cache_miss hints=none strategy=merge
+2026-10-31 22:53:32.947 UTC [325] INFO:  Stream table ax.st_day_product_status refreshed (DIFFERENTIAL: +4 -0)
+2026-10-31 22:53:32.951 UTC [325] ERROR:  column "t" does not exist at character 102
+2026-10-31 22:53:33.071 UTC [333] DEBUG:  [pg_trickle] DELTA SQL for ax.st_day_category_status (pgt_id=2):
+2026-10-31 22:53:33.073 UTC [333] DEBUG:  [pg_trickle] MT-8 fallback=partition_or_trigger_apply_constraint for ax.st_day_category_status
+2026-10-31 22:53:33.087 UTC [333] INFO:  [PGS_PROFILE] decision=2.13ms generate+build=2.66ms merge_exec=16.30ms cleanup_enqueue=0.00ms total=21.10ms affected=3 phantom_cleanup=0 delta_est=5 mode=INCR path=cache_miss hints=none strategy=merge
+2026-10-31 22:53:33.088 UTC [333] INFO:  Stream table ax.st_day_category_status refreshed (DIFFERENTIAL: +3 -0)
+2026-10-31 22:53:33.092 UTC [333] ERROR:  column "t" does not exist at character 102
+2026-10-31 22:53:33.206 UTC [340] DEBUG:  [pg_trickle] DELTA SQL for ax.st_hour_category_status (pgt_id=3):
+2026-10-31 22:53:33.207 UTC [340] DEBUG:  [pg_trickle] MT-8 fallback=partition_or_trigger_apply_constraint for ax.st_hour_category_status
+2026-10-31 22:53:33.216 UTC [340] INFO:  [PGS_PROFILE] decision=1.89ms generate+build=2.24ms merge_exec=10.53ms cleanup_enqueue=0.00ms total=14.66ms affected=3 phantom_cleanup=0 delta_est=5 mode=INCR path=cache_miss hints=none strategy=merge
+2026-10-31 22:53:33.217 UTC [340] INFO:  Stream table ax.st_hour_category_status refreshed (DIFFERENTIAL: +3 -0)
+2026-10-31 22:53:33.220 UTC [340] ERROR:  column "t" does not exist at character 102
+2026-10-31 22:54:05.748 UTC [387] DEBUG:  [pg_trickle] DELTA SQL for ax.st_day_product_status (pgt_id=1):
+2026-10-31 22:54:05.749 UTC [387] DEBUG:  [pg_trickle] MT-8 fallback=partition_or_trigger_apply_constraint for ax.st_day_product_status
+2026-10-31 22:54:05.753 UTC [387] INFO:  [PGS_PROFILE] decision=2.56ms generate+build=1.95ms merge_exec=5.05ms cleanup_enqueue=0.00ms total=9.55ms affected=4 phantom_cleanup=0 delta_est=5 mode=INCR path=cache_miss hints=none strategy=merge
+2026-10-31 22:54:05.756 UTC [387] INFO:  Stream table ax.st_day_product_status refreshed (DIFFERENTIAL: +4 -0)
+2026-10-31 22:54:05.943 UTC [394] DEBUG:  [pg_trickle] DELTA SQL for ax.st_day_category_status (pgt_id=2):
+2026-10-31 22:54:05.945 UTC [394] DEBUG:  [pg_trickle] MT-8 fallback=partition_or_trigger_apply_constraint for ax.st_day_category_status
+2026-10-31 22:54:05.954 UTC [394] INFO:  [PGS_PROFILE] decision=2.49ms generate+build=2.99ms merge_exec=11.16ms cleanup_enqueue=0.00ms total=16.64ms affected=3 phantom_cleanup=0 delta_est=5 mode=INCR path=cache_miss hints=none strategy=merge
+2026-10-31 22:54:05.955 UTC [394] INFO:  Stream table ax.st_day_category_status refreshed (DIFFERENTIAL: +3 -0)
+2026-10-31 22:54:06.078 UTC [401] DEBUG:  [pg_trickle] DELTA SQL for ax.st_hour_category_status (pgt_id=3):
+2026-10-31 22:54:06.079 UTC [401] DEBUG:  [pg_trickle] MT-8 fallback=partition_or_trigger_apply_constraint for ax.st_hour_category_status
+2026-10-31 22:54:06.086 UTC [401] INFO:  [PGS_PROFILE] decision=2.14ms generate+build=2.15ms merge_exec=8.82ms cleanup_enqueue=0.00ms total=13.11ms affected=3 phantom_cleanup=0 delta_est=5 mode=INCR path=cache_miss hints=none strategy=merge
+2026-10-31 22:54:06.087 UTC [401] INFO:  Stream table ax.st_hour_category_status refreshed (DIFFERENTIAL: +3 -0)

@@ -1,0 +1,53 @@
+[22:52:27 +0s] STEP start target
+ Container ax-issue31-g4-repro-db Starting 
+ Container ax-issue31-g4-repro-db Started 
+PostgreSQL 18.6 (Debian 18.6-1.pgdg12+2) on aarch64-unknown-linux-gnu, compiled by gcc (Debian 12.2.0-14+deb12u1) 12.2.0, 64-bit
+off
+ax_g4_repro
+[22:52:32 +5s] STEP fixture
+[22:52:33 +6s] fixture exit 3
+[22:53:25 +58s] STEP baseline checks
+[22:53:31 +64s] scheduler idle check: history 6 -> 6 (must be equal)
+ st_day_product_status   |             0 |           0
+ st_day_category_status  |             0 |           0
+ st_hour_category_status |             0 |           0
+[22:53:31 +64s] STEP case B setup
+ st_day_product_status   |             0 |           0
+ st_day_category_status  |             0 |           0
+ st_hour_category_status |             0 |           0
+B precondition source|paid
+B precondition stream|paid|1
+st_day_category_status|{"sources": {"17431": {"lsn": "0/227C118", "snapshot_ts": "1793487211Z"}, "17462": {"lsn": "0/22663E0", "snapshot_ts": "1793487211Z"}}, "data_timestamp": "1793487211Z"}
+st_day_product_status|{"sources": {"17462": {"lsn": "0/22663E0", "snapshot_ts": "1793487211Z"}}, "data_timestamp": "1793487211Z"}
+st_hour_category_status|{"sources": {"17431": {"lsn": "0/2294CE8", "snapshot_ts": "1793487211Z"}, "17462": {"lsn": "0/22663E0", "snapshot_ts": "1793487211Z"}}, "data_timestamp": "1793487211Z"}
+[22:53:32 +65s] STEP case B update
+[22:53:32 +65s] B_update exit 0
+[22:53:32 +65s] STEP case B trace st_day_product_status
+[22:53:32 +65s] trace st_day_product_status exit 3
+[22:53:32 +65s] STEP case B trace st_day_category_status
+[22:53:32 +65s] trace st_day_category_status exit 3
+[22:53:32 +65s] STEP case B trace st_hour_category_status
+[22:53:32 +65s] trace st_hour_category_status exit 3
+ st_day_product_status   |             1 |           1
+ st_day_category_status  |             1 |           1
+ st_hour_category_status |             1 |           1
+[22:53:32 +65s] STEP case A insert+update
+[22:53:32 +65s] A cases exit 0
+[22:53:32 +65s] STEP case A trace st_day_product_status
+[22:53:32 +65s] trace st_day_product_status exit 3
+[22:53:32 +65s] STEP case A trace st_day_category_status
+[22:53:33 +66s] trace st_day_category_status exit 3
+[22:53:33 +66s] STEP case A trace st_hour_category_status
+[22:53:33 +66s] trace st_hour_category_status exit 3
+ st_day_product_status   |             2 |           1
+ st_day_category_status  |             2 |           1
+ st_hour_category_status |             2 |           1
+[22:53:33 +66s] STEP logs
+[22:53:33 +66s] DONE total 66s
+[22:54:05] DEVIATION 2: trace_refresh.sql line 76 unquoted psql booleans aborted+rolled back every trace (refresh included). Using trace_refresh_fixed.sql (only that line quoted). B_update and A events now share one window (different groups).
+[22:54:05] fixed trace st_day_product_status exit 0
+[22:54:05] fixed trace st_day_category_status exit 0
+[22:54:06] fixed trace st_hour_category_status exit 0
+ st_day_product_status   |             0 |           1
+ st_day_category_status  |             0 |           0
+ st_hour_category_status |             0 |           0

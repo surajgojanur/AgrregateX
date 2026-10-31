@@ -1,0 +1,15 @@
+BEGIN
+SET
+        observed_utc        | snapshot 
+----------------------------+----------
+ 2026-10-31 22:53:25.913979 | 932:932:
+(1 row)
+
+      stream_table       | missing_in_st | extra_in_st 
+-------------------------+---------------+-------------
+ st_day_product_status   |             0 |           0
+ st_day_category_status  |             0 |           0
+ st_hour_category_status |             0 |           0
+(3 rows)
+
+ROLLBACK

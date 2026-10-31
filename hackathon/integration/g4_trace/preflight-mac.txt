@@ -1,0 +1,37 @@
+2026-10-31T22:46:52Z
+MacBookAir10,1
+8
+8589934592
+swap: total = 8192.00M  used = 7338.44M  free = 853.56M  (encrypted)
+System-wide memory free percentage: 32%
+available_est_GiB(free+inactive+speculative+purgeable)=1.25
+--- swap I/O over 10 s (vm_stat swapins/swapouts delta)
+before: 22591086 24125859  after: 22597836 24128703 
+--- disk
+/dev/disk3s5   228Gi   180Gi    17Gi    92%    2.9M  180M    2%   /System/Volumes/Data
+--- docker
+server=29.9.2 vm_mem_GiB=4106604544 cpus=8
+aggregatex-api-1	Up 2 hours	127.0.0.1:8090->8000/tcp
+aggregatex-writer-1	Up 2 hours	8000/tcp
+aggregatex-db-1	Up 2 hours (healthy)	127.0.0.1:25560->5432/tcp
+aggregatex-api-1 51.13MiB / 3.825GiB 0.16%
+aggregatex-writer-1 27.46MiB / 3.825GiB 0.21%
+aggregatex-db-1 304.8MiB / 2GiB 92.85%
+--- collisions
+port 25634 free
+no g4 volume
+no g4 container
+--- image
+sha256:94344bb98995b19c826f939739672481abaab8c25710e3910b48bdb7cf5b3b8d arm64 ghcr.io/trickle-labs/pg_trickle@sha256:94344bb98995b19c826f939739672481abaab8c25710e3910b48bdb7cf5b3b8d
+    682 MiB  /System/Library/Frameworks/Virtualization.framework/Versions/A/XPCServices/com.apple.Virtualization.VirtualMachine.xpc
+    283 MiB  claude
+    176 MiB  Visual Studio Code.app
+    109 MiB  Brave Browser.app
+    108 MiB  Arc.app
+     75 MiB  Visual Studio Code.app
+     69 MiB  Brave Browser.app
+     67 MiB  Arc.app
+     51 MiB  /System/Library/PrivateFrameworks/iCloudDriveCore.framework/Versions/A/Support/bird
+     36 MiB  /System/Library/DriverExtensions/com.apple.DriverKit-AppleBCMWLAN.dext/com.apple.DriverKit-AppleBCMWLAN
+     36 MiB  Visual Studio Code.app
+     33 MiB  Visual Studio Code.app
