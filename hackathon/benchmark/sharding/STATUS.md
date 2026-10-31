@@ -2,15 +2,16 @@
 
 | Requirement | Status | Evidence |
 |---|---|---|
-| Tenant mapping exactly one known shard | Simulated PASS | `test_mapping_requires_exact_tenants_and_known_shard` |
-| Per-shard aggregate oracle, nullable dimensions, day boundary | Simulated PASS | `test_per_shard_oracle_nullable_keys_and_time_edges` |
-| Detect tenant duplication/misplacement | Simulated PASS | `test_duplicate_or_misplaced_tenant_fails` |
-| Unavailable shard gives 503; other shard continues | Simulated contract PASS | `test_unavailable_returns_503_and_other_shard_works` |
-| Unknown tenant fails closed | Simulated PASS | `test_unmapped_tenant_fails_closed` |
-| Actual API and database on two shards | BLOCKED | Waiting for Opus implementation and endpoint/mapping contract |
-| Disposable network partition and automatic restore | NOT RUN | Script exists; no verified disposable shard network is available |
-| Live latency, freshness, recovery, throughput | NOT TESTED | Collector interface only; must run after integration |
-| 1M / 10M | NOT RUN | No large workload permitted in this scaffold; 10M requires approval |
+| Tenant mapping complete, unique and known shard | Simulated PASS | test_model.py |
+| Correctly mapped zero-order tenants permitted | Simulated PASS | test_model.py |
+| Three independent stream grains and nullable keys | Simulated PASS | model.py oracle_streams + test_model.py |
+| Both-direction aggregate comparison | Simulated PASS | multiset_mismatches unit case |
+| HTTP 503 separated from successful latency/timeouts | Simulated PASS | test_metrics.py |
+| Fault network isolated to shard A | Safety validation implemented; not executed | partition.sh + test_network_safety.py |
+| Network restoration verifies aliases/IP/connectivity | Implemented; not executed | partition.sh |
+| Actual API and database on two shards | BLOCKED | Waiting for Opus implementation/contract |
+| Live latency, freshness, recovery, throughput | NOT TESTED | No live sharding stack available |
+| 1M / 10M | NOT RUN | not authorized/necessary here |
 
-Run simulated suite: `python3 -m unittest discover -s hackathon/benchmark/sharding -v`.
-`partition.sh` is not executed by tests and requires explicit disposable containers/network.
+Run tests: `python3 -m unittest discover -s hackathon/benchmark/sharding -v`.
+The network injector is never invoked by tests and is not run against existing services.

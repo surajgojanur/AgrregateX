@@ -1,4 +1,4 @@
-"""Pure testable contracts for two-shard routing; no network or DB calls."""
+"""Pure testable contracts for two-shard routing and three stream-table grains."""
 from dataclasses import dataclass
 from typing import Callable, Mapping, Sequence
 
@@ -24,7 +24,7 @@ def validate_mapping(mapping: Mapping[int, str], shards: Sequence[str], expected
     if len(set(shards)) != len(shards) or not shards:
         raise AssertionError("shard names must be non-empty and unique")
     if set(mapping) != set(expected_tenants):
-        raise AssertionError("each expected tenant must have exactly one mapping")
+        raise AssertionError("every directory tenant must map to exactly one shard")
     if any(mapping[t] not in shards for t in expected_tenants):
         raise AssertionError("tenant mapped to unknown shard")
 
@@ -38,17 +38,33 @@ def route(tenant_id: int, mapping: Mapping[int, str], clients: Mapping[str, Call
     except ShardUnavailable as exc:
         raise ServiceUnavailable(f"tenant {tenant_id} shard unavailable") from exc
 
-def aggregates(rows: Sequence[Order]):
-    result = {}
-    for r in rows:
-        key = (r.tenant_id, r.day, r.product_id, r.category_id, r.status)
-        state = result.setdefault(key, [0, 0, 0])
-        state[0] += 1
-        state[1] += r.quantity
-        state[2] += r.quantity * r.unit_price_cents
-    return {k: tuple(v) for k, v in result.items()}
+def oracle_streams(rows: Sequence[Order]):
+    """Independent in-memory truth for exact stream-table group keys."""
+    specs = {
+        "st_day_product_status": lambda r: (r.tenant_id, r.day, r.product_id, r.status),
+        "st_day_category_status": lambda r: (r.tenant_id, r.day, r.category_id, r.status),
+        "st_hour_category_status": lambda r: (r.tenant_id, r.hour, r.category_id, r.status),
+    }
+    results = {}
+    for name, key_fn in specs.items():
+        groups = {}
+        for row in rows:
+            key = key_fn(row)
+            acc = groups.setdefault(key, [0, 0, 0])
+            acc[0] += 1
+            acc[1] += row.quantity
+            acc[2] += row.quantity * row.unit_price_cents
+        results[name] = {key: tuple(values) for key, values in groups.items()}
+    return results
+
+def multiset_mismatches(expected, actual):
+    """Both directions; maps represent unique SQL GROUP BY keys, values aggregate tuples."""
+    missing = {k: v for k, v in expected.items() if actual.get(k) != v}
+    extra = {k: v for k, v in actual.items() if expected.get(k) != v}
+    return missing, extra
 
 def compare_shards(mapping, shard_rows, tenants, shards):
+    """Directory completeness is separate; mapped tenants may have zero source rows."""
     validate_mapping(mapping, shards, tenants)
     seen = {}
     for shard in shards:
@@ -56,8 +72,6 @@ def compare_shards(mapping, shard_rows, tenants, shards):
             if row.tenant_id in seen and seen[row.tenant_id] != shard:
                 raise AssertionError(f"tenant {row.tenant_id} duplicated across shards")
             seen[row.tenant_id] = shard
-            if mapping[row.tenant_id] != shard:
+            if row.tenant_id not in mapping or mapping[row.tenant_id] != shard:
                 raise AssertionError(f"tenant {row.tenant_id} stored on wrong shard")
-    if set(seen) != set(tenants):
-        raise AssertionError("tenant rows missing from shard set")
-    return {s: aggregates(shard_rows.get(s, ())) for s in shards}
+    return {s: oracle_streams(shard_rows.get(s, ())) for s in shards}
