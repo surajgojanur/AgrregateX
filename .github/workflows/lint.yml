@@ -1,0 +1,81 @@
+# =============================================================================
+# Lint Workflow — fmt + clippy for Rust and build-input changes
+#
+# Formatting runs before provisioning PostgreSQL or restoring build artifacts.
+# =============================================================================
+name: Lint
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'src/**'
+      - 'verification/**'
+      - 'benches/**'
+      - 'tests/**'
+      - 'sql/archive/**'
+      - 'Cargo.toml'
+      - 'Cargo.lock'
+      - 'build.rs'
+      - 'pg_trickle.control'
+      - '.cargo/**'
+      - 'scripts/gen_test_schema.py'
+      - '.github/actions/**'
+      - '.github/workflows/lint.yml'
+      - '!tests/release/**'
+      - '!**/*.md'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'src/**'
+      - 'verification/**'
+      - 'benches/**'
+      - 'tests/**'
+      - 'sql/archive/**'
+      - 'Cargo.toml'
+      - 'Cargo.lock'
+      - 'build.rs'
+      - 'pg_trickle.control'
+      - '.cargo/**'
+      - 'scripts/gen_test_schema.py'
+      - '.github/actions/**'
+      - '.github/workflows/lint.yml'
+      - '!tests/release/**'
+      - '!**/*.md'
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  CARGO_TERM_COLOR: always
+  PG_VERSION: "18"
+
+jobs:
+  lint:
+    name: Lint (fmt + clippy)
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Install rustfmt
+        uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: stable
+          components: rustfmt
+
+      - name: Check formatting
+        run: cargo fmt -- --check
+
+      - name: Setup pgrx environment
+        uses: ./.github/actions/setup-pgrx
+
+      - name: Run clippy
+        run: cargo clippy --all-targets --features pg18 -- -D warnings
+
+      - name: Check dynamic SQL builders
+        run: bash scripts/check_sql_builder.sh
+
+      - name: Check fuzz inventory
+        run: python3 scripts/check_fuzz_targets.py

@@ -1,0 +1,1342 @@
+//! E2E tests for D-4: Shared Change Buffers.
+//!
+//! Validates that multiple stream tables referencing the same source table
+//! share a single change buffer (`pgtrickle_changes.changes_{oid}`), with
+//! correct multi-frontier cleanup coordination.
+//!
+//! Prerequisites: `./tests/build_e2e_image.sh`
+
+mod e2e;
+
+use e2e::E2eDb;
+
+#[tokio::test]
+async fn test_cdc_deferred_replacement_preserves_complete_payload() {
+    let db = E2eDb::new().await.with_extension().await;
+    db.execute("ALTER SYSTEM SET pg_trickle.enabled = false")
+        .await;
+    db.execute("SELECT pg_reload_conf()").await;
+    for mode in ["row", "statement"] {
+        let source = format!("deferred_{mode}");
+        let wide = format!("{source}_rows");
+        let counts = format!("{source}_counts");
+        db.execute(&format!(
+            "CREATE TABLE {source} (id INT PRIMARY KEY DEFERRABLE INITIALLY DEFERRED, v INT, n NUMERIC, j JSON)"
+        ))
+        .await;
+        db.execute(&format!(
+            "INSERT INTO {source} VALUES (1,10,1.0,'{{\"x\":1}}'),(2,20,NULL,NULL)"
+        ))
+        .await;
+        let wide_query = format!("SELECT id,v,n,j FROM {source}");
+        let count_query = format!("SELECT COUNT(*) AS n,SUM(v) AS total FROM {source}");
+        for (name, query) in [(&wide, &wide_query), (&counts, &count_query)] {
+            db.try_execute_with_config(&[&format!("SET pg_trickle.cdc_trigger_mode='{mode}'")], &format!("SELECT pgtrickle.create_stream_table('{name}',$q${query}$q$,'24h','DIFFERENTIAL')")).await.unwrap();
+        }
+        let script = format!(
+            "BEGIN; INSERT INTO {source} VALUES (1,99,1.00,'{{\"x\":2}}'); UPDATE {source} SET v=v+1 WHERE id=1; DELETE FROM {source} WHERE id=1 AND v=11; SAVEPOINT s; UPDATE {source} SET v=0 WHERE id=2; ROLLBACK TO s; INSERT INTO {source} VALUES (3,5,NULL,NULL); UPDATE {source} SET v=6 WHERE id=3; DELETE FROM {source} WHERE id=3; COMMIT"
+        );
+        sqlx::raw_sql(sqlx::AssertSqlSafe(script))
+            .execute(&db.pool)
+            .await
+            .unwrap();
+        for (name, query) in [(&wide, &wide_query), (&counts, &count_query)] {
+            let before: i64 = db
+                .query_scalar(
+                    "SELECT coalesce(max(refresh_id),0) FROM pgtrickle.pgt_refresh_history",
+                )
+                .await;
+            db.try_execute_with_config(
+                &[
+                    "SET pg_trickle.refresh_strategy='differential'",
+                    "SET pg_trickle.differential_max_change_ratio=0",
+                ],
+                &format!("SELECT pgtrickle.refresh_stream_table('{name}')"),
+            )
+            .await
+            .unwrap();
+            let changed: bool = db.query_scalar(&format!("SELECT EXISTS (SELECT 1 FROM pgtrickle.pgt_refresh_history h JOIN pgtrickle.pgt_stream_tables s USING(pgt_id) WHERE s.pgt_name='{name}' AND h.refresh_id>{before} AND h.action='DIFFERENTIAL' AND h.status='COMPLETED' AND NOT h.was_full_fallback)")).await;
+            assert!(
+                changed,
+                "deferred replacement must execute differential maintenance"
+            );
+            e2e::oracle::assert_st_query_exact(
+                &db,
+                name,
+                query,
+                "deferred replacement and genuine transient cancellation",
+            )
+            .await;
+        }
+    }
+}
+
+#[tokio::test]
+async fn test_cdc_deferred_key_swap_preserves_complete_images() {
+    let db = E2eDb::new().await.with_extension().await;
+    db.execute("ALTER SYSTEM SET pg_trickle.enabled = false")
+        .await;
+    db.execute("SELECT pg_reload_conf()").await;
+
+    for mode in ["row", "statement"] {
+        let source = format!("key_swap_{mode}");
+        let output = format!("{source}_rows");
+        db.execute(&format!(
+            "CREATE TABLE {source} (id INT PRIMARY KEY DEFERRABLE INITIALLY DEFERRED, v TEXT, n NUMERIC, j JSON)"
+        ))
+        .await;
+        db.execute(&format!(
+            "INSERT INTO {source} VALUES (1,'alpha',1.0,'{{\"x\":1}}'),(2,'beta',2.0,'{{\"x\":2}}')"
+        ))
+        .await;
+        let query = format!("SELECT id,v,n,j FROM {source}");
+        db.try_execute_with_config(
+            &[&format!("SET pg_trickle.cdc_trigger_mode='{mode}'")],
+            &format!(
+                "SELECT pgtrickle.create_stream_table('{output}',$q${query}$q$,'24h','DIFFERENTIAL')"
+            ),
+        )
+        .await
+        .unwrap();
+
+        sqlx::raw_sql(sqlx::AssertSqlSafe(format!(
+            "BEGIN; SET CONSTRAINTS ALL DEFERRED; UPDATE {source} \
+             SET id=CASE id WHEN 1 THEN 2 ELSE 1 END WHERE id IN (1,2); COMMIT"
+        )))
+        .execute(&db.pool)
+        .await
+        .unwrap();
+
+        let before_refresh: i64 = db
+            .query_scalar("SELECT coalesce(max(refresh_id),0) FROM pgtrickle.pgt_refresh_history")
+            .await;
+        db.try_execute_with_config(
+            &[
+                "SET pg_trickle.refresh_strategy='differential'",
+                "SET pg_trickle.differential_max_change_ratio=0",
+            ],
+            &format!("SELECT pgtrickle.refresh_stream_table('{output}')"),
+        )
+        .await
+        .unwrap();
+        let differential: bool = db
+            .query_scalar(&format!(
+                "SELECT EXISTS (SELECT 1 FROM pgtrickle.pgt_refresh_history h \
+             JOIN pgtrickle.pgt_stream_tables s USING(pgt_id) \
+             WHERE s.pgt_name='{output}' AND h.refresh_id>{before_refresh} \
+             AND h.action='DIFFERENTIAL' AND h.status='COMPLETED' AND NOT h.was_full_fallback)"
+            ))
+            .await;
+        assert!(
+            differential,
+            "deferred key swap must execute differential maintenance"
+        );
+        e2e::oracle::assert_st_query_exact(
+            &db,
+            &output,
+            &query,
+            "deferred primary-key swap with complete payload images",
+        )
+        .await;
+    }
+}
+
+#[tokio::test]
+async fn test_cdc_deferred_key_swap_preserves_protected_consumer_cuts() {
+    let db = E2eDb::new().await.with_extension().await;
+    db.execute("ALTER SYSTEM SET pg_trickle.enabled = false")
+        .await;
+    db.execute("SELECT pg_reload_conf()").await;
+
+    for mode in ["row", "statement"] {
+        let source = format!("window_key_swap_{mode}");
+        let fast = format!("{source}_fast");
+        let slow = format!("{source}_slow");
+        db.execute(&format!(
+            "CREATE TABLE {source} (id INT PRIMARY KEY DEFERRABLE INITIALLY DEFERRED, v NUMERIC, label TEXT)"
+        ))
+        .await;
+        db.execute(&format!(
+            "INSERT INTO {source} VALUES (1,1.0,'alpha'),(2,2.0,'beta')"
+        ))
+        .await;
+
+        let fast_query = format!("SELECT id,v,scale(v) AS v_scale,label FROM {source}");
+        let slow_query = format!("SELECT id,label FROM {source}");
+        for (name, query) in [(&fast, &fast_query), (&slow, &slow_query)] {
+            db.try_execute_with_config(
+                &[&format!("SET pg_trickle.cdc_trigger_mode='{mode}'")],
+                &format!(
+                    "SELECT pgtrickle.create_stream_table('{name}',$q${query}$q$,'24h','DIFFERENTIAL')"
+                ),
+            )
+            .await
+            .unwrap();
+        }
+
+        sqlx::raw_sql(sqlx::AssertSqlSafe(format!(
+            "BEGIN; SET CONSTRAINTS ALL DEFERRED; UPDATE {source} \
+             SET id=CASE id WHEN 1 THEN 2 ELSE 1 END WHERE id IN (1,2); COMMIT"
+        )))
+        .execute(&db.pool)
+        .await
+        .unwrap();
+
+        let before_fast: i64 = db
+            .query_scalar("SELECT COALESCE(max(refresh_id),0) FROM pgtrickle.pgt_refresh_history")
+            .await;
+        db.try_execute_with_config(
+            &[
+                "SET pg_trickle.refresh_strategy='differential'",
+                "SET pg_trickle.differential_max_change_ratio=0",
+                "SET pg_trickle.compact_threshold=1",
+            ],
+            &format!("SELECT pgtrickle.refresh_stream_table('{fast}')"),
+        )
+        .await
+        .unwrap();
+        let fast_differential: bool = db
+            .query_scalar(&format!(
+                "SELECT EXISTS (SELECT 1 FROM pgtrickle.pgt_refresh_history h \
+                 JOIN pgtrickle.pgt_stream_tables s USING(pgt_id) \
+                 WHERE s.pgt_name='{fast}' AND h.refresh_id>{before_fast} \
+                   AND h.action='DIFFERENTIAL' AND h.status='COMPLETED' \
+                   AND NOT h.was_full_fallback)"
+            ))
+            .await;
+        assert!(
+            fast_differential,
+            "fast consumer must execute differential work"
+        );
+
+        let source_oid: i64 = db
+            .query_scalar(&format!("SELECT '{source}'::regclass::oid::bigint"))
+            .await;
+        let buffer = db.change_buffer_table(source_oid).await;
+        let retained_for_slow: i64 = db
+            .query_scalar(&format!("SELECT count(*) FROM {buffer}"))
+            .await;
+        assert!(
+            retained_for_slow >= 4,
+            "the slow consumer's deferred swap images must remain after compaction is considered"
+        );
+
+        e2e::oracle::assert_st_query_exact(
+            &db,
+            &fast,
+            &fast_query,
+            "fast consumer after deferred key swap",
+        )
+        .await;
+        e2e::oracle::assert_st_query_exact(
+            &db,
+            &slow,
+            "SELECT 1::int AS id,'alpha'::text AS label \
+             UNION ALL SELECT 2::int,'beta'::text",
+            "slow consumer remains at its original cut",
+        )
+        .await;
+
+        db.execute(&format!(
+            "UPDATE {source} SET v=1.00,label='alpha-new' WHERE id=2"
+        ))
+        .await;
+        let before_slow: i64 = db
+            .query_scalar("SELECT COALESCE(max(refresh_id),0) FROM pgtrickle.pgt_refresh_history")
+            .await;
+        db.try_execute_with_config(
+            &[
+                "SET pg_trickle.refresh_strategy='differential'",
+                "SET pg_trickle.differential_max_change_ratio=0",
+                "SET pg_trickle.compact_threshold=1",
+            ],
+            &format!("SELECT pgtrickle.refresh_stream_table('{slow}')"),
+        )
+        .await
+        .unwrap();
+        let slow_differential: bool = db
+            .query_scalar(&format!(
+                "SELECT EXISTS (SELECT 1 FROM pgtrickle.pgt_refresh_history h \
+                 JOIN pgtrickle.pgt_stream_tables s USING(pgt_id) \
+                 WHERE s.pgt_name='{slow}' AND h.refresh_id>{before_slow} \
+                   AND h.action='DIFFERENTIAL' AND h.status='COMPLETED' \
+                   AND NOT h.was_full_fallback)"
+            ))
+            .await;
+        assert!(
+            slow_differential,
+            "slow consumer must execute differential catch-up"
+        );
+        e2e::oracle::assert_st_query_exact(
+            &db,
+            &fast,
+            "SELECT 2::int AS id,1.0::numeric AS v,1::int AS v_scale,'alpha'::text AS label \
+             UNION ALL SELECT 1::int,2.0::numeric,1::int,'beta'::text",
+            "fast consumer remains at the deferred-swap cut",
+        )
+        .await;
+        e2e::oracle::assert_st_query_exact(
+            &db,
+            &slow,
+            &slow_query,
+            "slow consumer catches up through the payload update",
+        )
+        .await;
+
+        db.try_execute_with_config(
+            &[
+                "SET pg_trickle.refresh_strategy='differential'",
+                "SET pg_trickle.differential_max_change_ratio=0",
+                "SET pg_trickle.compact_threshold=1",
+            ],
+            &format!("SELECT pgtrickle.refresh_stream_table('{fast}')"),
+        )
+        .await
+        .unwrap();
+        for (name, query) in [(&fast, &fast_query), (&slow, &slow_query)] {
+            e2e::oracle::assert_st_query_exact(
+                &db,
+                name,
+                query,
+                "both consumers converge after protected-window catch-up",
+            )
+            .await;
+        }
+    }
+}
+
+#[tokio::test]
+async fn test_cdc_shared_source_compaction_preserves_interior_consumer_cut() {
+    let db = E2eDb::new().await.with_extension().await;
+    db.execute("ALTER SYSTEM SET pg_trickle.enabled = false")
+        .await;
+    db.execute("SELECT pg_reload_conf()").await;
+
+    for mode in ["row", "statement"] {
+        let source = format!("interior_cut_{mode}");
+        let fast = format!("{source}_fast");
+        let slow = format!("{source}_slow");
+        db.execute(&format!(
+            "CREATE TABLE {source} (id INT PRIMARY KEY, v INT, label TEXT)"
+        ))
+        .await;
+        db.execute(&format!("INSERT INTO {source} VALUES (1,1,'initial')"))
+            .await;
+
+        let query = format!("SELECT id,v,label FROM {source}");
+        for name in [&fast, &slow] {
+            db.try_execute_with_config(
+                &[&format!("SET pg_trickle.cdc_trigger_mode='{mode}'")],
+                &format!(
+                    "SELECT pgtrickle.create_stream_table('{name}',$q${query}$q$,'24h','DIFFERENTIAL')"
+                ),
+            )
+            .await
+            .unwrap();
+        }
+
+        // Advance the slow consumer to an interior cut while the fast
+        // consumer still starts at the initial snapshot.
+        db.execute(&format!(
+            "UPDATE {source} SET v=2,label='middle' WHERE id=1"
+        ))
+        .await;
+        let before_slow: i64 = db
+            .query_scalar("SELECT COALESCE(max(refresh_id),0) FROM pgtrickle.pgt_refresh_history")
+            .await;
+        db.try_execute_with_config(
+            &[
+                "SET pg_trickle.refresh_strategy='differential'",
+                "SET pg_trickle.differential_max_change_ratio=0",
+                "SET pg_trickle.compact_threshold=1",
+            ],
+            &format!("SELECT pgtrickle.refresh_stream_table('{slow}')"),
+        )
+        .await
+        .unwrap();
+        let slow_advanced: bool = db
+            .query_scalar(&format!(
+                "SELECT EXISTS (SELECT 1 FROM pgtrickle.pgt_refresh_history h \
+                 JOIN pgtrickle.pgt_stream_tables s USING(pgt_id) \
+                 WHERE s.pgt_name='{slow}' AND h.refresh_id>{before_slow} \
+                   AND h.action='DIFFERENTIAL' AND h.status='COMPLETED' \
+                   AND NOT h.was_full_fallback)"
+            ))
+            .await;
+        assert!(
+            slow_advanced,
+            "slow consumer must advance to the middle cut"
+        );
+        e2e::oracle::assert_st_query_exact(
+            &db,
+            &slow,
+            "SELECT 1::int AS id,2::int AS v,'middle'::text AS label",
+            "slow consumer at its interior cut",
+        )
+        .await;
+
+        // The fast consumer's range now spans changes from both sides of the
+        // slow consumer's cut. With two consumers, compaction must retain all
+        // four D/I images so the slow consumer can consume only its own suffix.
+        db.execute(&format!("UPDATE {source} SET v=3,label='final' WHERE id=1"))
+            .await;
+        let before_fast: i64 = db
+            .query_scalar("SELECT COALESCE(max(refresh_id),0) FROM pgtrickle.pgt_refresh_history")
+            .await;
+        db.try_execute_with_config(
+            &[
+                "SET pg_trickle.refresh_strategy='differential'",
+                "SET pg_trickle.differential_max_change_ratio=0",
+                "SET pg_trickle.compact_threshold=1",
+            ],
+            &format!("SELECT pgtrickle.refresh_stream_table('{fast}')"),
+        )
+        .await
+        .unwrap();
+        let fast_advanced: bool = db
+            .query_scalar(&format!(
+                "SELECT EXISTS (SELECT 1 FROM pgtrickle.pgt_refresh_history h \
+                 JOIN pgtrickle.pgt_stream_tables s USING(pgt_id) \
+                 WHERE s.pgt_name='{fast}' AND h.refresh_id>{before_fast} \
+                   AND h.action='DIFFERENTIAL' AND h.status='COMPLETED' \
+                   AND NOT h.was_full_fallback)"
+            ))
+            .await;
+        assert!(fast_advanced, "fast consumer must span both changes");
+
+        let source_oid: i64 = db
+            .query_scalar(&format!("SELECT '{source}'::regclass::oid::bigint"))
+            .await;
+        let buffer = db.change_buffer_table(source_oid).await;
+        let retained_change_images: i64 = db
+            .query_scalar(&format!(
+                "SELECT count(*) FROM {buffer} WHERE action IN ('D','I')"
+            ))
+            .await;
+        let retained_snapshot_markers: i64 = db
+            .query_scalar(&format!("SELECT count(*) FROM {buffer} WHERE action = 'S'"))
+            .await;
+        assert_eq!(
+            retained_change_images, 4,
+            "shared consumer frontier must retain all four D/I images across the interior cut"
+        );
+        assert_eq!(
+            retained_snapshot_markers, 1,
+            "the source snapshot marker remains in its protected history"
+        );
+
+        e2e::oracle::assert_st_query_exact(&db, &fast, &query, "fast consumer after both changes")
+            .await;
+        e2e::oracle::assert_st_query_exact(
+            &db,
+            &slow,
+            "SELECT 1::int AS id,2::int AS v,'middle'::text AS label",
+            "slow consumer remains at its interior cut",
+        )
+        .await;
+
+        let before_slow_catchup: i64 = db
+            .query_scalar("SELECT COALESCE(max(refresh_id),0) FROM pgtrickle.pgt_refresh_history")
+            .await;
+        db.try_execute_with_config(
+            &[
+                "SET pg_trickle.refresh_strategy='differential'",
+                "SET pg_trickle.differential_max_change_ratio=0",
+                "SET pg_trickle.compact_threshold=1",
+            ],
+            &format!("SELECT pgtrickle.refresh_stream_table('{slow}')"),
+        )
+        .await
+        .unwrap();
+        let slow_caught_up: bool = db
+            .query_scalar(&format!(
+                "SELECT EXISTS (SELECT 1 FROM pgtrickle.pgt_refresh_history h \
+                 JOIN pgtrickle.pgt_stream_tables s USING(pgt_id) \
+                 WHERE s.pgt_name='{slow}' AND h.refresh_id>{before_slow_catchup} \
+                   AND h.action='DIFFERENTIAL' AND h.status='COMPLETED' \
+                   AND NOT h.was_full_fallback)"
+            ))
+            .await;
+        assert!(slow_caught_up, "slow consumer must consume its own suffix");
+        e2e::oracle::assert_st_query_exact(
+            &db,
+            &slow,
+            &query,
+            "slow consumer after protected-window catch-up",
+        )
+        .await;
+    }
+}
+
+#[tokio::test]
+async fn test_cdc_statement_payload_names_do_not_shadow_row_aliases() {
+    let db = E2eDb::new().await.with_extension().await;
+    db.execute("ALTER SYSTEM SET pg_trickle.enabled=false")
+        .await;
+    db.execute("SELECT pg_reload_conf()").await;
+    db.execute("CREATE TABLE alias_source (id INT PRIMARY KEY,n NUMERIC,o JSON)")
+        .await;
+    db.execute("INSERT INTO alias_source VALUES (1,1.0,'{\"a\":1}')")
+        .await;
+    let query = "SELECT id,n,o FROM alias_source";
+    db.try_execute_with_config(&["SET pg_trickle.cdc_trigger_mode='statement'"],&format!("SELECT pgtrickle.create_stream_table('alias_result',$q${query}$q$,'24h','DIFFERENTIAL')")).await.unwrap();
+    db.execute("UPDATE alias_source SET n=1.00,o='{\"a\":2}'")
+        .await;
+    db.try_execute_with_config(
+        &[
+            "SET pg_trickle.refresh_strategy='differential'",
+            "SET pg_trickle.differential_max_change_ratio=0",
+        ],
+        "SELECT pgtrickle.refresh_stream_table('alias_result')",
+    )
+    .await
+    .unwrap();
+    e2e::oracle::assert_st_query_exact(
+        &db,
+        "alias_result",
+        query,
+        "payload names versus transition aliases",
+    )
+    .await;
+    let scale: i32 = db.query_scalar("SELECT scale(n) FROM alias_result").await;
+    assert_eq!(scale, 2);
+}
+
+#[tokio::test]
+async fn test_cdc_traced_refreshes_consume_each_current_window() {
+    let db = E2eDb::new().await.with_extension().await;
+    db.execute("ALTER SYSTEM SET pg_trickle.enabled = false")
+        .await;
+    db.execute("SELECT pg_reload_conf()").await;
+    db.execute("CREATE TABLE traced_source (id INT PRIMARY KEY, v INT)")
+        .await;
+    db.execute("INSERT INTO traced_source VALUES (1,10)").await;
+    let query = "SELECT id,v FROM traced_source";
+    db.create_st("traced_result", query, "24h", "DIFFERENTIAL")
+        .await;
+    let mut conn = db.pool.acquire().await.unwrap();
+    for sql in [
+        "SELECT pgtrickle.clear_caches()",
+        "SET pg_trickle.refresh_strategy = 'differential'",
+        "SET pg_trickle.differential_max_change_ratio = 0",
+        "SET pg_trickle.dvm_decision_trace = on",
+    ] {
+        sqlx::query(sqlx::AssertSqlSafe(sql.to_string()))
+            .execute(&mut *conn)
+            .await
+            .unwrap();
+    }
+    for value in [20, 30, 40] {
+        sqlx::query(sqlx::AssertSqlSafe(format!(
+            "UPDATE traced_source SET v={value} WHERE id=1"
+        )))
+        .execute(&mut *conn)
+        .await
+        .unwrap();
+        sqlx::query(sqlx::AssertSqlSafe(
+            "SELECT pgtrickle.refresh_stream_table('traced_result')".to_string(),
+        ))
+        .execute(&mut *conn)
+        .await
+        .unwrap();
+        e2e::oracle::assert_st_query_exact(
+            &db,
+            "traced_result",
+            query,
+            "traced current capture window",
+        )
+        .await;
+    }
+}
+
+#[tokio::test]
+async fn test_shared_numeric_images_preserve_scale_for_both_trigger_modes_and_orders() {
+    let db = E2eDb::new().await.with_extension().await;
+    db.execute("ALTER SYSTEM SET pg_trickle.enabled = false")
+        .await;
+    db.execute("ALTER SYSTEM SET pg_trickle.cdc_mode = 'trigger'")
+        .await;
+    db.execute("SELECT pg_reload_conf()").await;
+    for mode in ["row", "statement"] {
+        for all_first in [true, false] {
+            let source = format!("image_{mode}_{all_first}");
+            let wide = format!("{source}_wide");
+            let narrow = format!("{source}_narrow");
+            db.execute(&format!(
+                "CREATE TABLE {source} (id INT PRIMARY KEY, pad TEXT, v NUMERIC)"
+            ))
+            .await;
+            db.execute(&format!("INSERT INTO {source} VALUES (1,'x',1.0)"))
+                .await;
+            let wide_query = format!("SELECT id,v,pad,scale(v) AS observed_scale FROM {source}");
+            let narrow_query = format!("SELECT id,scale(v) AS observed_scale FROM {source}");
+            let consumers = if all_first {
+                [(&wide, &wide_query), (&narrow, &narrow_query)]
+            } else {
+                [(&narrow, &narrow_query), (&wide, &wide_query)]
+            };
+            for (name, query) in consumers {
+                db.try_execute_with_config(&[&format!("SET pg_trickle.cdc_trigger_mode = '{mode}'")], &format!("SELECT pgtrickle.create_stream_table('{name}', $q${query}$q$, '24h', 'DIFFERENTIAL')")).await.expect("admit consumer with selected trigger mode");
+            }
+            let row_update_trigger: bool = db.query_scalar(&format!("SELECT EXISTS (SELECT 1 FROM pg_trigger WHERE tgrelid='{source}'::regclass AND tgname LIKE 'pg_trickle_cdc_%' AND (tgtype::int & 16) <> 0 AND (tgtype::int & 1) <> 0)")).await;
+            assert_eq!(row_update_trigger, mode == "row", "observed capture route");
+            let oid: i64 = db
+                .query_scalar(&format!("SELECT '{source}'::regclass::oid::bigint"))
+                .await;
+            let buffer = db.change_buffer_table(oid).await;
+            for (cycle, literal) in ["1.00", "1.0", "NULL", "1.00", "1.00"].iter().enumerate() {
+                let before: i64 = db
+                    .query_scalar(&format!("SELECT COALESCE(max(change_id),0) FROM {buffer}"))
+                    .await;
+                db.execute(&format!("UPDATE {source} SET v={literal} WHERE id=1"))
+                    .await;
+                let (captured, changed): (i64,i64) = sqlx::query_as(sqlx::AssertSqlSafe(format!("SELECT count(*),count(*) FILTER (WHERE get_bit(changed_cols,2)=1) FROM {buffer} WHERE change_id>{before} AND action IN ('D','I')"))).fetch_one(&db.pool).await.unwrap();
+                assert_eq!(captured, 2, "{mode}/{all_first}/{cycle}: D+I capture");
+                assert_eq!(changed, 2, "representation-aware numeric bit");
+                let before_refresh: i64 = db
+                    .query_scalar(
+                        "SELECT COALESCE(max(refresh_id),0) FROM pgtrickle.pgt_refresh_history",
+                    )
+                    .await;
+                for name in [&wide, &narrow] {
+                    db.try_execute_with_config(
+                        &[
+                            "SET pg_trickle.refresh_strategy = 'differential'",
+                            "SET pg_trickle.differential_max_change_ratio = 0",
+                        ],
+                        &format!("SELECT pgtrickle.refresh_stream_table('{name}')"),
+                    )
+                    .await
+                    .expect("consume captured numeric image change");
+                    if cycle < 4 {
+                        let differential: bool = db.query_scalar(&format!("SELECT EXISTS (SELECT 1 FROM pgtrickle.pgt_refresh_history h JOIN pgtrickle.pgt_stream_tables s USING(pgt_id) WHERE s.pgt_name='{name}' AND h.refresh_id>{before_refresh} AND h.status='COMPLETED' AND h.action='DIFFERENTIAL' AND NOT h.was_full_fallback)")).await;
+                        assert!(differential, "{name}: fresh executed differential route");
+                    }
+                }
+                e2e::oracle::assert_st_query_exact(&db, &wide, &wide_query, "wide image consumer")
+                    .await;
+                e2e::oracle::assert_st_query_exact(
+                    &db,
+                    &narrow,
+                    &narrow_query,
+                    "narrow scale consumer after wide refresh",
+                )
+                .await;
+            }
+        }
+    }
+}
+
+#[tokio::test]
+async fn test_compaction_shared_source_preserves_consumer_boundaries() {
+    let db = E2eDb::new().await.with_extension().await;
+    db.execute("CREATE TABLE compact_src (id INT PRIMARY KEY)")
+        .await;
+    db.execute("INSERT INTO compact_src SELECT generate_series(1, 100)")
+        .await;
+    let query = "SELECT id FROM compact_src";
+    for name in ["compact_fast", "compact_slow"] {
+        db.create_st(name, query, "1h", "DIFFERENTIAL").await;
+    }
+
+    db.execute("INSERT INTO compact_src VALUES (101)").await;
+    db.refresh_st("compact_fast").await;
+    assert_eq!(db.count("compact_fast").await, 101);
+    db.execute("DELETE FROM compact_src WHERE id = 101").await;
+    db.execute_seq(&[
+        "SET pg_trickle.compact_threshold = 1",
+        "SET pg_trickle.refresh_strategy = 'differential'",
+        "SELECT pgtrickle.refresh_stream_table('compact_slow')",
+    ])
+    .await;
+    e2e::oracle::assert_st_query_exact(
+        &db,
+        "compact_fast",
+        "SELECT id FROM compact_src UNION ALL SELECT 101",
+        "fast source consumer remains at its earlier cut",
+    )
+    .await;
+    db.assert_st_matches_query("compact_slow", query).await;
+    db.refresh_st("compact_fast").await;
+
+    for name in ["compact_fast", "compact_slow"] {
+        db.assert_st_matches_query(name, query).await;
+    }
+}
+
+#[tokio::test]
+async fn test_compaction_shared_stream_preserves_consumer_boundaries() {
+    let db = E2eDb::new().await.with_extension().await;
+    db.execute("CREATE TABLE compact_src (id INT PRIMARY KEY)")
+        .await;
+    db.execute("INSERT INTO compact_src SELECT generate_series(1, 100)")
+        .await;
+    db.create_st(
+        "compact_upstream",
+        "SELECT id FROM compact_src",
+        "1h",
+        "DIFFERENTIAL",
+    )
+    .await;
+    let query = "SELECT id FROM compact_upstream";
+    for name in ["compact_fast", "compact_slow"] {
+        db.create_st(name, query, "1h", "DIFFERENTIAL").await;
+    }
+
+    db.execute("INSERT INTO compact_src VALUES (101)").await;
+    db.refresh_st_with_retry("compact_upstream").await;
+    db.refresh_st_with_retry("compact_fast").await;
+    assert_eq!(db.count("compact_fast").await, 101);
+    db.execute("DELETE FROM compact_src WHERE id = 101").await;
+    db.refresh_st("compact_upstream").await;
+    db.execute_seq(&[
+        "SET pg_trickle.compact_threshold = 1",
+        "SET pg_trickle.refresh_strategy = 'differential'",
+        "SELECT pgtrickle.refresh_stream_table('compact_slow')",
+    ])
+    .await;
+    e2e::oracle::assert_st_query_exact(
+        &db,
+        "compact_fast",
+        "SELECT id FROM compact_upstream UNION ALL SELECT 101",
+        "fast stream consumer remains at its earlier cut",
+    )
+    .await;
+    db.assert_st_matches_query("compact_slow", query).await;
+    db.refresh_st("compact_fast").await;
+
+    for name in ["compact_fast", "compact_slow"] {
+        db.assert_st_matches_query(name, query).await;
+    }
+}
+
+#[tokio::test]
+async fn test_compaction_single_consumer_stream_preserves_latest_payload() {
+    let db = E2eDb::new().await.with_extension().await;
+    db.execute("CREATE TABLE compact_src (id INT PRIMARY KEY, val INT)")
+        .await;
+    db.execute("INSERT INTO compact_src VALUES (1, 0)").await;
+    db.create_st(
+        "compact_upstream",
+        "SELECT id, val FROM compact_src",
+        "1h",
+        "DIFFERENTIAL",
+    )
+    .await;
+    db.create_st(
+        "compact_downstream",
+        "SELECT id, val FROM compact_upstream",
+        "1h",
+        "DIFFERENTIAL",
+    )
+    .await;
+
+    for val in 1..=3 {
+        db.execute(&format!("UPDATE compact_src SET val = {val} WHERE id = 1"))
+            .await;
+        db.refresh_st_until_converged("compact_upstream").await;
+    }
+
+    db.execute_seq(&[
+        "SET pg_trickle.compact_threshold = 1",
+        "SET pg_trickle.refresh_strategy = 'differential'",
+        "SELECT pgtrickle.refresh_stream_table('compact_downstream')",
+    ])
+    .await;
+    db.assert_st_matches_query("compact_downstream", "SELECT id, val FROM compact_src")
+        .await;
+    let differential: bool = db
+        .query_scalar(
+            "SELECT h.action = 'DIFFERENTIAL' AND h.status = 'COMPLETED' \
+             AND NOT h.was_full_fallback \
+             FROM pgtrickle.pgt_refresh_history h \
+             JOIN pgtrickle.pgt_stream_tables st USING (pgt_id) \
+             WHERE st.pgt_name = 'compact_downstream' \
+             ORDER BY h.refresh_id DESC LIMIT 1",
+        )
+        .await;
+    assert!(
+        differential,
+        "single-consumer ST compaction stays differential"
+    );
+}
+
+#[tokio::test]
+async fn test_compaction_keyless_source_and_stream_preserve_duplicates() {
+    let db = E2eDb::new().await.with_extension().await;
+    db.execute("CREATE TABLE compact_src (val INT)").await;
+    db.execute("INSERT INTO compact_src SELECT generate_series(1, 100)")
+        .await;
+    db.create_st(
+        "compact_upstream",
+        "SELECT val FROM compact_src",
+        "1h",
+        "DIFFERENTIAL",
+    )
+    .await;
+    let query = "SELECT val, COUNT(*) AS cnt FROM compact_upstream GROUP BY val";
+    db.create_st("compact_counts", query, "1h", "DIFFERENTIAL")
+        .await;
+
+    db.execute("INSERT INTO compact_src VALUES (101), (101), (101)")
+        .await;
+    db.execute_seq(&[
+        "SET pg_trickle.compact_threshold = 1",
+        "SET pg_trickle.refresh_strategy = 'differential'",
+        "SELECT pgtrickle.refresh_stream_table('compact_upstream')",
+        "SELECT pgtrickle.refresh_stream_table('compact_counts')",
+    ])
+    .await;
+
+    db.assert_st_matches_query("compact_upstream", "SELECT val FROM compact_src")
+        .await;
+    db.assert_st_matches_query("compact_counts", query).await;
+    let count: i64 = db
+        .query_scalar("SELECT cnt FROM compact_counts WHERE val = 101")
+        .await;
+    assert_eq!(count, 3);
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// D-4.1 — Fan-out: 10 STs from one source share a single change buffer
+// ═══════════════════════════════════════════════════════════════════════════
+
+/// Create 10 stream tables from the same source table. Verify:
+/// 1. Only one change buffer table exists (`changes_{oid}`).
+/// 2. All 10 STs produce correct results after full + differential refresh.
+/// 3. The `pgtrickle.shared_buffer_stats()` function reports accurate metrics.
+#[tokio::test]
+async fn test_d4_fanout_10_sts_shared_buffer() {
+    let db = E2eDb::new().await.with_extension().await;
+
+    // Source table with a few columns.
+    db.execute(
+        "CREATE TABLE d4_src (
+            id   SERIAL PRIMARY KEY,
+            grp  TEXT NOT NULL,
+            val  INT NOT NULL,
+            note TEXT DEFAULT 'x'
+        )",
+    )
+    .await;
+    db.execute(
+        "INSERT INTO d4_src (grp, val) VALUES
+            ('a', 10), ('b', 20), ('c', 30), ('a', 40), ('b', 50)",
+    )
+    .await;
+
+    // Create 10 STs with different defining queries over the same source.
+    let st_names = [
+        "d4_sum_grp",
+        "d4_cnt_grp",
+        "d4_max_grp",
+        "d4_min_grp",
+        "d4_avg_grp",
+        "d4_sum_all",
+        "d4_cnt_all",
+        "d4_filter_a",
+        "d4_filter_b",
+        "d4_id_note",
+    ];
+    let st_queries = [
+        "SELECT grp, SUM(val) AS total FROM d4_src GROUP BY grp",
+        "SELECT grp, COUNT(*) AS cnt FROM d4_src GROUP BY grp",
+        "SELECT grp, MAX(val) AS mx FROM d4_src GROUP BY grp",
+        "SELECT grp, MIN(val) AS mn FROM d4_src GROUP BY grp",
+        "SELECT grp, AVG(val) AS av FROM d4_src GROUP BY grp",
+        "SELECT SUM(val) AS total FROM d4_src",
+        "SELECT COUNT(*) AS cnt FROM d4_src",
+        "SELECT id, val FROM d4_src WHERE grp = 'a'",
+        "SELECT id, val FROM d4_src WHERE grp = 'b'",
+        "SELECT id, note FROM d4_src",
+    ];
+
+    for (name, query) in st_names.iter().zip(st_queries.iter()) {
+        db.create_st(name, query, "1m", "DIFFERENTIAL").await;
+    }
+
+    // Full refresh all.
+    for name in &st_names {
+        db.refresh_st(name).await;
+    }
+
+    // Verify: only one change buffer table exists for this source.
+    let buf_count: i64 = db
+        .query_scalar(
+            "SELECT count(*) FROM pg_class c
+             JOIN pg_namespace n ON n.oid = c.relnamespace
+             WHERE n.nspname = 'pgtrickle_changes'
+               AND c.relkind IN ('r', 'p')
+               AND c.relname LIKE 'changes_%'
+               AND c.relname NOT LIKE 'changes_pgt_%'",
+        )
+        .await;
+    assert_eq!(
+        buf_count, 1,
+        "should have exactly 1 change buffer for the source"
+    );
+
+    // Verify: shared_buffer_stats reports 10 consumers.
+    let consumer_count: i32 = db
+        .query_scalar("SELECT consumer_count FROM pgtrickle.shared_buffer_stats() LIMIT 1")
+        .await;
+    assert_eq!(consumer_count, 10, "shared buffer should have 10 consumers");
+
+    // Insert new rows and differentially refresh all.
+    db.execute("INSERT INTO d4_src (grp, val) VALUES ('a', 100), ('c', 200)")
+        .await;
+
+    for name in &st_names {
+        db.refresh_st(name).await;
+    }
+
+    // Validate a few STs.
+    let sum_a: i64 = db
+        .query_scalar("SELECT total FROM d4_sum_grp WHERE grp = 'a'")
+        .await;
+    assert_eq!(sum_a, 150); // 10 + 40 + 100
+
+    let cnt_all: i64 = db.query_scalar("SELECT cnt FROM d4_cnt_all").await;
+    assert_eq!(cnt_all, 7);
+
+    let filter_a_cnt: i64 = db.query_scalar("SELECT count(*) FROM d4_filter_a").await;
+    assert_eq!(filter_a_cnt, 3); // id 1, 4, and the new one
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// D-4.2 — Multi-frontier cleanup: slowest consumer protects buffer rows
+// ═══════════════════════════════════════════════════════════════════════════
+
+/// Two STs share a buffer. Refresh only ST1 (ST2 falls behind). Insert more
+/// rows. Refresh ST1 again. Buffer rows needed by ST2 must NOT be cleaned up.
+/// Then refresh ST2 — it should see all changes.
+#[tokio::test]
+async fn test_d4_multi_frontier_slowest_consumer_protection() {
+    let db = E2eDb::new().await.with_extension().await;
+
+    db.execute(
+        "CREATE TABLE d4_mf_src (
+            id  SERIAL PRIMARY KEY,
+            val INT NOT NULL
+        )",
+    )
+    .await;
+    db.execute("INSERT INTO d4_mf_src (val) VALUES (10), (20)")
+        .await;
+
+    db.create_st(
+        "d4_mf_fast",
+        "SELECT SUM(val) AS total FROM d4_mf_src",
+        "1m",
+        "DIFFERENTIAL",
+    )
+    .await;
+    db.create_st(
+        "d4_mf_slow",
+        "SELECT COUNT(*) AS cnt FROM d4_mf_src",
+        "1m",
+        "DIFFERENTIAL",
+    )
+    .await;
+
+    // Full refresh both.
+    db.refresh_st("d4_mf_fast").await;
+    db.refresh_st("d4_mf_slow").await;
+
+    // Wave 1: insert + refresh only the fast consumer.
+    db.execute("INSERT INTO d4_mf_src (val) VALUES (30)").await;
+    db.refresh_st("d4_mf_fast").await;
+
+    let fast_total: i64 = db.query_scalar("SELECT total FROM d4_mf_fast").await;
+    assert_eq!(fast_total, 60); // 10 + 20 + 30
+
+    // Wave 2: more inserts + refresh only fast consumer again.
+    db.execute("INSERT INTO d4_mf_src (val) VALUES (40)").await;
+    db.refresh_st("d4_mf_fast").await;
+
+    let fast_total2: i64 = db.query_scalar("SELECT total FROM d4_mf_fast").await;
+    assert_eq!(fast_total2, 100); // 10 + 20 + 30 + 40
+
+    // Now refresh the slow consumer — it should catch up with ALL changes.
+    db.refresh_st("d4_mf_slow").await;
+
+    let slow_cnt: i64 = db.query_scalar("SELECT cnt FROM d4_mf_slow").await;
+    assert_eq!(slow_cnt, 4); // all 4 rows
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// D-4.3 — Column superset: buffer tracks union of all consumer columns
+// ═══════════════════════════════════════════════════════════════════════════
+
+/// Two STs reference different columns from the same source. The shared buffer
+/// should track the union of both column sets.
+#[tokio::test]
+async fn test_d4_column_superset_tracked() {
+    let db = E2eDb::new().await.with_extension().await;
+
+    db.execute(
+        "CREATE TABLE d4_cs_src (
+            id   SERIAL PRIMARY KEY,
+            col_a TEXT NOT NULL DEFAULT 'x',
+            col_b INT NOT NULL DEFAULT 0,
+            col_c NUMERIC NOT NULL DEFAULT 0
+        )",
+    )
+    .await;
+    db.execute("INSERT INTO d4_cs_src (col_a, col_b, col_c) VALUES ('hello', 1, 10.5)")
+        .await;
+
+    // ST1 uses col_a, ST2 uses col_b and col_c.
+    db.create_st(
+        "d4_cs_st1",
+        "SELECT id, col_a FROM d4_cs_src",
+        "1m",
+        "DIFFERENTIAL",
+    )
+    .await;
+    db.create_st(
+        "d4_cs_st2",
+        "SELECT id, col_b, col_c FROM d4_cs_src",
+        "1m",
+        "DIFFERENTIAL",
+    )
+    .await;
+
+    db.refresh_st("d4_cs_st1").await;
+    db.refresh_st("d4_cs_st2").await;
+
+    // The shared buffer should track col_a, col_b, col_c (superset).
+    let columns_tracked: i32 = db
+        .query_scalar("SELECT columns_tracked FROM pgtrickle.shared_buffer_stats() LIMIT 1")
+        .await;
+    // id (PK) + col_a + col_b + col_c = 4 columns
+    assert!(
+        columns_tracked >= 3,
+        "buffer should track at least 3 user columns (union), got {}",
+        columns_tracked
+    );
+
+    // Both STs work correctly with differential refresh.
+    db.execute("INSERT INTO d4_cs_src (col_a, col_b, col_c) VALUES ('world', 2, 20.5)")
+        .await;
+
+    db.refresh_st("d4_cs_st1").await;
+    db.refresh_st("d4_cs_st2").await;
+
+    let st1_cnt: i64 = db.query_scalar("SELECT count(*) FROM d4_cs_st1").await;
+    assert_eq!(st1_cnt, 2);
+
+    let st2_sum: i64 = db
+        .query_scalar("SELECT SUM(col_b)::bigint FROM d4_cs_st2")
+        .await;
+    assert_eq!(st2_sum, 3); // 1 + 2
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// D-4.4 — Shared buffer stats function returns correct data
+// ═══════════════════════════════════════════════════════════════════════════
+
+/// Verify that `pgtrickle.shared_buffer_stats()` returns accurate metadata.
+#[tokio::test]
+async fn test_d4_shared_buffer_stats_accuracy() {
+    let db = E2eDb::new().await.with_extension().await;
+
+    db.execute(
+        "CREATE TABLE d4_stats_src (
+            id  SERIAL PRIMARY KEY,
+            val INT NOT NULL
+        )",
+    )
+    .await;
+    db.execute("INSERT INTO d4_stats_src (val) VALUES (1), (2), (3)")
+        .await;
+
+    db.create_st(
+        "d4_stats_st1",
+        "SELECT SUM(val) AS total FROM d4_stats_src",
+        "1m",
+        "DIFFERENTIAL",
+    )
+    .await;
+    db.create_st(
+        "d4_stats_st2",
+        "SELECT COUNT(*) AS cnt FROM d4_stats_src",
+        "1m",
+        "DIFFERENTIAL",
+    )
+    .await;
+
+    db.refresh_st("d4_stats_st1").await;
+    db.refresh_st("d4_stats_st2").await;
+
+    // Insert data to put rows in the buffer.
+    db.execute("INSERT INTO d4_stats_src (val) VALUES (4), (5)")
+        .await;
+
+    // Verify stats function returns a row.
+    let consumer_count: i32 = db
+        .query_scalar("SELECT consumer_count FROM pgtrickle.shared_buffer_stats() LIMIT 1")
+        .await;
+    assert_eq!(consumer_count, 2, "should have 2 consumers");
+
+    let source_table: String = db
+        .query_scalar("SELECT source_table FROM pgtrickle.shared_buffer_stats() LIMIT 1")
+        .await;
+    assert!(
+        source_table.contains("d4_stats_src"),
+        "source_table should contain the table name, got: {}",
+        source_table
+    );
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// D-4.5 — DROP ST reduces consumer count
+// ═══════════════════════════════════════════════════════════════════════════
+
+/// When a stream table is dropped, the consumer count for the shared buffer
+/// should decrease. When the last consumer is dropped, the buffer is removed.
+#[tokio::test]
+async fn test_d4_drop_st_reduces_consumer_count() {
+    let db = E2eDb::new().await.with_extension().await;
+
+    db.execute(
+        "CREATE TABLE d4_drop_src (
+            id  SERIAL PRIMARY KEY,
+            val INT NOT NULL
+        )",
+    )
+    .await;
+    db.execute("INSERT INTO d4_drop_src (val) VALUES (1)").await;
+
+    db.create_st(
+        "d4_drop_st1",
+        "SELECT SUM(val) AS s FROM d4_drop_src",
+        "1m",
+        "DIFFERENTIAL",
+    )
+    .await;
+    db.create_st(
+        "d4_drop_st2",
+        "SELECT COUNT(*) AS c FROM d4_drop_src",
+        "1m",
+        "DIFFERENTIAL",
+    )
+    .await;
+
+    db.refresh_st("d4_drop_st1").await;
+    db.refresh_st("d4_drop_st2").await;
+
+    let cnt_before: i32 = db
+        .query_scalar("SELECT consumer_count FROM pgtrickle.shared_buffer_stats() LIMIT 1")
+        .await;
+    assert_eq!(cnt_before, 2);
+
+    // Drop one ST.
+    db.drop_st("d4_drop_st1").await;
+
+    let cnt_after: i32 = db
+        .query_scalar("SELECT consumer_count FROM pgtrickle.shared_buffer_stats() LIMIT 1")
+        .await;
+    assert_eq!(cnt_after, 1);
+
+    // Drop the last ST — buffer tracking should be removed.
+    db.drop_st("d4_drop_st2").await;
+
+    let stats_count: i64 = db
+        .query_scalar("SELECT count(*) FROM pgtrickle.shared_buffer_stats()")
+        .await;
+    assert_eq!(stats_count, 0, "no shared buffers should remain");
+}
+
+// ═══════════════════════════════════════════════════════════════════════════
+// PERF-2 — Auto Buffer Partitioning
+// ═══════════════════════════════════════════════════════════════════════════
+
+/// Verify that `buffer_partitioning = 'on'` creates a partitioned change buffer
+/// from the start and that differential refresh works correctly through it.
+#[tokio::test]
+async fn test_perf2_buffer_partitioning_on_creates_partitioned() {
+    let db = E2eDb::new().await.with_extension().await;
+
+    // Enable buffer partitioning + create ST on the SAME connection so
+    // the session-level SET is visible to the create_stream_table call.
+    db.execute(
+        "CREATE TABLE perf2_src (
+            id   SERIAL PRIMARY KEY,
+            grp  TEXT NOT NULL,
+            val  INT NOT NULL
+        )",
+    )
+    .await;
+    db.execute("INSERT INTO perf2_src (grp, val) VALUES ('a', 10), ('b', 20), ('c', 30)")
+        .await;
+
+    db.execute_seq(&[
+        "SET pg_trickle.buffer_partitioning = 'on'",
+        "SELECT pgtrickle.create_stream_table('perf2_sum', \
+         $$SELECT grp, SUM(val) AS total FROM perf2_src GROUP BY grp$$, \
+         '1m', 'DIFFERENTIAL')",
+    ])
+    .await;
+
+    // Full refresh.
+    db.refresh_st("perf2_sum").await;
+
+    // Verify the change buffer is partitioned (relkind = 'p').
+    let is_partitioned: bool = db
+        .query_scalar("SELECT is_partitioned FROM pgtrickle.shared_buffer_stats() LIMIT 1")
+        .await;
+    assert!(
+        is_partitioned,
+        "buffer should be partitioned with mode='on'"
+    );
+
+    // Insert new rows and differential refresh.
+    db.execute("INSERT INTO perf2_src (grp, val) VALUES ('a', 100)")
+        .await;
+    db.refresh_st("perf2_sum").await;
+
+    let sum_a: i64 = db
+        .query_scalar("SELECT total FROM perf2_sum WHERE grp = 'a'")
+        .await;
+    assert_eq!(
+        sum_a, 110,
+        "differential refresh through partitioned buffer"
+    );
+}
+
+/// Verify that `buffer_partitioning = 'auto'` starts with an unpartitioned
+/// buffer for normal workloads (below compact_threshold).
+#[tokio::test]
+async fn test_perf2_auto_mode_starts_unpartitioned() {
+    let db = E2eDb::new().await.with_extension().await;
+
+    db.execute(
+        "CREATE TABLE perf2_auto_src (
+            id   SERIAL PRIMARY KEY,
+            val  INT NOT NULL
+        )",
+    )
+    .await;
+    db.execute("INSERT INTO perf2_auto_src (val) VALUES (1), (2), (3)")
+        .await;
+
+    // Enable auto mode + create ST on the SAME connection.
+    // Use a short schedule (< 30s) so auto mode does NOT partition at creation time.
+    db.execute_seq(&[
+        "SET pg_trickle.buffer_partitioning = 'auto'",
+        "SELECT pgtrickle.create_stream_table('perf2_auto_cnt', \
+         $$SELECT COUNT(*) AS cnt FROM perf2_auto_src$$, \
+         '10s', 'DIFFERENTIAL')",
+    ])
+    .await;
+
+    db.refresh_st("perf2_auto_cnt").await;
+
+    // With only 3 rows, the buffer should NOT be auto-promoted.
+    let is_partitioned: bool = db
+        .query_scalar("SELECT is_partitioned FROM pgtrickle.shared_buffer_stats() LIMIT 1")
+        .await;
+    assert!(
+        !is_partitioned,
+        "with low volume, auto mode should keep buffer unpartitioned"
+    );
+
+    // Normal differential refresh should still work.
+    db.execute("INSERT INTO perf2_auto_src (val) VALUES (4)")
+        .await;
+    db.refresh_st_until_converged("perf2_auto_cnt").await;
+
+    let cnt: i64 = db.query_scalar("SELECT cnt FROM perf2_auto_cnt").await;
+    assert_eq!(cnt, 4);
+}
+
+/// Verify that `buffer_partitioning = 'auto'` promotes to partitioned mode
+/// when the buffer fill rate exceeds compact_threshold within a single cycle.
+///
+/// This test lowers the compact_threshold to a small value, inserts enough
+/// rows to exceed it, and verifies the auto-promotion happens during
+/// differential refresh.
+#[tokio::test]
+async fn test_perf2_auto_mode_promotes_on_high_throughput() {
+    let db = E2eDb::new().await.with_extension().await;
+
+    db.execute(
+        "CREATE TABLE perf2_promo_src (
+            id   SERIAL PRIMARY KEY,
+            val  INT NOT NULL
+        )",
+    )
+    .await;
+    db.execute("INSERT INTO perf2_promo_src (val) VALUES (1)")
+        .await;
+
+    // Set auto mode + low threshold + create ST on the SAME connection.
+    // Use a short schedule (< 30s) so auto mode does NOT partition at creation time —
+    // we want to test runtime promotion via compact_threshold.
+    db.execute_seq(&[
+        "SET pg_trickle.buffer_partitioning = 'auto'",
+        "SET pg_trickle.compact_threshold = 50",
+        "SELECT pgtrickle.create_stream_table('perf2_promo_cnt', \
+         $$SELECT COUNT(*) AS cnt FROM perf2_promo_src$$, \
+         '10s', 'DIFFERENTIAL')",
+    ])
+    .await;
+
+    // Full refresh to establish baseline (needs auto mode visible).
+    db.execute_seq(&[
+        "SET pg_trickle.buffer_partitioning = 'auto'",
+        "SELECT pgtrickle.refresh_stream_table('perf2_promo_cnt')",
+    ])
+    .await;
+
+    // Verify buffer starts unpartitioned.
+    let is_part_before: bool = db
+        .query_scalar("SELECT is_partitioned FROM pgtrickle.shared_buffer_stats() LIMIT 1")
+        .await;
+    assert!(
+        !is_part_before,
+        "buffer should start unpartitioned in auto mode"
+    );
+
+    // Insert >50 rows to exceed the lowered compact_threshold.
+    db.execute(
+        "INSERT INTO perf2_promo_src (val)
+         SELECT generate_series(1, 100)",
+    )
+    .await;
+
+    // Differential refresh with auto mode + low threshold on same connection.
+    db.execute_seq(&[
+        "SET pg_trickle.buffer_partitioning = 'auto'",
+        "SET pg_trickle.compact_threshold = 50",
+        "SELECT pgtrickle.refresh_stream_table('perf2_promo_cnt')",
+    ])
+    .await;
+
+    // Verify buffer was promoted to partitioned.
+    let is_part_after: bool = db
+        .query_scalar("SELECT is_partitioned FROM pgtrickle.shared_buffer_stats() LIMIT 1")
+        .await;
+    assert!(
+        is_part_after,
+        "buffer should be auto-promoted after exceeding compact_threshold"
+    );
+
+    // Verify data correctness after promotion.
+    let cnt: i64 = db.query_scalar("SELECT cnt FROM perf2_promo_cnt").await;
+    assert_eq!(cnt, 101, "1 initial + 100 inserted = 101");
+
+    // Verify subsequent differential refresh still works through the
+    // partitioned buffer.
+    db.execute("INSERT INTO perf2_promo_src (val) VALUES (999)")
+        .await;
+    db.execute_seq(&[
+        "SET pg_trickle.buffer_partitioning = 'auto'",
+        "SELECT pgtrickle.refresh_stream_table('perf2_promo_cnt')",
+    ])
+    .await;
+
+    let cnt_after: i64 = db.query_scalar("SELECT cnt FROM perf2_promo_cnt").await;
+    assert_eq!(cnt_after, 102, "post-promotion differential refresh");
+}

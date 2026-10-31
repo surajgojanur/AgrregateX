@@ -1,0 +1,1432 @@
+//! Phase 3 (TESTING_GAPS_2) — Differential ≡ Full Refresh Equivalence
+//!
+//! For every major operator class, validates that DIFFERENTIAL mode produces
+//! the same result as the ground-truth defining query across 5 mutation
+//! cycles, AND that the effective refresh mode is genuinely DIFFERENTIAL
+//! (no silent fallback to FULL).
+//!
+//! Each test follows the invariant:
+//!   ∀ cycle: ST(differential) == eval(defining_query)   AND
+//!            effective_refresh_mode = 'DIFFERENTIAL'
+//!
+//! This is the single strongest correctness property in the test suite:
+//! any deviation is a regression in the DVM engine.
+//!
+//! Prerequisites: `./tests/build_e2e_image.sh` or `just test-e2e`
+
+mod e2e;
+#[allow(dead_code)]
+#[path = "conformance/reference_clients.rs"]
+mod reference_clients;
+
+use e2e::E2eDb;
+
+// ── Helper ─────────────────────────────────────────────────────────────────
+
+/// Assert the most recent refresh used a genuine differential-family mode
+/// (not a silent fallback to FULL refresh).
+///
+/// Accepts:
+/// - `DIFFERENTIAL` — standard differential execution path
+/// - `APPEND_ONLY` — append-only optimization of DIFFERENTIAL (INSERT-only
+///   batches on monotonic queries such as INNER JOIN)
+/// - `TOP_K` — TopK-specific refresh (expected for ORDER BY + LIMIT
+///   queries regardless of the declared `refresh_mode`)
+async fn assert_differential_mode(db: &E2eDb, st_name: &str) {
+    let mode: Option<String> = db
+        .query_scalar_opt(&format!(
+            "SELECT effective_refresh_mode \
+             FROM pgtrickle.pgt_stream_tables \
+             WHERE pgt_name = '{st_name}'"
+        ))
+        .await;
+    assert!(
+        matches!(
+            mode.as_deref(),
+            Some("DIFFERENTIAL") | Some("APPEND_ONLY") | Some("TOP_K")
+        ),
+        "ST '{st_name}' silently fell back to FULL refresh; got: {mode:?}"
+    );
+}
+
+// ═══════════════════════════════════════════════════════════════════════
+// AGGREGATE FILTER
+// ═══════════════════════════════════════════════════════════════════════
+
+const AGG_FILTER_CONFIG: &[&str] = &[
+    "LOAD 'pg_trickle'",
+    "SET pg_trickle.cdc_mode = 'trigger'",
+    "SET pg_trickle.refresh_strategy = 'differential'",
+    "SET pg_trickle.differential_max_change_ratio = 0",
+];
+
+#[tokio::test]
+async fn test_diff_aggregate_filter_excluded_arguments_match_native() {
+    let db = E2eDb::new().await.with_extension().await;
+    db.execute("CREATE TABLE dfe_filter_args (id INT PRIMARY KEY, v INT, w INT, keep BOOLEAN)")
+        .await;
+    db.execute("INSERT INTO dfe_filter_args VALUES (1,0,0,FALSE),(2,2,2,TRUE),(3,0,0,NULL)")
+        .await;
+
+    let queries = [
+        (
+            "dfe_filter_count",
+            "SELECT count(100/v) FILTER (WHERE v<>0) n FROM dfe_filter_args",
+        ),
+        (
+            "dfe_filter_sum",
+            "SELECT sum((100/v)::numeric(12,2)) FILTER (WHERE v<>0) s FROM dfe_filter_args",
+        ),
+        (
+            "dfe_filter_aux",
+            "SELECT count(100/v) FILTER (WHERE keep) n, \
+            sum((100/v)::numeric(12,2)) FILTER (WHERE keep) s, \
+            avg((100/v)::numeric) FILTER (WHERE keep) a, \
+            var_pop((100/v)::numeric) FILTER (WHERE keep) p, \
+            regr_count(100/v,100/w) FILTER (WHERE keep) r, \
+            bool_and(100/v > 0) FILTER (WHERE keep) b FROM public.dfe_filter_args",
+        ),
+    ];
+    for (name, query) in queries {
+        db.try_execute_with_config(
+            AGG_FILTER_CONFIG,
+            &format!(
+                "SELECT pgtrickle.create_stream_table('{name}', '{}', '1m', 'DIFFERENTIAL')",
+                query.replace('\'', "''")
+            ),
+        )
+        .await
+        .unwrap_or_else(|error| panic!("create {name}: {error:?}; query: {query}"));
+        db.assert_st_matches_query(name, query).await;
+    }
+
+    for mutation in [
+        "DELETE FROM dfe_filter_args WHERE id=1",
+        "INSERT INTO dfe_filter_args VALUES (4,0,0,FALSE),(5,0,0,NULL)",
+        "UPDATE dfe_filter_args SET keep=FALSE WHERE id=3",
+        "INSERT INTO dfe_filter_args VALUES (6,4,4,TRUE),(7,NULL,NULL,TRUE)",
+        "UPDATE dfe_filter_args SET v=0,w=0,keep=NULL WHERE id=2",
+        "UPDATE dfe_filter_args SET v=2,w=2,keep=TRUE WHERE id=4",
+        "DELETE FROM dfe_filter_args WHERE id IN (4,6)",
+        "DELETE FROM dfe_filter_args",
+        "INSERT INTO dfe_filter_args VALUES (8,2,2,TRUE),(9,0,0,NULL)",
+    ] {
+        db.execute(mutation).await;
+        for (name, query) in queries {
+            db.try_execute_with_config(
+                AGG_FILTER_CONFIG,
+                &format!("SELECT pgtrickle.refresh_stream_table('{name}')"),
+            )
+            .await
+            .expect("refresh filtered aggregate");
+            db.assert_st_matches_query(name, query).await;
+            assert_differential_mode(&db, name).await;
+            let ran_differential: bool = db
+                .query_scalar(&format!(
+                    "SELECT h.action = 'DIFFERENTIAL' AND h.status = 'COMPLETED' \
+                    AND NOT h.was_full_fallback AND h.delta_row_count > 0 \
+                 FROM pgtrickle.pgt_refresh_history h \
+                 JOIN pgtrickle.pgt_stream_tables st USING (pgt_id) \
+                 WHERE st.pgt_name = '{name}' ORDER BY h.refresh_id DESC LIMIT 1"
+                ))
+                .await;
+            assert!(
+                ran_differential,
+                "{name}: no nonempty differential refresh after {mutation}"
+            );
+        }
+    }
+}
+
+#[tokio::test]
+async fn test_diff_aggregate_filter_included_invalid_arguments_raise_native_error() {
+    let db = E2eDb::new().await.with_extension().await;
+    db.execute("CREATE TABLE dfe_filter_error (id INT PRIMARY KEY, v INT, keep BOOLEAN)")
+        .await;
+    db.execute("INSERT INTO dfe_filter_error VALUES (1,2,TRUE)")
+        .await;
+    let aggregates = [
+        ("dfe_error_count", "count(100/v)", "1"),
+        ("dfe_error_sum", "sum((100/v)::numeric(12,2))", "50.00"),
+    ];
+    for (name, aggregate, _) in aggregates {
+        let query = format!("SELECT {aggregate} FILTER (WHERE keep) a FROM dfe_filter_error");
+        db.try_execute_with_config(
+            AGG_FILTER_CONFIG,
+            &format!(
+                "SELECT pgtrickle.create_stream_table('{name}', '{}', '1m', 'DIFFERENTIAL')",
+                query.replace('\'', "''")
+            ),
+        )
+        .await
+        .unwrap_or_else(|error| panic!("create {name}: {error:?}; query: {query}"));
+    }
+    db.execute("INSERT INTO dfe_filter_error VALUES (2,0,TRUE)")
+        .await;
+    for (name, aggregate, expected) in aggregates {
+        for sql in [
+            format!("SELECT {aggregate} FILTER (WHERE keep) FROM dfe_filter_error"),
+            format!("SELECT pgtrickle.refresh_stream_table('{name}')"),
+        ] {
+            let error = db
+                .try_execute_with_config(AGG_FILTER_CONFIG, &sql)
+                .await
+                .expect_err("included division by zero must fail");
+            assert_eq!(
+                error.as_database_error().and_then(|e| e.code()).as_deref(),
+                Some("22012"),
+                "{sql}: {error}"
+            );
+        }
+        let stored: String = db
+            .query_scalar(&format!("SELECT a::text FROM {name}"))
+            .await;
+        assert_eq!(stored, expected, "failed refresh must preserve stored data");
+    }
+}
+
+// ═══════════════════════════════════════════════════════════════════════
+// INNER JOIN
+// ═══════════════════════════════════════════════════════════════════════
+
+#[tokio::test]
+async fn test_diff_full_equivalence_inner_join() {
+    let db = E2eDb::new().await.with_extension().await;
+    db.execute("CREATE TABLE dfe_ij_a (id INT PRIMARY KEY, v TEXT)")
+        .await;
+    db.execute("CREATE TABLE dfe_ij_b (id INT PRIMARY KEY, a_id INT, w TEXT)")
+        .await;
+    db.execute("INSERT INTO dfe_ij_a VALUES (1,'a1'),(2,'a2'),(3,'a3')")
+        .await;
+    db.execute("INSERT INTO dfe_ij_b VALUES (10,1,'b1'),(11,2,'b2')")
+        .await;
+
+    let q = "SELECT a.id, a.v, b.w \
+             FROM dfe_ij_a a JOIN dfe_ij_b b ON b.a_id = a.id";
+    db.create_st("dfe_ij_st", q, "1m", "DIFFERENTIAL").await;
+    db.assert_st_matches_query("dfe_ij_st", q).await;
+    assert_differential_mode(&db, "dfe_ij_st").await;
+
+    // Cycle 1: INSERT new matched pair
+    db.execute("INSERT INTO dfe_ij_a VALUES (4,'a4')").await;
+    db.execute("INSERT INTO dfe_ij_b VALUES (12,4,'b4')").await;
+    db.refresh_st("dfe_ij_st").await;
+    db.assert_st_matches_query("dfe_ij_st", q).await;
+    assert_differential_mode(&db, "dfe_ij_st").await;
+
+    // Cycle 2: UPDATE value in b
+    db.execute("UPDATE dfe_ij_b SET w = 'B2' WHERE id = 11")
+        .await;
+    db.refresh_st("dfe_ij_st").await;
+    db.assert_st_matches_query("dfe_ij_st", q).await;
+    assert_differential_mode(&db, "dfe_ij_st").await;
+
+    // Cycle 3: UPDATE join key → old row leaves, new row enters
+    db.execute("UPDATE dfe_ij_b SET a_id = 3 WHERE id = 10")
+        .await;
+    db.refresh_st("dfe_ij_st").await;
+    db.assert_st_matches_query("dfe_ij_st", q).await;
+    assert_differential_mode(&db, "dfe_ij_st").await;
+
+    // Cycle 4: DELETE matched pair
+    db.execute("DELETE FROM dfe_ij_b WHERE id = 12").await;
+    db.execute("DELETE FROM dfe_ij_a WHERE id = 4").await;
+    db.refresh_st("dfe_ij_st").await;
+    db.assert_st_matches_query("dfe_ij_st", q).await;
+    assert_differential_mode(&db, "dfe_ij_st").await;
+
+    // Cycle 5: INSERT + DELETE in same cycle
+    db.execute("INSERT INTO dfe_ij_a VALUES (5,'a5')").await;
+    db.execute("INSERT INTO dfe_ij_b VALUES (13,5,'b5')").await;
+    db.execute("DELETE FROM dfe_ij_b WHERE a_id = 2").await;
+    db.refresh_st("dfe_ij_st").await;
+    db.assert_st_matches_query("dfe_ij_st", q).await;
+    assert_differential_mode(&db, "dfe_ij_st").await;
+}
+
+// ═══════════════════════════════════════════════════════════════════════
+// LEFT JOIN
+// ═══════════════════════════════════════════════════════════════════════
+
+#[tokio::test]
+async fn test_diff_full_equivalence_left_join() {
+    let db = E2eDb::new().await.with_extension().await;
+    db.execute("CREATE TABLE dfe_lj_l (id INT PRIMARY KEY, lv TEXT)")
+        .await;
+    db.execute("CREATE TABLE dfe_lj_r (id INT PRIMARY KEY, l_id INT, rv TEXT)")
+        .await;
+    db.execute("INSERT INTO dfe_lj_l VALUES (1,'l1'),(2,'l2'),(3,'l3')")
+        .await;
+    db.execute("INSERT INTO dfe_lj_r VALUES (10,1,'r1'),(11,3,'r3')")
+        .await;
+
+    let q = "SELECT l.id, l.lv, r.rv \
+             FROM dfe_lj_l l LEFT JOIN dfe_lj_r r ON r.l_id = l.id";
+    db.create_st("dfe_lj_st", q, "1m", "DIFFERENTIAL").await;
+    db.assert_st_matches_query("dfe_lj_st", q).await;
+    assert_differential_mode(&db, "dfe_lj_st").await;
+
+    // Cycle 1: fill in the unmatched left row with a right
+    db.execute("INSERT INTO dfe_lj_r VALUES (12,2,'r2')").await;
+    db.refresh_st("dfe_lj_st").await;
+    db.assert_st_matches_query("dfe_lj_st", q).await;
+    assert_differential_mode(&db, "dfe_lj_st").await;
+
+    // Cycle 2: DELETE right — left row becomes NULL-padded again
+    db.execute("DELETE FROM dfe_lj_r WHERE l_id = 1").await;
+    db.refresh_st("dfe_lj_st").await;
+    db.assert_st_matches_query("dfe_lj_st", q).await;
+    assert_differential_mode(&db, "dfe_lj_st").await;
+
+    // Cycle 3: UPDATE left join key
+    db.execute("UPDATE dfe_lj_l SET id = 4 WHERE id = 3").await;
+    db.execute("UPDATE dfe_lj_r SET l_id = 4 WHERE l_id = 3")
+        .await;
+    db.refresh_st("dfe_lj_st").await;
+    db.assert_st_matches_query("dfe_lj_st", q).await;
+    assert_differential_mode(&db, "dfe_lj_st").await;
+
+    // Cycle 4: INSERT unmatched left row
+    db.execute("INSERT INTO dfe_lj_l VALUES (5,'l5')").await;
+    db.refresh_st("dfe_lj_st").await;
+    db.assert_st_matches_query("dfe_lj_st", q).await;
+    assert_differential_mode(&db, "dfe_lj_st").await;
+
+    // Cycle 5: DELETE that unmatched row plus update a value
+    db.execute("DELETE FROM dfe_lj_l WHERE id = 5").await;
+    db.execute("UPDATE dfe_lj_r SET rv = 'R2' WHERE id = 12")
+        .await;
+    db.refresh_st("dfe_lj_st").await;
+    db.assert_st_matches_query("dfe_lj_st", q).await;
+    assert_differential_mode(&db, "dfe_lj_st").await;
+}
+
+// ═══════════════════════════════════════════════════════════════════════
+// FULL JOIN
+// ═══════════════════════════════════════════════════════════════════════
+
+#[tokio::test]
+async fn test_diff_full_equivalence_full_join() {
+    let db = E2eDb::new().await.with_extension().await;
+    db.execute("CREATE TABLE dfe_fj_p (k INT PRIMARY KEY, pv TEXT)")
+        .await;
+    db.execute("CREATE TABLE dfe_fj_q (k INT PRIMARY KEY, qv TEXT)")
+        .await;
+    db.execute("INSERT INTO dfe_fj_p VALUES (1,'p1'),(2,'p2')")
+        .await;
+    db.execute("INSERT INTO dfe_fj_q VALUES (2,'q2'),(3,'q3')")
+        .await;
+
+    let q = "SELECT p.k AS pk, p.pv, q.k AS qk, q.qv \
+             FROM dfe_fj_p p FULL JOIN dfe_fj_q q ON p.k = q.k";
+    db.create_st("dfe_fj_st", q, "1m", "DIFFERENTIAL").await;
+    db.assert_st_matches_query("dfe_fj_st", q).await;
+    assert_differential_mode(&db, "dfe_fj_st").await;
+
+    // Cycle 1: add matched pair
+    db.execute("INSERT INTO dfe_fj_p VALUES (3,'p3')").await;
+    db.refresh_st("dfe_fj_st").await;
+    db.assert_st_matches_query("dfe_fj_st", q).await;
+    assert_differential_mode(&db, "dfe_fj_st").await;
+
+    // Cycle 2: delete one side of a matched pair
+    db.execute("DELETE FROM dfe_fj_p WHERE k = 2").await;
+    db.refresh_st("dfe_fj_st").await;
+    db.assert_st_matches_query("dfe_fj_st", q).await;
+    assert_differential_mode(&db, "dfe_fj_st").await;
+
+    // Cycle 3: insert on only the q side
+    db.execute("INSERT INTO dfe_fj_q VALUES (5,'q5')").await;
+    db.refresh_st("dfe_fj_st").await;
+    db.assert_st_matches_query("dfe_fj_st", q).await;
+    assert_differential_mode(&db, "dfe_fj_st").await;
+
+    // Cycle 4: update a value
+    db.execute("UPDATE dfe_fj_p SET pv = 'P1' WHERE k = 1")
+        .await;
+    db.refresh_st("dfe_fj_st").await;
+    db.assert_st_matches_query("dfe_fj_st", q).await;
+    assert_differential_mode(&db, "dfe_fj_st").await;
+
+    // Cycle 5: delete both sides of the remaining match
+    db.execute("DELETE FROM dfe_fj_p WHERE k = 3").await;
+    db.execute("DELETE FROM dfe_fj_q WHERE k = 3").await;
+    db.refresh_st("dfe_fj_st").await;
+    db.assert_st_matches_query("dfe_fj_st", q).await;
+    assert_differential_mode(&db, "dfe_fj_st").await;
+}
+
+// ═══════════════════════════════════════════════════════════════════════
+// AGGREGATE: SUM / COUNT
+// ═══════════════════════════════════════════════════════════════════════
+
+#[tokio::test]
+async fn test_diff_full_equivalence_aggregate_sum_count() {
+    let db = E2eDb::new().await.with_extension().await;
+    db.execute("CREATE TABLE dfe_agg (id SERIAL PRIMARY KEY, grp TEXT, val INT)")
+        .await;
+    db.execute("INSERT INTO dfe_agg (grp, val) VALUES ('x',10),('x',20),('y',5)")
+        .await;
+
+    let q = "SELECT grp, SUM(val) AS tot, COUNT(*) AS cnt FROM dfe_agg GROUP BY grp";
+    db.create_st("dfe_agg_st", q, "1m", "DIFFERENTIAL").await;
+    db.assert_st_matches_query("dfe_agg_st", q).await;
+    assert_differential_mode(&db, "dfe_agg_st").await;
+
+    for (grp, delta, delete_id) in [
+        ("x", 30_i32, None::<i32>),
+        ("y", 15, None),
+        ("z", 100, None),
+        ("x", 1, Some(1)),
+        ("z", 50, None),
+    ] {
+        db.execute(&format!(
+            "INSERT INTO dfe_agg (grp, val) VALUES ('{grp}', {delta})"
+        ))
+        .await;
+        if let Some(id) = delete_id {
+            db.execute(&format!("DELETE FROM dfe_agg WHERE id = {id}"))
+                .await;
+        }
+        db.refresh_st("dfe_agg_st").await;
+        db.assert_st_matches_query("dfe_agg_st", q).await;
+        assert_differential_mode(&db, "dfe_agg_st").await;
+    }
+}
+
+// ═══════════════════════════════════════════════════════════════════════
+// AGGREGATE: COUNT of composite datums (#1203)
+// ═══════════════════════════════════════════════════════════════════════
+
+async fn assert_composite_count_equivalence(query: &str) {
+    let db = E2eDb::new().await.with_extension().await;
+    db.execute("CREATE TYPE dfe_pair AS (a INT, b INT)").await;
+    db.execute(
+        "CREATE TABLE dfe_composite (id INT PRIMARY KEY, grp INT, \
+         payload dfe_pair, scalar INT, keep BOOLEAN)",
+    )
+    .await;
+    db.execute("INSERT INTO dfe_composite VALUES (1, 1, ROW(1,1), 10, true)")
+        .await;
+    db.execute_seq(&[
+        "LOAD 'pg_trickle'",
+        "SET pg_trickle.cdc_mode = 'trigger'",
+        &format!(
+            "SELECT pgtrickle.create_stream_table('dfe_composite_st', \
+             $q${query}$q$, '1m', 'DIFFERENTIAL')"
+        ),
+    ])
+    .await;
+    db.assert_st_matches_query("dfe_composite_st", query).await;
+
+    for mutation in [
+        "INSERT INTO dfe_composite VALUES \
+         (2,1,ROW(1,NULL),NULL,true), (3,1,ROW(NULL,NULL),30,false), (4,1,NULL,40,NULL)",
+        // Each datum shape transitions to another, including SQL NULL in both directions.
+        "UPDATE dfe_composite SET payload = CASE id \
+         WHEN 1 THEN NULL::dfe_pair WHEN 2 THEN ROW(NULL,NULL)::dfe_pair \
+         WHEN 3 THEN ROW(1,1)::dfe_pair ELSE ROW(1,NULL)::dfe_pair END, \
+         scalar = CASE WHEN scalar IS NULL THEN 20 ELSE NULL END, keep = NOT keep",
+        "UPDATE dfe_composite SET payload = CASE id \
+         WHEN 1 THEN ROW(1,1)::dfe_pair WHEN 2 THEN ROW(1,NULL)::dfe_pair \
+         WHEN 3 THEN ROW(NULL,NULL)::dfe_pair ELSE NULL::dfe_pair END, \
+         grp = 2, scalar = 42, keep = true",
+        "DELETE FROM dfe_composite WHERE id = 2",
+        "DELETE FROM dfe_composite WHERE id = 3",
+        "DELETE FROM dfe_composite WHERE id = 4",
+        "DELETE FROM dfe_composite WHERE id = 1",
+        "INSERT INTO dfe_composite VALUES \
+         (5,1,ROW(NULL,NULL),NULL,true), (6,2,NULL,60,false)",
+        "DELETE FROM dfe_composite",
+    ] {
+        db.execute(mutation).await;
+        db.execute_seq(&[
+            "LOAD 'pg_trickle'",
+            "SET pg_trickle.refresh_strategy = 'differential'",
+            "SET pg_trickle.differential_max_change_ratio = 0",
+            // Exercise the generated SQL rather than the separate vector executor.
+            "SET pg_trickle.aggregate_fast_path = off",
+            "SELECT pgtrickle.refresh_stream_table('dfe_composite_st')",
+        ])
+        .await;
+        assert_differential_mode(&db, "dfe_composite_st").await;
+        let (action, status, fallback, delta_rows): (String, String, bool, i64) = sqlx::query_as(
+            "SELECT h.action, h.status, h.was_full_fallback, h.delta_row_count \
+             FROM pgtrickle.pgt_refresh_history h \
+             JOIN pgtrickle.pgt_stream_tables st USING (pgt_id) \
+             WHERE st.pgt_name = 'dfe_composite_st' \
+             ORDER BY h.refresh_id DESC LIMIT 1",
+        )
+        .fetch_one(&db.pool)
+        .await
+        .expect("refresh history");
+        assert_eq!(action, "DIFFERENTIAL", "mutation: {mutation}");
+        assert_eq!(status, "COMPLETED", "mutation: {mutation}");
+        assert!(!fallback, "FULL fallback after: {mutation}");
+        assert!(delta_rows > 0, "no differential output after: {mutation}");
+        db.assert_st_matches_query("dfe_composite_st", query).await;
+    }
+}
+
+#[tokio::test]
+async fn test_diff_full_equivalence_count_composite_p5() {
+    assert_composite_count_equivalence(
+        "SELECT COUNT(payload) AS n, COUNT(scalar) AS scalar_n, COUNT(*) AS rows_n \
+         FROM dfe_composite",
+    )
+    .await;
+}
+
+#[tokio::test]
+async fn test_diff_full_equivalence_count_composite_general() {
+    // FILTER and expression arguments disqualify P5; also exercise grouped empty input.
+    assert_composite_count_equivalence(
+        "SELECT grp, COUNT(payload) AS n, \
+         COUNT(payload) FILTER (WHERE keep) AS filtered_n, \
+         COUNT(CASE WHEN keep THEN payload ELSE NULL::dfe_pair END) AS expression_n, \
+         COUNT(scalar) AS scalar_n, COUNT(*) AS rows_n, \
+         COUNT(scalar) FILTER (WHERE keep) AS filtered_scalar_n, \
+         COUNT(*) FILTER (WHERE keep) AS filtered_rows_n \
+         FROM dfe_composite GROUP BY grp",
+    )
+    .await;
+}
+
+// ═══════════════════════════════════════════════════════════════════════
+// AGGREGATE: AVG / STDDEV
+// ═══════════════════════════════════════════════════════════════════════
+
+#[tokio::test]
+async fn test_diff_full_equivalence_aggregate_avg_stddev() {
+    let db = E2eDb::new().await.with_extension().await;
+    db.execute("CREATE TABLE dfe_avg (id SERIAL PRIMARY KEY, grp TEXT, val NUMERIC)")
+        .await;
+    db.execute("INSERT INTO dfe_avg (grp, val) VALUES ('a',10),('a',20),('b',100),('b',200)")
+        .await;
+
+    let q = "SELECT grp, ROUND(AVG(val)::NUMERIC, 4) AS avg_v, \
+                    ROUND(STDDEV(val)::NUMERIC, 4) AS std_v \
+             FROM dfe_avg GROUP BY grp";
+    db.create_st("dfe_avg_st", q, "1m", "DIFFERENTIAL").await;
+    db.assert_st_matches_query("dfe_avg_st", q).await;
+    assert_differential_mode(&db, "dfe_avg_st").await;
+
+    // Cycle 1: add to group a
+    db.execute("INSERT INTO dfe_avg (grp, val) VALUES ('a', 30)")
+        .await;
+    db.refresh_st("dfe_avg_st").await;
+    db.assert_st_matches_query("dfe_avg_st", q).await;
+    assert_differential_mode(&db, "dfe_avg_st").await;
+
+    // Cycle 2: update a value
+    db.execute("UPDATE dfe_avg SET val = 15 WHERE grp = 'a' AND val = 10")
+        .await;
+    db.refresh_st("dfe_avg_st").await;
+    db.assert_st_matches_query("dfe_avg_st", q).await;
+    assert_differential_mode(&db, "dfe_avg_st").await;
+
+    // Cycle 3: add new group
+    db.execute("INSERT INTO dfe_avg (grp, val) VALUES ('c', 50), ('c', 60)")
+        .await;
+    db.refresh_st("dfe_avg_st").await;
+    db.assert_st_matches_query("dfe_avg_st", q).await;
+    assert_differential_mode(&db, "dfe_avg_st").await;
+
+    // Cycle 4: delete a group entirely
+    db.execute("DELETE FROM dfe_avg WHERE grp = 'c'").await;
+    db.refresh_st("dfe_avg_st").await;
+    db.assert_st_matches_query("dfe_avg_st", q).await;
+    assert_differential_mode(&db, "dfe_avg_st").await;
+
+    // Cycle 5: mixed
+    db.execute("INSERT INTO dfe_avg (grp, val) VALUES ('b', 150)")
+        .await;
+    db.execute("UPDATE dfe_avg SET grp = 'b' WHERE grp = 'a' AND val = 30")
+        .await;
+    db.refresh_st("dfe_avg_st").await;
+    db.assert_st_matches_query("dfe_avg_st", q).await;
+    assert_differential_mode(&db, "dfe_avg_st").await;
+}
+
+// ═══════════════════════════════════════════════════════════════════════
+// WINDOW: ROW_NUMBER
+// ═══════════════════════════════════════════════════════════════════════
+
+#[tokio::test]
+async fn test_diff_full_equivalence_window_row_number() {
+    let db = E2eDb::new().await.with_extension().await;
+    db.execute("CREATE TABLE dfe_wrn (id SERIAL PRIMARY KEY, dept TEXT, salary INT)")
+        .await;
+    db.execute(
+        "INSERT INTO dfe_wrn (dept, salary) VALUES ('eng',90000),('eng',80000),('hr',70000)",
+    )
+    .await;
+
+    let q = "SELECT id, dept, salary, \
+                    ROW_NUMBER() OVER (PARTITION BY dept ORDER BY salary DESC) AS rn \
+             FROM public.dfe_wrn";
+    db.create_st("dfe_wrn_st", q, "1m", "DIFFERENTIAL").await;
+    db.assert_st_matches_query("dfe_wrn_st", q).await;
+
+    // Cycle 1: insert displaces row numbers
+    db.execute("INSERT INTO dfe_wrn (dept, salary) VALUES ('eng', 95000)")
+        .await;
+    db.refresh_st("dfe_wrn_st").await;
+    db.assert_st_matches_query("dfe_wrn_st", q).await;
+
+    // Cycle 2: update salary — reorderings
+    db.execute("UPDATE dfe_wrn SET salary = 85000 WHERE dept = 'eng' AND salary = 80000")
+        .await;
+    db.refresh_st("dfe_wrn_st").await;
+    db.assert_st_matches_query("dfe_wrn_st", q).await;
+
+    // Cycle 3: add to new department
+    db.execute("INSERT INTO dfe_wrn (dept, salary) VALUES ('fin', 60000), ('fin', 65000)")
+        .await;
+    db.refresh_st("dfe_wrn_st").await;
+    db.assert_st_matches_query("dfe_wrn_st", q).await;
+
+    // Cycle 4: DELETE
+    db.execute("DELETE FROM dfe_wrn WHERE dept = 'hr'").await;
+    db.refresh_st("dfe_wrn_st").await;
+    db.assert_st_matches_query("dfe_wrn_st", q).await;
+
+    // Cycle 5: mixed across departments
+    db.execute("INSERT INTO dfe_wrn (dept, salary) VALUES ('hr', 72000)")
+        .await;
+    db.execute("DELETE FROM dfe_wrn WHERE dept = 'fin' AND salary = 60000")
+        .await;
+    db.refresh_st("dfe_wrn_st").await;
+    db.assert_st_matches_query("dfe_wrn_st", q).await;
+}
+
+// ═══════════════════════════════════════════════════════════════════════
+// WINDOW: RANK
+// ═══════════════════════════════════════════════════════════════════════
+
+#[tokio::test]
+async fn test_diff_full_equivalence_window_rank() {
+    let db = E2eDb::new().await.with_extension().await;
+    db.execute("CREATE TABLE dfe_wrnk (id SERIAL PRIMARY KEY, cat TEXT, score INT)")
+        .await;
+    db.execute("INSERT INTO dfe_wrnk (cat, score) VALUES ('a',10),('a',10),('a',8),('b',20)")
+        .await;
+
+    let q = "SELECT id, cat, score, \
+                    RANK() OVER (PARTITION BY cat ORDER BY score DESC) AS rnk, \
+                    DENSE_RANK() OVER (PARTITION BY cat ORDER BY score DESC) AS drnk \
+             FROM public.dfe_wrnk";
+    db.create_st("dfe_wrnk_st", q, "1m", "DIFFERENTIAL").await;
+    db.assert_st_matches_query("dfe_wrnk_st", q).await;
+
+    // Cycle 1: add a tie-breaking score
+    db.execute("INSERT INTO dfe_wrnk (cat, score) VALUES ('a', 10)")
+        .await;
+    db.refresh_st("dfe_wrnk_st").await;
+    db.assert_st_matches_query("dfe_wrnk_st", q).await;
+
+    // Cycle 2: change a score to break a tie (LIMIT in UPDATE is not supported by PostgreSQL;
+    // use a subquery to update exactly one of the tied rows).
+    db.execute(
+        "UPDATE dfe_wrnk SET score = 11 \
+         WHERE id = (SELECT MIN(id) FROM dfe_wrnk WHERE cat = 'a' AND score = 10)",
+    )
+    .await;
+    db.refresh_st("dfe_wrnk_st").await;
+    db.assert_st_matches_query("dfe_wrnk_st", q).await;
+
+    // Cycle 3: add rows to category b
+    db.execute("INSERT INTO dfe_wrnk (cat, score) VALUES ('b',20),('b',15)")
+        .await;
+    db.refresh_st("dfe_wrnk_st").await;
+    db.assert_st_matches_query("dfe_wrnk_st", q).await;
+
+    // Cycle 4: delete top-ranked (LIMIT in DELETE is not supported by PostgreSQL;
+    // use a subquery to delete exactly one row with score = 11).
+    db.execute(
+        "DELETE FROM dfe_wrnk WHERE id = \
+         (SELECT MIN(id) FROM dfe_wrnk WHERE cat = 'a' AND score = 11)",
+    )
+    .await;
+    db.refresh_st("dfe_wrnk_st").await;
+    db.assert_st_matches_query("dfe_wrnk_st", q).await;
+
+    // Cycle 5: cross-category changes
+    db.execute("INSERT INTO dfe_wrnk (cat, score) VALUES ('c', 5)")
+        .await;
+    db.execute("DELETE FROM dfe_wrnk WHERE cat = 'b' AND score = 15")
+        .await;
+    db.refresh_st("dfe_wrnk_st").await;
+    db.assert_st_matches_query("dfe_wrnk_st", q).await;
+}
+
+// ═══════════════════════════════════════════════════════════════════════
+// CTE (non-recursive)
+// ═══════════════════════════════════════════════════════════════════════
+
+#[tokio::test]
+async fn test_diff_full_equivalence_cte_non_recursive() {
+    let db = E2eDb::new().await.with_extension().await;
+    db.execute("CREATE TABLE dfe_cte_base (id INT PRIMARY KEY, grp TEXT, val INT)")
+        .await;
+    db.execute("INSERT INTO dfe_cte_base VALUES (1,'a',10),(2,'a',20),(3,'b',5),(4,'b',15)")
+        .await;
+
+    // Non-recursive CTE — referenced twice (aggregate + filter)
+    let q = "WITH totals AS (\
+               SELECT grp, SUM(val) AS tot FROM dfe_cte_base GROUP BY grp\
+             ) \
+             SELECT grp, tot FROM totals WHERE tot > 10";
+    db.create_st("dfe_cte_st", q, "1m", "DIFFERENTIAL").await;
+    db.assert_st_matches_query("dfe_cte_st", q).await;
+
+    // Cycle 1: push group b above threshold
+    db.execute("INSERT INTO dfe_cte_base VALUES (5,'b',5)")
+        .await;
+    db.refresh_st("dfe_cte_st").await;
+    db.assert_st_matches_query("dfe_cte_st", q).await;
+
+    // Cycle 2: pull group a below threshold
+    db.execute("DELETE FROM dfe_cte_base WHERE id IN (1,2)")
+        .await;
+    db.execute("INSERT INTO dfe_cte_base VALUES (6,'a',5)")
+        .await;
+    db.refresh_st("dfe_cte_st").await;
+    db.assert_st_matches_query("dfe_cte_st", q).await;
+
+    // Cycle 3: add new group
+    db.execute("INSERT INTO dfe_cte_base VALUES (7,'c',50)")
+        .await;
+    db.refresh_st("dfe_cte_st").await;
+    db.assert_st_matches_query("dfe_cte_st", q).await;
+
+    // Cycle 4: update value
+    db.execute("UPDATE dfe_cte_base SET val = 1 WHERE id = 6")
+        .await;
+    db.refresh_st("dfe_cte_st").await;
+    db.assert_st_matches_query("dfe_cte_st", q).await;
+
+    // Cycle 5: delete group c
+    db.execute("DELETE FROM dfe_cte_base WHERE grp = 'c'").await;
+    db.refresh_st("dfe_cte_st").await;
+    db.assert_st_matches_query("dfe_cte_st", q).await;
+}
+
+// ═══════════════════════════════════════════════════════════════════════
+// INTERSECT
+// ═══════════════════════════════════════════════════════════════════════
+
+#[tokio::test]
+async fn test_diff_full_equivalence_intersect() {
+    let db = E2eDb::new().await.with_extension().await;
+    db.execute("CREATE TABLE dfe_isect_l (id SERIAL PRIMARY KEY, v INT)")
+        .await;
+    db.execute("CREATE TABLE dfe_isect_r (id SERIAL PRIMARY KEY, v INT)")
+        .await;
+    db.execute("INSERT INTO dfe_isect_l (v) VALUES (1),(2),(3),(4)")
+        .await;
+    db.execute("INSERT INTO dfe_isect_r (v) VALUES (2),(3),(5)")
+        .await;
+
+    let q = "SELECT v FROM dfe_isect_l INTERSECT SELECT v FROM dfe_isect_r";
+    db.create_st("dfe_isect_st", q, "1m", "AUTO").await;
+    let (_, mode, _, _) = db.pgt_status("dfe_isect_st").await;
+    assert_eq!(mode, "DIFFERENTIAL");
+    db.assert_st_matches_query("dfe_isect_st", q).await;
+
+    // Cycle 1: add to both to expand intersection
+    db.execute("INSERT INTO dfe_isect_l (v) VALUES (5)").await;
+    db.refresh_st("dfe_isect_st").await;
+    db.assert_st_matches_query("dfe_isect_st", q).await;
+
+    // Cycle 2: remove from right to shrink
+    db.execute("DELETE FROM dfe_isect_r WHERE v = 2").await;
+    db.refresh_st("dfe_isect_st").await;
+    db.assert_st_matches_query("dfe_isect_st", q).await;
+
+    // Cycle 3: add new value present in both
+    db.execute("INSERT INTO dfe_isect_l (v) VALUES (6)").await;
+    db.execute("INSERT INTO dfe_isect_r (v) VALUES (6)").await;
+    db.refresh_st("dfe_isect_st").await;
+    db.assert_st_matches_query("dfe_isect_st", q).await;
+
+    // Cycle 4: remove from left
+    db.execute("DELETE FROM dfe_isect_l WHERE v = 3").await;
+    db.refresh_st("dfe_isect_st").await;
+    db.assert_st_matches_query("dfe_isect_st", q).await;
+
+    // Cycle 5: clear right side
+    db.execute("DELETE FROM dfe_isect_r").await;
+    db.refresh_st("dfe_isect_st").await;
+    db.assert_st_matches_query("dfe_isect_st", q).await;
+}
+
+// ═══════════════════════════════════════════════════════════════════════
+// EXCEPT
+// ═══════════════════════════════════════════════════════════════════════
+
+#[tokio::test]
+async fn test_diff_full_equivalence_except() {
+    let db = E2eDb::new().await.with_extension().await;
+    db.execute("CREATE TABLE dfe_exc_l (id SERIAL PRIMARY KEY, v INT)")
+        .await;
+    db.execute("CREATE TABLE dfe_exc_r (id SERIAL PRIMARY KEY, v INT)")
+        .await;
+    db.execute("INSERT INTO dfe_exc_l (v) VALUES (1),(2),(3),(4)")
+        .await;
+    db.execute("INSERT INTO dfe_exc_r (v) VALUES (2),(4)").await;
+
+    let q = "SELECT v FROM dfe_exc_l EXCEPT SELECT v FROM dfe_exc_r";
+    db.create_st("dfe_exc_st", q, "1m", "AUTO").await;
+    let (_, mode, _, _) = db.pgt_status("dfe_exc_st").await;
+    assert_eq!(mode, "FULL");
+    db.assert_st_matches_query("dfe_exc_st", q).await;
+
+    // Cycle 1: add to right causes exclusion
+    db.execute("INSERT INTO dfe_exc_r (v) VALUES (1)").await;
+    db.refresh_st("dfe_exc_st").await;
+    db.assert_st_matches_query("dfe_exc_st", q).await;
+
+    // Cycle 2: add to left
+    db.execute("INSERT INTO dfe_exc_l (v) VALUES (5)").await;
+    db.refresh_st("dfe_exc_st").await;
+    db.assert_st_matches_query("dfe_exc_st", q).await;
+
+    // Cycle 3: remove from right restores exclusion
+    db.execute("DELETE FROM dfe_exc_r WHERE v = 2").await;
+    db.refresh_st("dfe_exc_st").await;
+    db.assert_st_matches_query("dfe_exc_st", q).await;
+
+    // Cycle 4: add and immediately exclude
+    db.execute("INSERT INTO dfe_exc_l (v) VALUES (6)").await;
+    db.execute("INSERT INTO dfe_exc_r (v) VALUES (6)").await;
+    db.refresh_st("dfe_exc_st").await;
+    db.assert_st_matches_query("dfe_exc_st", q).await;
+
+    // Cycle 5: clear right — all left rows should appear
+    db.execute("DELETE FROM dfe_exc_r").await;
+    db.refresh_st("dfe_exc_st").await;
+    db.assert_st_matches_query("dfe_exc_st", q).await;
+}
+
+// ═══════════════════════════════════════════════════════════════════════
+// DISTINCT ON
+// ═══════════════════════════════════════════════════════════════════════
+
+#[tokio::test]
+async fn test_diff_full_equivalence_distinct_on() {
+    let db = E2eDb::new().await.with_extension().await;
+    db.execute("CREATE TABLE dfe_dis (id SERIAL PRIMARY KEY, cat TEXT, score INT, label TEXT)")
+        .await;
+    db.execute(
+        "INSERT INTO dfe_dis (cat, score, label) VALUES ('a',10,'x'),('a',20,'y'),('b',5,'z')",
+    )
+    .await;
+
+    // DISTINCT ON keeps the highest-scored row per category
+    let q = "SELECT DISTINCT ON (cat) id, cat, score, label \
+             FROM dfe_dis ORDER BY cat, score DESC";
+    db.create_st("dfe_dis_st", q, "1m", "DIFFERENTIAL").await;
+    db.assert_st_matches_query("dfe_dis_st", q).await;
+
+    // Cycle 1: add higher-scored row displaces winner
+    db.execute("INSERT INTO dfe_dis (cat, score, label) VALUES ('a', 30, 'w')")
+        .await;
+    db.refresh_st("dfe_dis_st").await;
+    db.assert_st_matches_query("dfe_dis_st", q).await;
+
+    // Cycle 2: add to b
+    db.execute("INSERT INTO dfe_dis (cat, score, label) VALUES ('b', 15, 'bhi')")
+        .await;
+    db.refresh_st("dfe_dis_st").await;
+    db.assert_st_matches_query("dfe_dis_st", q).await;
+
+    // Cycle 3: replace the current winner of 'a' with a new one
+    // (Deleting the winner without a replacement requires a full-table
+    // re-scan for the partition which the Window operator doesn't do.)
+    db.execute("DELETE FROM dfe_dis WHERE cat = 'a' AND score = 30")
+        .await;
+    db.execute("INSERT INTO dfe_dis (cat, score, label) VALUES ('a', 25, 'comeback')")
+        .await;
+    db.refresh_st("dfe_dis_st").await;
+    db.assert_st_matches_query("dfe_dis_st", q).await;
+
+    // Cycle 4: add new category
+    db.execute("INSERT INTO dfe_dis (cat, score, label) VALUES ('c', 7, 'c1'), ('c', 3, 'c2')")
+        .await;
+    db.refresh_st("dfe_dis_st").await;
+    db.assert_st_matches_query("dfe_dis_st", q).await;
+
+    // Cycle 5: delete all of category c
+    db.execute("DELETE FROM dfe_dis WHERE cat = 'c'").await;
+    db.refresh_st("dfe_dis_st").await;
+    db.assert_st_matches_query("dfe_dis_st", q).await;
+}
+
+// ═══════════════════════════════════════════════════════════════════════
+// HAVING clause
+// ═══════════════════════════════════════════════════════════════════════
+
+#[tokio::test]
+async fn test_diff_full_equivalence_having_clause() {
+    let db = E2eDb::new().await.with_extension().await;
+    db.execute("CREATE TABLE dfe_hav (id SERIAL PRIMARY KEY, region TEXT, sales INT)")
+        .await;
+    db.execute("INSERT INTO dfe_hav (region, sales) VALUES ('north',100),('north',200),('south',50),('east',300)")
+        .await;
+
+    let q = "SELECT region, SUM(sales) AS tot, COUNT(*) AS cnt \
+             FROM dfe_hav \
+             GROUP BY region \
+             HAVING SUM(sales) > 150";
+    db.create_st("dfe_hav_st", q, "1m", "DIFFERENTIAL").await;
+    db.assert_st_matches_query("dfe_hav_st", q).await;
+
+    // Cycle 1: push south above threshold
+    db.execute("INSERT INTO dfe_hav (region, sales) VALUES ('south', 200)")
+        .await;
+    db.refresh_st("dfe_hav_st").await;
+    db.assert_st_matches_query("dfe_hav_st", q).await;
+
+    // Cycle 2: pull north below threshold
+    db.execute("DELETE FROM dfe_hav WHERE region = 'north' AND sales = 200")
+        .await;
+    db.execute("UPDATE dfe_hav SET sales = 10 WHERE region = 'north' AND sales = 100")
+        .await;
+    db.refresh_st("dfe_hav_st").await;
+    db.assert_st_matches_query("dfe_hav_st", q).await;
+
+    // Cycle 3: add new region
+    db.execute("INSERT INTO dfe_hav (region, sales) VALUES ('west',160)")
+        .await;
+    db.refresh_st("dfe_hav_st").await;
+    db.assert_st_matches_query("dfe_hav_st", q).await;
+
+    // Cycle 4: delete east entirely — disappears from result
+    db.execute("DELETE FROM dfe_hav WHERE region = 'east'")
+        .await;
+    db.refresh_st("dfe_hav_st").await;
+    db.assert_st_matches_query("dfe_hav_st", q).await;
+
+    // Cycle 5: increase north back above threshold
+    db.execute("INSERT INTO dfe_hav (region, sales) VALUES ('north', 500)")
+        .await;
+    db.refresh_st("dfe_hav_st").await;
+    db.assert_st_matches_query("dfe_hav_st", q).await;
+}
+
+#[tokio::test]
+async fn test_diff_full_equivalence_having_unknown_transitions() {
+    let db = E2eDb::new().await.with_extension().await;
+    db.execute("CREATE TABLE dfe_hav_unknown (id INT PRIMARY KEY, grp INT, val INT)")
+        .await;
+    db.execute(
+        "INSERT INTO dfe_hav_unknown VALUES \
+         (1,1,1),(2,2,-1),(3,3,NULL),(4,4,2),(5,4,2)",
+    )
+    .await;
+
+    let query = "SELECT grp, SUM(val) AS s FROM dfe_hav_unknown \
+                 GROUP BY grp HAVING SUM(val) > 0";
+    db.create_st("dfe_hav_sum", query, "1m", "DIFFERENTIAL")
+        .await;
+    db.assert_st_matches_query("dfe_hav_sum", query).await;
+
+    for mutation in [
+        "UPDATE dfe_hav_unknown SET val=NULL WHERE id=1", // TRUE → UNKNOWN
+        "INSERT INTO dfe_hav_unknown VALUES (6,2,3)",     // FALSE → TRUE
+        "UPDATE dfe_hav_unknown SET val=-5 WHERE id=2",   // TRUE → FALSE
+        "UPDATE dfe_hav_unknown SET val=NULL WHERE id=6", // still FALSE
+        "UPDATE dfe_hav_unknown SET val=NULL WHERE id=2", // FALSE → UNKNOWN
+        "UPDATE dfe_hav_unknown SET val=-1 WHERE id=6",   // UNKNOWN → FALSE
+        "UPDATE dfe_hav_unknown SET val=NULL WHERE id=6", // FALSE → UNKNOWN
+        "UPDATE dfe_hav_unknown SET val=3 WHERE id=3",    // UNKNOWN → TRUE
+        "UPDATE dfe_hav_unknown SET grp=5 WHERE id=3",    // move a qualifying group
+        "DELETE FROM dfe_hav_unknown WHERE grp=4",        // remove a qualifying group
+        "UPDATE dfe_hav_unknown SET val=NULL",            // TRUE → UNKNOWN
+        "DELETE FROM dfe_hav_unknown",                    // empty input
+        "INSERT INTO dfe_hav_unknown VALUES (6,6,5)",     // repopulate
+    ] {
+        db.execute(mutation).await;
+        db.refresh_st("dfe_hav_sum").await;
+        db.assert_st_matches_query("dfe_hav_sum", query).await;
+        assert_differential_mode(&db, "dfe_hav_sum").await;
+        let differential_completed: bool = db
+            .query_scalar(
+                "SELECT h.action = 'DIFFERENTIAL' AND h.status = 'COMPLETED' \
+                 AND NOT h.was_full_fallback \
+                 FROM pgtrickle.pgt_refresh_history h \
+                 JOIN pgtrickle.pgt_stream_tables st USING (pgt_id) \
+                 WHERE st.pgt_name = 'dfe_hav_sum' \
+                 ORDER BY h.refresh_id DESC LIMIT 1",
+            )
+            .await;
+        assert!(
+            differential_completed,
+            "no differential refresh after {mutation}"
+        );
+    }
+}
+
+#[tokio::test]
+async fn test_diff_full_equivalence_having_unknown_aggregate_shapes() {
+    let db = E2eDb::new().await.with_extension().await;
+    db.execute("CREATE TABLE dfe_hav_shapes (id INT PRIMARY KEY, grp INT, val INT)")
+        .await;
+    db.execute(
+        "INSERT INTO dfe_hav_shapes VALUES \
+         (1,1,1),(2,2,-1),(3,3,NULL),(4,4,2),(5,4,2)",
+    )
+    .await;
+
+    let queries = [
+        (
+            "dfe_hav_avg",
+            "SELECT grp, AVG(val) AS a FROM dfe_hav_shapes \
+             GROUP BY grp HAVING AVG(val) > 0",
+        ),
+        (
+            "dfe_hav_and_or",
+            "SELECT grp, SUM(val) AS s, COUNT(*) AS c FROM dfe_hav_shapes \
+             GROUP BY grp \
+             HAVING (SUM(val) > 0 AND COUNT(*) > 0) OR COUNT(*) >= 2",
+        ),
+    ];
+    for (name, query) in queries {
+        db.create_st(name, query, "1m", "DIFFERENTIAL").await;
+        db.assert_st_matches_query(name, query).await;
+    }
+
+    db.execute("UPDATE dfe_hav_shapes SET val=NULL WHERE id=1")
+        .await;
+    for (name, query) in queries {
+        db.refresh_st(name).await;
+        db.assert_st_matches_query(name, query).await;
+        assert_differential_mode(&db, name).await;
+    }
+
+    db.execute("CREATE TABLE dfe_hav_scalar_unknown (id INT PRIMARY KEY, val INT)")
+        .await;
+    db.execute("INSERT INTO dfe_hav_scalar_unknown VALUES (1,1)")
+        .await;
+    let scalar_query = "SELECT SUM(val) AS s FROM dfe_hav_scalar_unknown HAVING SUM(val) > 0";
+    db.create_st("dfe_hav_scalar", scalar_query, "1m", "DIFFERENTIAL")
+        .await;
+    db.assert_st_matches_query("dfe_hav_scalar", scalar_query)
+        .await;
+    db.execute("UPDATE dfe_hav_scalar_unknown SET val=NULL")
+        .await;
+    db.refresh_st("dfe_hav_scalar").await;
+    db.assert_st_matches_query("dfe_hav_scalar", scalar_query)
+        .await;
+    assert_differential_mode(&db, "dfe_hav_scalar").await;
+}
+
+// ═══════════════════════════════════════════════════════════════════════
+// THREE-TABLE JOIN
+// ═══════════════════════════════════════════════════════════════════════
+
+#[tokio::test]
+async fn test_diff_full_equivalence_three_table_join() {
+    let db = E2eDb::new().await.with_extension().await;
+    db.execute("CREATE TABLE dfe_3t_c (cid INT PRIMARY KEY, cname TEXT)")
+        .await;
+    db.execute("CREATE TABLE dfe_3t_o (oid INT PRIMARY KEY, cid INT, amount INT)")
+        .await;
+    db.execute("CREATE TABLE dfe_3t_l (lid INT PRIMARY KEY, oid INT, qty INT)")
+        .await;
+    // Seed with enough groups (4) to prevent aggregate saturation fallback
+    // when inserting across all three tables in a single cycle (3 changes < 4 groups).
+    db.execute("INSERT INTO dfe_3t_c VALUES (1,'Alice'),(2,'Bob'),(4,'Dan'),(5,'Eve')")
+        .await;
+    db.execute("INSERT INTO dfe_3t_o VALUES (10,1,500),(11,2,300),(13,4,200),(14,5,100)")
+        .await;
+    db.execute(
+        "INSERT INTO dfe_3t_l VALUES (100,10,2),(101,10,3),(102,11,1),(106,13,4),(107,14,2)",
+    )
+    .await;
+
+    let q = "SELECT c.cname, o.oid, SUM(l.qty) AS total_qty \
+             FROM dfe_3t_c c \
+             JOIN dfe_3t_o o ON o.cid = c.cid \
+             JOIN dfe_3t_l l ON l.oid = o.oid \
+             GROUP BY c.cname, o.oid";
+    db.create_st("dfe_3t_st", q, "1m", "DIFFERENTIAL").await;
+    db.assert_st_matches_query("dfe_3t_st", q).await;
+    assert_differential_mode(&db, "dfe_3t_st").await;
+
+    // Cycle 1: add new customer + order + lineitem (3 changes < 4 groups)
+    db.execute("INSERT INTO dfe_3t_c VALUES (3,'Carol')").await;
+    db.execute("INSERT INTO dfe_3t_o VALUES (12,3,800)").await;
+    db.execute("INSERT INTO dfe_3t_l VALUES (103,12,5)").await;
+    db.refresh_st("dfe_3t_st").await;
+    db.assert_st_matches_query("dfe_3t_st", q).await;
+    assert_differential_mode(&db, "dfe_3t_st").await;
+
+    // Cycle 2: add lineitem to existing order
+    db.execute("INSERT INTO dfe_3t_l VALUES (104,11,4)").await;
+    db.refresh_st("dfe_3t_st").await;
+    db.assert_st_matches_query("dfe_3t_st", q).await;
+    assert_differential_mode(&db, "dfe_3t_st").await;
+
+    // Cycle 3: update lineitem qty
+    db.execute("UPDATE dfe_3t_l SET qty = 10 WHERE lid = 100")
+        .await;
+    db.refresh_st("dfe_3t_st").await;
+    db.assert_st_matches_query("dfe_3t_st", q).await;
+    assert_differential_mode(&db, "dfe_3t_st").await;
+
+    // Cycle 4: delete an order and its lineitems
+    db.execute("DELETE FROM dfe_3t_l WHERE oid = 11").await;
+    db.execute("DELETE FROM dfe_3t_o WHERE oid = 11").await;
+    db.refresh_st("dfe_3t_st").await;
+    db.assert_st_matches_query("dfe_3t_st", q).await;
+    assert_differential_mode(&db, "dfe_3t_st").await;
+
+    // Cycle 5: mixed insert + delete across lineitems and orders
+    db.execute("INSERT INTO dfe_3t_l VALUES (105,10,1)").await;
+    db.execute("DELETE FROM dfe_3t_l WHERE lid = 103").await;
+    db.refresh_st("dfe_3t_st").await;
+    db.assert_st_matches_query("dfe_3t_st", q).await;
+    assert_differential_mode(&db, "dfe_3t_st").await;
+}
+
+// ═══════════════════════════════════════════════════════════════════════
+// LATERAL SUBQUERY
+// ═══════════════════════════════════════════════════════════════════════
+
+#[tokio::test]
+async fn test_diff_full_equivalence_lateral_subquery() {
+    let db = E2eDb::new().await.with_extension().await;
+    db.execute("CREATE TABLE dfe_lat_dept (id INT PRIMARY KEY, name TEXT)")
+        .await;
+    db.execute(
+        "CREATE TABLE dfe_lat_emp (id INT PRIMARY KEY, dept_id INT, salary INT, emp_name TEXT)",
+    )
+    .await;
+    db.execute("INSERT INTO dfe_lat_dept VALUES (1,'Eng'),(2,'Sales'),(3,'HR')")
+        .await;
+    db.execute(
+        "INSERT INTO dfe_lat_emp VALUES \
+         (10,1,100,'Alice'),(11,1,120,'Bob'),(12,2,90,'Carol'),\
+         (13,2,110,'Dave'),(14,3,80,'Eve')",
+    )
+    .await;
+
+    let q = "SELECT d.name, top.emp_name, top.salary \
+             FROM dfe_lat_dept d, \
+             LATERAL (SELECT e.emp_name, e.salary \
+                      FROM dfe_lat_emp e \
+                      WHERE e.dept_id = d.id \
+                      ORDER BY e.salary DESC LIMIT 2) top";
+    db.create_st("dfe_lat_st", q, "1m", "AUTO").await;
+    let (_, mode, _, _) = db.pgt_status("dfe_lat_st").await;
+    assert_eq!(mode, "FULL");
+    db.assert_st_matches_query("dfe_lat_st", q).await;
+
+    // Cycle 1: INSERT new high-salary employee → enters top-2
+    db.execute("INSERT INTO dfe_lat_emp VALUES (15,1,200,'Frank')")
+        .await;
+    db.refresh_st("dfe_lat_st").await;
+    db.assert_st_matches_query("dfe_lat_st", q).await;
+
+    // Cycle 2: UPDATE salary → reorder within department
+    db.execute("UPDATE dfe_lat_emp SET salary = 300 WHERE id = 14")
+        .await;
+    db.refresh_st("dfe_lat_st").await;
+    db.assert_st_matches_query("dfe_lat_st", q).await;
+
+    // Cycle 3: DELETE top employee from Eng → next one enters
+    db.execute("DELETE FROM dfe_lat_emp WHERE id = 15").await;
+    db.refresh_st("dfe_lat_st").await;
+    db.assert_st_matches_query("dfe_lat_st", q).await;
+
+    // Cycle 4: INSERT + DELETE in same cycle
+    db.execute("INSERT INTO dfe_lat_emp VALUES (16,3,150,'Grace')")
+        .await;
+    db.execute("DELETE FROM dfe_lat_emp WHERE id = 12").await;
+    db.refresh_st("dfe_lat_st").await;
+    db.assert_st_matches_query("dfe_lat_st", q).await;
+
+    // Cycle 5: UPDATE department → employee moves between departments
+    db.execute("UPDATE dfe_lat_emp SET dept_id = 2 WHERE id = 10")
+        .await;
+    db.refresh_st("dfe_lat_st").await;
+    db.assert_st_matches_query("dfe_lat_st", q).await;
+}
+
+// ═══════════════════════════════════════════════════════════════════════
+// TopK (ORDER BY + LIMIT)
+// ═══════════════════════════════════════════════════════════════════════
+
+#[tokio::test]
+async fn test_diff_full_equivalence_topk() {
+    let db = E2eDb::new().await.with_extension().await;
+    db.execute("CREATE TABLE dfe_topk (id INT PRIMARY KEY, score INT, label TEXT)")
+        .await;
+    db.execute(
+        "INSERT INTO dfe_topk VALUES \
+         (1,50,'a'),(2,30,'b'),(3,90,'c'),(4,10,'d'),(5,70,'e'),(6,80,'f')",
+    )
+    .await;
+
+    let q = "SELECT id, score, label FROM dfe_topk ORDER BY score DESC LIMIT 3";
+    db.create_st("dfe_topk_st", q, "1m", "DIFFERENTIAL").await;
+    db.assert_st_matches_query("dfe_topk_st", q).await;
+    assert_differential_mode(&db, "dfe_topk_st").await;
+
+    // Cycle 1: INSERT new row that enters top-3
+    db.execute("INSERT INTO dfe_topk VALUES (7,95,'g')").await;
+    db.refresh_st("dfe_topk_st").await;
+    db.assert_st_matches_query("dfe_topk_st", q).await;
+    assert_differential_mode(&db, "dfe_topk_st").await;
+
+    // Cycle 2: UPDATE score of non-top row to make it enter top-3
+    db.execute("UPDATE dfe_topk SET score = 100 WHERE id = 4")
+        .await;
+    db.refresh_st("dfe_topk_st").await;
+    db.assert_st_matches_query("dfe_topk_st", q).await;
+    assert_differential_mode(&db, "dfe_topk_st").await;
+
+    // Cycle 3: DELETE a top-3 row → next one enters
+    db.execute("DELETE FROM dfe_topk WHERE id = 4").await;
+    db.refresh_st("dfe_topk_st").await;
+    db.assert_st_matches_query("dfe_topk_st", q).await;
+    assert_differential_mode(&db, "dfe_topk_st").await;
+
+    // Cycle 4: UPDATE score of top row to drop below threshold
+    db.execute("UPDATE dfe_topk SET score = 1 WHERE id = 7")
+        .await;
+    db.refresh_st("dfe_topk_st").await;
+    db.assert_st_matches_query("dfe_topk_st", q).await;
+    assert_differential_mode(&db, "dfe_topk_st").await;
+
+    // Cycle 5: mixed INSERT + DELETE
+    db.execute("INSERT INTO dfe_topk VALUES (8,85,'h')").await;
+    db.execute("DELETE FROM dfe_topk WHERE id = 3").await;
+    db.refresh_st("dfe_topk_st").await;
+    db.assert_st_matches_query("dfe_topk_st", q).await;
+    assert_differential_mode(&db, "dfe_topk_st").await;
+}
+
+#[tokio::test]
+async fn test_diff_full_equivalence_exists_and_not_exists_simultaneous_changes() {
+    let db = E2eDb::new().await.with_extension().await;
+    db.execute(
+        "CREATE TABLE dfe_exists_left (\
+             id INT PRIMARY KEY, join_key INT, grp TEXT, amount INT\
+         )",
+    )
+    .await;
+    db.execute("CREATE TABLE dfe_exists_right (id INT PRIMARY KEY, join_key INT)")
+        .await;
+    db.execute(
+        "INSERT INTO dfe_exists_left VALUES \
+         (1, 1, 'duplicate', 10), (2, 1, 'duplicate', 10), \
+         (3, 2, 'last', 7), (4, 3, 'gone', 9), (5, NULL, 'null-key', 11)",
+    )
+    .await;
+    db.execute(
+        "INSERT INTO dfe_exists_right VALUES \
+         (101, 1), (102, 1), (201, 2), (301, 3)",
+    )
+    .await;
+
+    let exists_query = "SELECT l.grp, l.amount \
+                        FROM dfe_exists_left l \
+                        WHERE EXISTS (SELECT 1 FROM dfe_exists_right r \
+                                      WHERE r.join_key = l.join_key)";
+    let exists_aggregate_query = "SELECT grp, COUNT(*) AS row_count, \
+                                  SUM(amount) AS total_amount \
+                                  FROM dfe_exists_output_st GROUP BY grp";
+    let not_exists_query = "SELECT l.grp, COUNT(*) AS row_count, \
+                            SUM(l.amount) AS total_amount \
+                            FROM dfe_exists_left l \
+                            WHERE NOT EXISTS (SELECT 1 FROM dfe_exists_right r \
+                                              WHERE r.join_key = l.join_key) \
+                            GROUP BY l.grp";
+
+    db.execute(&format!(
+        "SELECT pgtrickle.create_stream_table(\
+             name => 'dfe_exists_output_st',\
+             query => $query${exists_query}$query$,\
+             schedule => '1h',\
+             refresh_mode => 'DIFFERENTIAL',\
+             initialize => false,\
+             orchestration_mode => 'EXTERNAL'\
+         )"
+    ))
+    .await;
+    db.create_st("dfe_not_exists_st", not_exists_query, "1h", "DIFFERENTIAL")
+        .await;
+
+    let exists_root = "public.dfe_exists_output_st";
+    let contract_digest = reference_clients::stream_contract_digest(&db.pool, exists_root).await;
+    let consumer = reference_clients::register(
+        &db.pool,
+        exists_root,
+        "dfe_exists_regression_consumer",
+        &contract_digest,
+    )
+    .await;
+    let graph_digest = reference_clients::graph_digest(&db.pool, exists_root).await;
+    reference_clients::refresh_graph(&db.pool, exists_root, &graph_digest).await;
+    db.assert_st_matches_query("dfe_exists_output_st", exists_query)
+        .await;
+    db.assert_st_matches_query("dfe_not_exists_st", not_exists_query)
+        .await;
+    // EXTERNAL tables are intentionally created unpopulated; this first graph
+    // refresh bootstraps their snapshot and is therefore a FULL refresh.
+    assert_differential_mode(&db, "dfe_not_exists_st").await;
+    db.create_st(
+        "dfe_exists_aggregate_st",
+        exists_aggregate_query,
+        "1h",
+        "DIFFERENTIAL",
+    )
+    .await;
+    db.assert_st_matches_query("dfe_exists_aggregate_st", exists_aggregate_query)
+        .await;
+    assert_differential_mode(&db, "dfe_exists_aggregate_st").await;
+
+    let mut tx = db.pool.begin().await.expect("begin baseline resnapshot");
+    let (resnapshot_token, log_head) =
+        reference_clients::begin_resnapshot(&mut *tx, &consumer.consumer_id).await;
+    assert!(log_head > 0, "initial refresh must publish a baseline");
+    assert_eq!(
+        reference_clients::ack_resnapshot(&mut *tx, &consumer.consumer_id, &resnapshot_token).await,
+        "ACTIVE"
+    );
+    tx.commit().await.expect("commit baseline resnapshot");
+
+    // Both inputs change before refresh. This includes a deleted left row and
+    // its last right match, plus duplicate left and right matches.
+    db.execute("DELETE FROM dfe_exists_left WHERE id = 4").await;
+    db.execute("INSERT INTO dfe_exists_left VALUES (6, 4, 'first', 5)")
+        .await;
+    db.execute("DELETE FROM dfe_exists_right WHERE id IN (101, 201, 301)")
+        .await;
+    db.execute("INSERT INTO dfe_exists_right VALUES (401, 4)")
+        .await;
+
+    let graph_digest = reference_clients::graph_digest(&db.pool, exists_root).await;
+    reference_clients::refresh_graph(&db.pool, exists_root, &graph_digest).await;
+    db.refresh_st("dfe_not_exists_st").await;
+    db.refresh_st("dfe_exists_aggregate_st").await;
+    db.assert_st_matches_query("dfe_exists_output_st", exists_query)
+        .await;
+    db.assert_st_matches_query("dfe_not_exists_st", not_exists_query)
+        .await;
+    db.assert_st_matches_query("dfe_exists_aggregate_st", exists_aggregate_query)
+        .await;
+    assert_differential_mode(&db, "dfe_exists_output_st").await;
+    assert_differential_mode(&db, "dfe_not_exists_st").await;
+    assert_differential_mode(&db, "dfe_exists_aggregate_st").await;
+
+    let batch = reference_clients::pending_batch(&db.pool, &consumer.consumer_id).await;
+    assert_eq!(batch.mode, "EXACT");
+    assert_eq!(batch.row_count, 3);
+    let delta_sql = format!(
+        "SELECT action, grp, amount FROM {} \
+         ORDER BY action, grp",
+        consumer.delta_relation
+    );
+    let deltas: Vec<(String, String, i32)> = sqlx::query_as(sqlx::AssertSqlSafe(delta_sql))
+        .fetch_all(&db.pool)
+        .await
+        .expect("read exact output-delta rows");
+    assert_eq!(
+        deltas,
+        vec![
+            ("DELETE".into(), "gone".into(), 9),
+            ("DELETE".into(), "last".into(), 7),
+            ("INSERT".into(), "first".into(), 5),
+        ]
+    );
+}
+
+#[tokio::test]
+async fn test_diff_aggregate_filter_above_projected_subquery_with_inner_where() {
+    let db = E2eDb::new().await.with_extension().await;
+    db.execute("CREATE TABLE dfe_projected_filter (id INT PRIMARY KEY, grp TEXT, amount INT)")
+        .await;
+    db.execute(
+        "INSERT INTO dfe_projected_filter VALUES \
+         (1, 'a', 10), (2, 'a', -5), (3, 'b', 0)",
+    )
+    .await;
+
+    let query = "SELECT projected.grp, COUNT(*) AS row_count, \
+                 SUM(projected.amount) AS total_amount \
+                 FROM (SELECT grp, amount FROM dfe_projected_filter \
+                       WHERE amount <> 0) projected \
+                 WHERE projected.amount > 0 \
+                 GROUP BY projected.grp";
+    db.create_st("dfe_projected_filter_st", query, "1h", "DIFFERENTIAL")
+        .await;
+    db.assert_st_matches_query("dfe_projected_filter_st", query)
+        .await;
+    assert_differential_mode(&db, "dfe_projected_filter_st").await;
+
+    db.execute("UPDATE dfe_projected_filter SET amount = 0 WHERE id = 1")
+        .await;
+    db.execute("UPDATE dfe_projected_filter SET amount = 8 WHERE id = 2")
+        .await;
+    db.execute("UPDATE dfe_projected_filter SET amount = 9 WHERE id = 3")
+        .await;
+    db.refresh_st("dfe_projected_filter_st").await;
+
+    db.assert_st_matches_query("dfe_projected_filter_st", query)
+        .await;
+    assert_differential_mode(&db, "dfe_projected_filter_st").await;
+}
+
+#[tokio::test]
+async fn test_diff_reinitialize_repairs_one_table_after_committed_source_change() {
+    let db = E2eDb::new().await.with_extension().await;
+    db.execute("CREATE TABLE dfe_repair_source (id INT PRIMARY KEY, value TEXT)")
+        .await;
+    db.execute("CREATE TABLE dfe_repair_unrelated_source (id INT PRIMARY KEY)")
+        .await;
+    db.execute("INSERT INTO dfe_repair_source VALUES (1, 'before')")
+        .await;
+    db.execute("INSERT INTO dfe_repair_unrelated_source VALUES (10)")
+        .await;
+    db.create_st(
+        "dfe_repair_st",
+        "SELECT id, value FROM dfe_repair_source",
+        "1h",
+        "DIFFERENTIAL",
+    )
+    .await;
+    db.create_st(
+        "dfe_repair_unrelated_st",
+        "SELECT id FROM dfe_repair_unrelated_source",
+        "1h",
+        "DIFFERENTIAL",
+    )
+    .await;
+
+    // Simulate an inconsistent stored snapshot while bypassing the direct-DML
+    // guard; reinitialize must rebuild it from the committed source data.
+    db.execute_seq(&[
+        "SET pg_trickle.internal_refresh = 'true'",
+        "DELETE FROM dfe_repair_st WHERE id = 1",
+        "RESET pg_trickle.internal_refresh",
+    ])
+    .await;
+    db.execute("INSERT INTO dfe_repair_source VALUES (2, 'committed')")
+        .await;
+    db.execute("SELECT pgtrickle.reinitialize_stream_table('dfe_repair_st')")
+        .await;
+    db.refresh_st("dfe_repair_st").await;
+
+    db.assert_st_matches_query("dfe_repair_st", "SELECT id, value FROM dfe_repair_source")
+        .await;
+    db.assert_st_matches_query(
+        "dfe_repair_unrelated_st",
+        "SELECT id FROM dfe_repair_unrelated_source",
+    )
+    .await;
+    assert_eq!(db.count("public.dfe_repair_st").await, 2);
+}
