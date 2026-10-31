@@ -1,0 +1,123 @@
+{
+  "base_url": "http://127.0.0.1:8094",
+  "checks": [
+    {
+      "check": "desktop-dark landing",
+      "status": "PASS",
+      "detail": "landing and CTA shown"
+    },
+    {
+      "check": "desktop-dark dashboard",
+      "status": "PASS",
+      "detail": "analytics panels shown"
+    },
+    {
+      "check": "range 24 h",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "check": "range 7 d",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "check": "range 30 d",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "check": "range 90 d",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "check": "hour grain",
+      "status": "PASS",
+      "detail": "24 h range"
+    },
+    {
+      "check": "theme dark to light",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "check": "theme light to dark",
+      "status": "PASS",
+      "detail": ""
+    },
+    {
+      "check": "desktop-dark shards",
+      "status": "PASS",
+      "detail": "shard card/counts loaded"
+    },
+    {
+      "check": "desktop-dark engine",
+      "status": "PASS",
+      "detail": "three stream-table rows loaded"
+    },
+    {
+      "check": "desktop-dark monitoring",
+      "status": "PASS",
+      "detail": "degraded health state visible"
+    },
+    {
+      "check": "desktop-dark reload",
+      "status": "PASS",
+      "detail": "dashboard content loaded"
+    },
+    {
+      "check": "desktop-dark no horizontal overflow",
+      "status": "PASS",
+      "detail": "1440px / 1440px viewport"
+    },
+    {
+      "check": "mobile-light landing",
+      "status": "PASS",
+      "detail": "landing and CTA shown"
+    },
+    {
+      "check": "mobile-light dashboard",
+      "status": "PASS",
+      "detail": "analytics panels shown"
+    },
+    {
+      "check": "mobile-light shards",
+      "status": "PASS",
+      "detail": "shard card/counts loaded"
+    },
+    {
+      "check": "mobile-light engine",
+      "status": "PASS",
+      "detail": "three stream-table rows loaded"
+    },
+    {
+      "check": "mobile-light monitoring",
+      "status": "PASS",
+      "detail": "degraded health state visible"
+    },
+    {
+      "check": "mobile-light reload",
+      "status": "PASS",
+      "detail": "dashboard content loaded"
+    },
+    {
+      "check": "mobile-light no horizontal overflow",
+      "status": "PASS",
+      "detail": "390px / 390px viewport"
+    }
+  ],
+  "browser_errors": [],
+  "screenshots": [
+    "desktop-dark-landing.png",
+    "desktop-dark-dashboard.png",
+    "desktop-dark-shards.png",
+    "desktop-dark-engine.png",
+    "desktop-dark-monitoring.png",
+    "mobile-light-landing.png",
+    "mobile-light-dashboard.png",
+    "mobile-light-shards.png",
+    "mobile-light-engine.png",
+    "mobile-light-monitoring.png"
+  ]
+}

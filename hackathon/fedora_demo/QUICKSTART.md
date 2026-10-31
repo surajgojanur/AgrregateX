@@ -2,16 +2,18 @@
 
 ## What this starts
 
-Nothing. This guide uses the already running, localhost-only AgrregateX demo at
-`http://127.0.0.1:8093/`. It does not start, stop, rebuild, seed, migrate, or
-write to a database. The verified setup has one PostgreSQL database and one
-configured shard named `default`.
+Nothing. This guide describes the localhost-only latest-main AgrregateX demo at
+`http://127.0.0.1:8094/` on the Fedora host used for the 2026-11-01
+verification. This loopback URL is not reachable from another computer. It
+does not start, stop, rebuild, seed, migrate, or write to a database. The
+verified setup has one PostgreSQL database and one configured shard named
+`default`. Port 8093 may serve a separate pre-existing checkout.
 
 ## Before judges arrive
 
-1. Open `http://127.0.0.1:8093/` and confirm the AgrregateX landing page loads.
+1. Open `http://127.0.0.1:8094/` and confirm the AgrregateX landing page loads.
 2. Select **OPEN DASHBOARD**. Confirm the URL becomes
-   `http://127.0.0.1:8093/app#/dashboard`.
+   `http://127.0.0.1:8094/app#/dashboard`.
 3. Confirm the tenant selector and the four analytics panels load.
 4. Use the sidebar to visit **Shards**, **pg_trickle Engine**, and **Live
    Monitoring**. Shards must show one `DEFAULT` shard, not A/B.
@@ -22,7 +24,8 @@ configured shard named `default`.
 Optional bounded API check (one request per endpoint, GET only):
 
 ```sh
-python3 hackathon/fedora_demo/smoke.py
+python3 hackathon/fedora_demo/smoke.py \
+  --base-url http://127.0.0.1:8094 --tenant-id 1
 ```
 
 The smoke tool only accepts loopback URLs and has a 4-second request timeout.

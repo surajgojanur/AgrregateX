@@ -2,7 +2,8 @@
 
 ## 0:00–0:30 — Problem and landing page
 
-**Show:** `http://127.0.0.1:8093/`.
+**Show:** `http://127.0.0.1:8094/` on the verified Fedora host. This is a
+loopback-only URL, not a public link.
 
 **Say:** “A multi-tenant commerce system has operational orders and repeated
 analytics requests. If every dashboard repeatedly scans the order table, the
@@ -56,7 +57,7 @@ mode. Point to the displayed **effective** mode and history.
 
 ## 2:15–2:45 — Shards
 
-**Show:** `/app#/shards`.
+**Show:** `http://127.0.0.1:8094/app#/shards`.
 
 **Say:** “This Fedora environment is configured with one healthy `DEFAULT`
 shard and 1,002 orders, including 1,000 seed orders. It does not pretend there
@@ -65,11 +66,11 @@ failure recovery are being prepared.”
 
 ## 2:45–3:20 — Live Monitoring
 
-**Show:** `/app#/monitoring`.
+**Show:** `http://127.0.0.1:8094/app#/monitoring`.
 
 **Say:** “Monitoring shows actual API process metrics and refresh data. It
-currently marks the shard degraded because the pg_trickle health-check view
-returns a permissions error, even though the database probe and Shards page
+currently marks the shard degraded because the pg_trickle health check cannot
+read `pgtrickle.pgt_dependencies`, even though the database probe and Shards page
 show the single database reachable and active. That mismatch is a real issue
 we have documented. Request metrics are process-local and reset on restart;
 CDC backlog is an estimate.”
