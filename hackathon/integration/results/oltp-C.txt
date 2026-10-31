@@ -1,0 +1,10 @@
+number of failed transactions: 0 (0.000%)
+latency average = 35922.344 ms
+tps = 0.111351 (without initial connection time)
+      stream_table       | missing_in_st | extra_in_st 
+-------------------------+---------------+-------------
+ st_day_product_status   |             0 |           0
+ st_day_category_status  |             0 |           0
+ st_hour_category_status |             0 |           0
+(3 rows)
+

@@ -1,0 +1,1 @@
+{"label": "diff-1s-idle", "samples": 15, "timeouts": 0, "insert": {"n": 15, "p50_ms": 941.1, "p95_ms": 1780.0, "max_ms": 1780.0}, "cancel": {"n": 15, "p50_ms": 1524.3, "p95_ms": 2234.1, "max_ms": 2234.1}}

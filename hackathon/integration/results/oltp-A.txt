@@ -1,0 +1,4 @@
+== ARM A_no_stream_tables
+number of failed transactions: 0 (0.000%)
+latency average = 1.627 ms
+tps = 2457.834634 (without initial connection time)

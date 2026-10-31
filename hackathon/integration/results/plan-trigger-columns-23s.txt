@@ -1,0 +1,152 @@
+2026-10-31 09:53:42.324 UTC [4003] LOG:  duration: 23009.393 ms  plan:
+	Query Text: MERGE INTO "ax"."st_day_product_status" AS st USING (WITH __pgt_cte_agg_delta_1 AS (
+	SELECT c."tenant_id" AS "tenant_id",
+	       c."utc_day" AS "utc_day",
+	       c."product_id" AS "product_id",
+	       c."status" AS "status",
+	       SUM(CASE WHEN c.action = 'I' THEN 1 ELSE 0 END)::bigint AS __ins_count,
+	       SUM(CASE WHEN c.action = 'D' THEN 1 ELSE 0 END)::bigint AS __del_count,
+	       SUM(CASE WHEN c.action = 'I' THEN 1 ELSE 0 END)::bigint AS "__ins_order_count",
+	       SUM(CASE WHEN c.action = 'D' THEN 1 ELSE 0 END)::bigint AS "__del_order_count",
+	       SUM(CASE WHEN c.action = 'I' THEN c."quantity" ELSE 0 END) AS "__ins_units",
+	       SUM(CASE WHEN c.action = 'D' THEN c."quantity" ELSE 0 END) AS "__del_units",
+	       SUM(CASE WHEN c.action = 'I' AND (c."quantity") IS NOT NULL THEN 1 ELSE 0 END)::bigint AS "__ins_nonnull_units",
+	       SUM(CASE WHEN c.action = 'D' AND (c."quantity") IS NOT NULL THEN 1 ELSE 0 END)::bigint AS "__del_nonnull_units",
+	       SUM(CASE WHEN c.action = 'I' THEN c."line_cents" ELSE 0 END) AS "__ins_sales_cents",
+	       SUM(CASE WHEN c.action = 'D' THEN c."line_cents" ELSE 0 END) AS "__del_sales_cents",
+	       SUM(CASE WHEN c.action = 'I' AND (c."line_cents") IS NOT NULL THEN 1 ELSE 0 END)::bigint AS "__ins_nonnull_sales_cents",
+	       SUM(CASE WHEN c.action = 'D' AND (c."line_cents") IS NOT NULL THEN 1 ELSE 0 END)::bigint AS "__del_nonnull_sales_cents"
+	FROM pg_temp."__pgt_cdc_1_20336" c
+	WHERE c.lsn > '0/3C44DCC0'::pg_lsn AND c.lsn <= '0/3D1943A0'::pg_lsn
+	  AND c.action IN ('I', 'D')
+	GROUP BY c."tenant_id", c."utc_day", c."product_id", c."status"
+	),
+	__pgt_cte_agg_merge_2 AS (
+	SELECT COALESCE(st.__pgt_row_id, pgtrickle.encode_row_id_v3('GROUP_KEY', ROW((d."tenant_id"), (d."utc_day"), (d."product_id"), (d."status")))) AS __pgt_row_id,
+	       d."tenant_id",
+	       d."utc_day",
+	       d."product_id",
+	       d."status",
+	       COALESCE(st.__pgt_count, 0) + COALESCE(d.__ins_count, 0) - COALESCE(d.__del_count, 0) AS new_count,
+	       COALESCE(st.__pgt_count, 0) AS old_count,
+	       COALESCE(st."order_count", 0) + COALESCE(d."__ins_order_count", 0) - COALESCE(d."__del_order_count", 0) AS "new_order_count",
+	       st."order_count" AS "old_order_count",
+	       CASE WHEN (COALESCE(st."__pgt_aux_nonnull_units", 0) + COALESCE(d."__ins_nonnull_units", 0) - COALESCE(d."__del_nonnull_units", 0)) > 0 THEN COALESCE(st."units", 0) + COALESCE(d."__ins_units", 0) - COALESCE(d."__del_units", 0) ELSE NULL END AS "new_units",
+	       st."units" AS "old_units",
+	       COALESCE(st."__pgt_aux_nonnull_units", 0) + COALESCE(d."__ins_nonnull_units", 0) - COALESCE(d."__del_nonnull_units", 0) AS "new___pgt_aux_nonnull_units",
+	       CASE WHEN (COALESCE(st."__pgt_aux_nonnull_sales_cents", 0) + COALESCE(d."__ins_nonnull_sales_cents", 0) - COALESCE(d."__del_nonnull_sales_cents", 0)) > 0 THEN COALESCE(st."sales_cents", 0) + COALESCE(d."__ins_sales_cents", 0) - COALESCE(d."__del_sales_cents", 0) ELSE NULL END AS "new_sales_cents",
+	       st."sales_cents" AS "old_sales_cents",
+	       COALESCE(st."__pgt_aux_nonnull_sales_cents", 0) + COALESCE(d."__ins_nonnull_sales_cents", 0) - COALESCE(d."__del_nonnull_sales_cents", 0) AS "new___pgt_aux_nonnull_sales_cents",
+	       CASE
+	    WHEN st.__pgt_count IS NULL AND (COALESCE(d.__ins_count, 0) - COALESCE(d.__del_count, 0)) > 0 THEN 'I'
+	    WHEN COALESCE(st.__pgt_count, 0) + COALESCE(d.__ins_count, 0) - COALESCE(d.__del_count, 0) <= 0 THEN 'D'
+	    ELSE 'U'
+	END AS __pgt_meta_action
+	FROM __pgt_cte_agg_delta_1 AS d("tenant_id", "utc_day", "product_id", "status")
+	LEFT JOIN "ax"."st_day_product_status" st ON st."tenant_id" IS NOT DISTINCT FROM d."tenant_id" AND st."utc_day" IS NOT DISTINCT FROM d."utc_day" AND st."product_id" IS NOT DISTINCT FROM d."product_id" AND st."status" IS NOT DISTINCT FROM d."status"
+	),
+	__pgt_cte_agg_final_3 AS (
+	SELECT m.__pgt_row_id,
+	       CASE WHEN m.__pgt_meta_action = 'D' THEN 'D' ELSE 'I' END AS __pgt_action,
+	       m."tenant_id" AS "tenant_id", m."utc_day" AS "utc_day", m."product_id" AS "product_id", m."status" AS "status", CASE WHEN m.__pgt_meta_action = 'D' THEN m.old_count ELSE m.new_count END AS __pgt_count,
+	       CASE WHEN m.__pgt_meta_action = 'D' THEN m."old_order_count" ELSE m."new_order_count" END AS "order_count",
+	       CASE WHEN m.__pgt_meta_action = 'D' THEN m."old_units" ELSE m."new_units" END AS "units",
+	       CASE WHEN m.__pgt_meta_action = 'D' THEN 0 ELSE m."new___pgt_aux_nonnull_units" END AS "__pgt_aux_nonnull_units",
+	       CASE WHEN m.__pgt_meta_action = 'D' THEN m."old_sales_cents" ELSE m."new_sales_cents" END AS "sales_cents",
+	       CASE WHEN m.__pgt_meta_action = 'D' THEN 0 ELSE m."new___pgt_aux_nonnull_sales_cents" END AS "__pgt_aux_nonnull_sales_cents"
+	FROM __pgt_cte_agg_merge_2 m
+	WHERE m.__pgt_meta_action IN ('I', 'D')
+	   OR (m.__pgt_meta_action = 'U'
+	       AND (m.new_count IS DISTINCT FROM m.old_count
+	          OR m."new_order_count"::text IS DISTINCT FROM m."old_order_count"::text
+	          OR m."new_units"::text IS DISTINCT FROM m."old_units"::text
+	          OR m."new_sales_cents"::text IS DISTINCT FROM m."old_sales_cents"::text))
+	)
+	SELECT * FROM __pgt_cte_agg_final_3) AS d ON pgtrickle.row_probe_v1(st.__pgt_row_id) = pgtrickle.row_probe_v1(d.__pgt_row_id) AND st.__pgt_row_id = d.__pgt_row_id WHEN MATCHED AND d.__pgt_action = 'D' THEN DELETE WHEN MATCHED AND d.__pgt_action = 'I' AND (st."tenant_id"::text IS DISTINCT FROM d."tenant_id"::text OR st."utc_day"::text IS DISTINCT FROM d."utc_day"::text OR st."product_id"::text IS DISTINCT FROM d."product_id"::text OR st."status"::text IS DISTINCT FROM d."status"::text OR st."__pgt_count"::text IS DISTINCT FROM d."__pgt_count"::text OR st."order_count"::text IS DISTINCT FROM d."order_count"::text OR st."units"::text IS DISTINCT FROM d."units"::text OR st."__pgt_aux_nonnull_units"::text IS DISTINCT FROM d."__pgt_aux_nonnull_units"::text OR st."sales_cents"::text IS DISTINCT FROM d."sales_cents"::text OR st."__pgt_aux_nonnull_sales_cents"::text IS DISTINCT FROM d."__pgt_aux_nonnull_sales_cents"::text) THEN UPDATE SET "tenant_id" = d."tenant_id", "utc_day" = d."utc_day", "product_id" = d."product_id", "status" = d."status", "__pgt_count" = d."__pgt_count", "order_count" = d."order_count", "units" = d."units", "__pgt_aux_nonnull_units" = d."__pgt_aux_nonnull_units", "sales_cents" = d."sales_cents", "__pgt_aux_nonnull_sales_cents" = d."__pgt_aux_nonnull_sales_cents" WHEN NOT MATCHED AND d.__pgt_action = 'I' THEN INSERT (__pgt_row_id, "tenant_id", "utc_day", "product_id", "status", "__pgt_count", "order_count", "units", "__pgt_aux_nonnull_units", "sales_cents", "__pgt_aux_nonnull_sales_cents") VALUES (d.__pgt_row_id, d."tenant_id", d."utc_day", d."product_id", d."status", d."__pgt_count", d."order_count", d."units", d."__pgt_aux_nonnull_units", d."sales_cents", d."__pgt_aux_nonnull_sales_cents")
+	Merge on st_day_product_status st  (cost=12717.20..15871.73 rows=0 width=0) (actual time=23009.361..23009.370 rows=0.00 loops=1)
+	  Tuples: inserted=834 updated=616 deleted=788 skipped=311
+	  ->  Hash Right Join  (cost=12717.20..15871.73 rows=1 width=398) (actual time=22935.325..22961.329 rows=2549.00 loops=1)
+	        Hash Cond: ((pgtrickle.row_probe_v1(st.__pgt_row_id) = pgtrickle.row_probe_v1(d.__pgt_row_id)) AND (st.__pgt_row_id = d.__pgt_row_id))
+	        ->  Seq Scan on st_day_product_status st  (cost=0.00..2340.76 rows=81376 width=46) (actual time=0.020..6.039 rows=81376.00 loops=1)
+	        ->  Hash  (cost=12717.18..12717.18 rows=1 width=392) (actual time=22935.279..22935.287 rows=2549.00 loops=1)
+	              Buckets: 4096 (originally 1024)  Batches: 1 (originally 1)  Memory Usage: 778kB
+	              ->  Subquery Scan on d  (cost=204.17..12717.18 rows=1 width=392) (actual time=5.154..22913.977 rows=2549.00 loops=1)
+	                    ->  Nested Loop Left Join  (cost=204.17..12717.17 rows=1 width=184) (actual time=5.140..22906.809 rows=2549.00 loops=1)
+	                          Disabled: true
+	                          Join Filter: ((NOT (st_1.tenant_id IS DISTINCT FROM c.tenant_id)) AND (NOT (st_1.utc_day IS DISTINCT FROM c.utc_day)) AND (NOT (st_1.product_id IS DISTINCT FROM c.product_id)) AND (NOT (st_1.status IS DISTINCT FROM c.status)))
+	                          Rows Removed by Join Filter: 224433395
+	                          Filter: ((CASE WHEN ((st_1.__pgt_count IS NULL) AND ((COALESCE((sum(CASE WHEN (c.action = 'I'::bpchar) THEN 1 ELSE 0 END)), '0'::bigint) - COALESCE((sum(CASE WHEN (c.action = 'D'::bpchar) THEN 1 ELSE 0 END)), '0'::bigint)) > 0)) THEN 'I'::text WHEN (((COALESCE(st_1.__pgt_count, '0'::bigint) + COALESCE((sum(CASE WHEN (c.action = 'I'::bpchar) THEN 1 ELSE 0 END)), '0'::bigint)) - COALESCE((sum(CASE WHEN (c.action = 'D'::bpchar) THEN 1 ELSE 0 END)), '0'::bigint)) <= 0) THEN 'D'::text ELSE 'U'::text END = ANY ('{I,D}'::text[])) OR ((CASE WHEN ((st_1.__pgt_count IS NULL) AND ((COALESCE((sum(CASE WHEN (c.action = 'I'::bpchar) THEN 1 ELSE 0 END)), '0'::bigint) - COALESCE((sum(CASE WHEN (c.action = 'D'::bpchar) THEN 1 ELSE 0 END)), '0'::bigint)) > 0)) THEN 'I'::text WHEN (((COALESCE(st_1.__pgt_count, '0'::bigint) + COALESCE((sum(CASE WHEN (c.action = 'I'::bpchar) THEN 1 ELSE 0 END)), '0'::bigint)) - COALESCE((sum(CASE WHEN (c.action = 'D'::bpchar) THEN 1 ELSE 0 END)), '0'::bigint)) <= 0) THEN 'D'::text ELSE 'U'::text END = 'U'::text) AND ((((COALESCE(st_1.__pgt_count, '0'::bigint) + COALESCE((sum(CASE WHEN (c.action = 'I'::bpchar) THEN 1 ELSE 0 END)), '0'::bigint)) - COALESCE((sum(CASE WHEN (c.action = 'D'::bpchar) THEN 1 ELSE 0 END)), '0'::bigint)) IS DISTINCT FROM COALESCE(st_1.__pgt_count, '0'::bigint)) OR ((((COALESCE(st_1.order_count, '0'::bigint) + COALESCE((sum(CASE WHEN (c.action = 'I'::bpchar) THEN 1 ELSE 0 END)), '0'::bigint)) - COALESCE((sum(CASE WHEN (c.action = 'D'::bpchar) THEN 1 ELSE 0 END)), '0'::bigint)))::text IS DISTINCT FROM (st_1.order_count)::text) OR ((CASE WHEN (((COALESCE(st_1.__pgt_aux_nonnull_units, '0'::bigint) + COALESCE((sum(CASE WHEN ((c.action = 'I'::bpchar) AND (c.quantity IS NOT NULL)) THEN 1 ELSE 0 END)), '0'::bigint)) - COALESCE((sum(CASE WHEN ((c.action = 'D'::bpchar) AND (c.quantity IS NOT NULL)) THEN 1 ELSE 0 END)), '0'::bigint)) > 0) THEN ((COALESCE(st_1.units, '0'::bigint) + COALESCE((sum(CASE WHEN (c.action = 'I'::bpchar) THEN c.quantity ELSE 0 END)), '0'::bigint)) - COALESCE((sum(CASE WHEN (c.action = 'D'::bpchar) THEN c.quantity ELSE 0 END)), '0'::bigint)) ELSE NULL::bigint END)::text IS DISTINCT FROM (st_1.units)::text) OR ((CASE WHEN (((COALESCE(st_1.__pgt_aux_nonnull_sales_cents, '0'::bigint) + COALESCE((sum(CASE WHEN ((c.action = 'I'::bpchar) AND (c.line_cents IS NOT NULL)) THEN 1 ELSE 0 END)), '0'::bigint)) - COALESCE((sum(CASE WHEN ((c.action = 'D'::bpchar) AND (c.line_cents IS NOT NULL)) THEN 1 ELSE 0 END)), '0'::bigint)) > 0) THEN ((COALESCE(st_1.sales_cents, '0'::numeric) + COALESCE((sum(CASE WHEN (c.action = 'I'::bpchar) THEN c.line_cents ELSE '0'::bigint END)), '0'::numeric)) - COALESCE((sum(CASE WHEN (c.action = 'D'::bpchar) THEN c.line_cents ELSE '0'::bigint END)), '0'::numeric)) ELSE NULL::numeric END)::text IS DISTINCT FROM (st_1.sales_cents)::text))))
+	                          Rows Removed by Filter: 209
+	                          ->  GroupAggregate  (cost=204.17..204.25 rows=1 width=192) (actual time=2.806..30.820 rows=2758.00 loops=1)
+	                                Group Key: c.tenant_id, c.utc_day, c.product_id, c.status
+	                                ->  Sort  (cost=204.17..204.18 rows=1 width=68) (actual time=2.791..8.630 rows=5262.00 loops=1)
+	                                      Sort Key: c.tenant_id, c.utc_day, c.product_id, c.status
+	                                      Sort Method: quicksort  Memory: 515kB
+	                                      ->  Seq Scan on __pgt_cdc_1_20336 c  (cost=0.00..204.16 rows=1 width=68) (actual time=0.009..0.909 rows=5262.00 loops=1)
+	                                            Filter: ((lsn > '0/3C44DCC0'::pg_lsn) AND (lsn <= '0/3D1943A0'::pg_lsn) AND (action = ANY ('{I,D}'::bpchar[])))
+	                          ->  Seq Scan on st_day_product_status st_1  (cost=0.00..2340.76 rows=81376 width=109) (actual time=0.003..3.448 rows=81376.00 loops=2758)
+2026-10-31 09:53:42.324 UTC [4003] CONTEXT:  SQL statement "MERGE INTO "ax"."st_day_product_status" AS st USING (WITH __pgt_cte_agg_delta_1 AS (
+	SELECT c."tenant_id" AS "tenant_id",
+	       c."utc_day" AS "utc_day",
+	       c."product_id" AS "product_id",
+	       c."status" AS "status",
+	       SUM(CASE WHEN c.action = 'I' THEN 1 ELSE 0 END)::bigint AS __ins_count,
+	       SUM(CASE WHEN c.action = 'D' THEN 1 ELSE 0 END)::bigint AS __del_count,
+	       SUM(CASE WHEN c.action = 'I' THEN 1 ELSE 0 END)::bigint AS "__ins_order_count",
+	       SUM(CASE WHEN c.action = 'D' THEN 1 ELSE 0 END)::bigint AS "__del_order_count",
+	       SUM(CASE WHEN c.action = 'I' THEN c."quantity" ELSE 0 END) AS "__ins_units",
+	       SUM(CASE WHEN c.action = 'D' THEN c."quantity" ELSE 0 END) AS "__del_units",
+	       SUM(CASE WHEN c.action = 'I' AND (c."quantity") IS NOT NULL THEN 1 ELSE 0 END)::bigint AS "__ins_nonnull_units",
+	       SUM(CASE WHEN c.action = 'D' AND (c."quantity") IS NOT NULL THEN 1 ELSE 0 END)::bigint AS "__del_nonnull_units",
+	       SUM(CASE WHEN c.action = 'I' THEN c."line_cents" ELSE 0 END) AS "__ins_sales_cents",
+	       SUM(CASE WHEN c.action = 'D' THEN c."line_cents" ELSE 0 END) AS "__del_sales_cents",
+	       SUM(CASE WHEN c.action = 'I' AND (c."line_cents") IS NOT NULL THEN 1 ELSE 0 END)::bigint AS "__ins_nonnull_sales_cents",
+	       SUM(CASE WHEN c.action = 'D' AND (c."line_cents") IS NOT NULL THEN 1 ELSE 0 END)::bigint AS "__del_nonnull_sales_cents"
+	FROM pg_temp."__pgt_cdc_1_20336" c
+	WHERE c.lsn > '0/3C44DCC0'::pg_lsn AND c.lsn <= '0/3D1943A0'::pg_lsn
+	  AND c.action IN ('I', 'D')
+	GROUP BY c."tenant_id", c."utc_day", c."product_id", c."status"
+	),
+	__pgt_cte_agg_merge_2 AS (
+	SELECT COALESCE(st.__pgt_row_id, pgtrickle.encode_row_id_v3('GROUP_KEY', ROW((d."tenant_id"), (d."utc_day"), (d."product_id"), (d."status")))) AS __pgt_row_id,
+	       d."tenant_id",
+	       d."utc_day",
+	       d."product_id",
+	       d."status",
+	       COALESCE(st.__pgt_count, 0) + COALESCE(d.__ins_count, 0) - COALESCE(d.__del_count, 0) AS new_count,
+	       COALESCE(st.__pgt_count, 0) AS old_count,
+	       COALESCE(st."order_count", 0) + COALESCE(d."__ins_order_count", 0) - COALESCE(d."__del_order_count", 0) AS "new_order_count",
+	       st."order_count" AS "old_order_count",
+	       CASE WHEN (COALESCE(st."__pgt_aux_nonnull_units", 0) + COALESCE(d."__ins_nonnull_units", 0) - COALESCE(d."__del_nonnull_units", 0)) > 0 THEN COALESCE(st."units", 0) + COALESCE(d."__ins_units", 0) - COALESCE(d."__del_units", 0) ELSE NULL END AS "new_units",
+	       st."units" AS "old_units",
+	       COALESCE(st."__pgt_aux_nonnull_units", 0) + COALESCE(d."__ins_nonnull_units", 0) - COALESCE(d."__del_nonnull_units", 0) AS "new___pgt_aux_nonnull_units",
+	       CASE WHEN (COALESCE(st."__pgt_aux_nonnull_sales_cents", 0) + COALESCE(d."__ins_nonnull_sales_cents", 0) - COALESCE(d."__del_nonnull_sales_cents", 0)) > 0 THEN COALESCE(st."sales_cents", 0) + COALESCE(d."__ins_sales_cents", 0) - COALESCE(d."__del_sales_cents", 0) ELSE NULL END AS "new_sales_cents",
+	       st."sales_cents" AS "old_sales_cents",
+	       COALESCE(st."__pgt_aux_nonnull_sales_cents", 0) + COALESCE(d."__ins_nonnull_sales_cents", 0) - COALESCE(d."__del_nonnull_sales_cents", 0) AS "new___pgt_aux_nonnull_sales_cents",
+	       CASE
+	    WHEN st.__pgt_count IS NULL AND (COALESCE(d.__ins_count, 0) - COALESCE(d.__del_count, 0)) > 0 THEN 'I'
+	    WHEN COALESCE(st.__pgt_count, 0) + COALESCE(d.__ins_count, 0) - COALESCE(d.__del_count, 0) <= 0 THEN 'D'
+	    ELSE 'U'
+	END AS __pgt_meta_action
+	FROM __pgt_cte_agg_delta_1 AS d("tenant_id", "utc_day", "product_id", "status")
+	LEFT JOIN "ax"."st_day_product_status" st ON st."tenant_id" IS NOT DISTINCT FROM d."tenant_id" AND st."utc_day" IS NOT DISTINCT FROM d."utc_day" AND st."product_id" IS NOT DISTINCT FROM d."product_id" AND st."status" IS NOT DISTINCT FROM d."status"
+	),
+	__pgt_cte_agg_final_3 AS (
+	SELECT m.__pgt_row_id,
+	       CASE WHEN m.__pgt_meta_action = 'D' THEN 'D' ELSE 'I' END AS __pgt_action,
+	       m."tenant_id" AS "tenant_id", m."utc_day" AS "utc_day", m."product_id" AS "product_id", m."status" AS "status", CASE WHEN m.__pgt_meta_action = 'D' THEN m.old_count ELSE m.new_count END AS __pgt_count,
+	       CASE WHEN m.__pgt_meta_action = 'D' THEN m."old_order_count" ELSE m."new_order_count" END AS "order_count",
+	       CASE WHEN m.__pgt_meta_action = 'D' THEN m."old_units" ELSE m."new_units" END AS "units",
+	       CASE WHEN m.__pgt_meta_action = 'D' THEN 0 ELSE m."new___pgt_aux_nonnull_units" END AS "__pgt_aux_nonnull_units",
+	       CASE WHEN m.__pgt_meta_action = 'D' THEN m."old_sales_cents" ELSE m."new_sales_cents" END AS "sales_cents",
+	       CASE WHEN m.__pgt_meta_action = 'D' THEN 0 ELSE m."new___pgt_aux_nonnull_sales_cents" END AS "__pgt_aux_nonnull_sales_cents"
+	FROM __pgt_cte_agg_merge_2 m
+	WHERE m.__pgt_meta_action IN ('I', 'D')
+	   OR (m.__pgt_meta_action = 'U'
+	       AND (m.new_count IS DISTINCT FROM m.old_count
+	          OR m."new_order_count"::text IS DISTINCT FROM m."old_order_count"::text
+	          OR m."new_units"::text IS DISTINCT FROM m."old_units"::text
+	          OR m."new_sales_cents"::text IS DISTINCT FROM m."old_sales_cents"::text))
+	)
+	SELECT * FROM __pgt_cte_agg_final_3) AS d ON pgtrickle.row_probe_v1(st.__pgt_row_id) = pgtrickle.row_probe_v1(d.__pgt_row_id) AND st.__pgt_row_id = d.__pgt_row_id WHEN MATCHED AND d.__pgt_action = 'D' THEN DELETE WHEN MATCHED AND d.__pgt_action = 'I' AND (st."tenant_id"::text IS DISTINCT FROM d."tenant_id"::text OR st."utc_day"::text IS DISTINCT FROM d."utc_day"::text OR st."product_id"::text IS DISTINCT FROM d."product_id"::text OR st."status"::text IS DISTINCT FROM d."status"::text OR st."__pgt_count"::text IS DISTINCT FROM d."__pgt_count"::text OR st."order_count"::text IS DISTINCT FROM d."order_count"::text OR st."units"::text IS DISTINCT FROM d."units"::text OR st."__pgt_aux_nonnull_units"::text IS DISTINCT FROM d."__pgt_aux_nonnull_units"::text OR st."sales_cents"::text IS DISTINCT FROM d."sales_cents"::text OR st."__pgt_aux_nonnull_sales_cents"::text IS DISTINCT FROM d."__pgt_aux_nonnull_sales_cents"::text) THEN UPDATE SET "tenant_id" = d."tenant_id", "utc_day" = d."utc_day", "product_id" = d."product_id", "status" = d."status", "__pgt_count" = d."__pgt_count", "order_count" = d."order_count", "units" = d."units", "__pgt_aux_nonnull_units" = d."__pgt_aux_nonnull_units", "sales_cents" = d."sales_cents", "__pgt_aux_nonnull_sales_cents" = d."__pgt_aux_nonnull_sales_cents" WHEN NOT MATCHED AND d.__pgt_action = 'I' THEN INSERT (__pgt_row_id, "tenant_id", "utc_day", "product_id", "status", "__pgt_count", "order_count", "units", "__pgt_aux_nonnull_units", "sales_cents", "__pgt_aux_nonnull_sales_cents") VALUES (d.__pgt_row_id, d."tenant_id", d."utc_day", d."product_id", d."status", d."__pgt_count", d."order_count", d."units", d."__pgt_aux_nonnull_units", d."sales_cents", d."__pgt_aux_nonnull_sales_cents")"
+2026-10-31 09:53:42.332 UTC [4003] LOG:  duration: 23067.692 ms  plan:

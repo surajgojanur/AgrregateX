@@ -1,0 +1,45 @@
+# two-DB evidence 2026-10-31T10:04:55Z
+    datname    |     backend_type     | pid  |         backend_start         
+---------------+----------------------+------+-------------------------------
+ postgres      | pg_trickle launcher  |   82 | 2026-10-31 09:39:13.574786+00
+ tenant_gen    | pg_trickle scheduler | 6539 | 2026-10-31 10:02:02.510884+00
+ tenant_shared | pg_trickle scheduler |   84 | 2026-10-31 09:39:13.581082+00
+(3 rows)
+
+## tenant_shared
+ current_database |            name            | status | refresh_mode 
+------------------+----------------------------+--------+--------------
+ tenant_shared    | ax.st_day_category_status  | ACTIVE | DIFFERENTIAL
+ tenant_shared    | ax.st_day_product_status   | ACTIVE | DIFFERENTIAL
+ tenant_shared    | ax.st_hour_category_status | ACTIVE | DIFFERENTIAL
+(3 rows)
+
+ orders | tenants 
+--------+---------
+ 100073 |      10
+(1 row)
+
+## tenant_gen
+ current_database |            name            | status | refresh_mode 
+------------------+----------------------------+--------+--------------
+ tenant_gen       | ax.st_day_category_status  | ACTIVE | DIFFERENTIAL
+ tenant_gen       | ax.st_day_product_status   | ACTIVE | DIFFERENTIAL
+ tenant_gen       | ax.st_hour_category_status | ACTIVE | DIFFERENTIAL
+(3 rows)
+
+ orders | tenants 
+--------+---------
+ 234082 |      11
+(1 row)
+
+                  name                  | setting 
+----------------------------------------+---------
+ autovacuum_max_workers                 | 3
+ max_parallel_workers                   | 8
+ max_worker_processes                   | 32
+ pg_trickle.max_dynamic_refresh_workers | 4
+ pg_trickle.per_database_worker_quota   | 0
+(5 rows)
+
+## scheduler RSS (kB)
+sh: 1: pgrep: not found

@@ -1,0 +1,20 @@
+== ARM B_differential_1s
+number of failed transactions: 0 (0.000%)
+latency average = 2.272 ms
+tps = 1760.510891 (without initial connection time)
+ pending_buffer_size | approx_rows 
+---------------------+-------------
+ 22 MB               |        9962
+(1 row)
+
+ stream_table | action | fallback | reason | refreshes | p50_ms | max_ms | failed 
+--------------+--------+----------+--------+-----------+--------+--------+--------
+(0 rows)
+
+            name            |    staleness    
+----------------------------+-----------------
+ ax.st_day_category_status  | 00:00:22.02991
+ ax.st_day_product_status   | 00:00:23.083951
+ ax.st_hour_category_status | 00:00:21.73773
+(3 rows)
+

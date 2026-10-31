@@ -1,0 +1,39 @@
+# trg-diff-1s-trigger-nochurn  mode=DIFFERENTIAL sched=1s cdc=trigger mutations=5000 dim_churn=false  2026-10-31T09:52:00Z
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-opus-spike/hackathon/sql/10_stream_tables.sql:41: NOTICE:  publication "pgtrickle_cdc_daaaeeb1fdc57e97" does not exist, skipping
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-opus-spike/hackathon/sql/10_stream_tables.sql:41: INFO:  Stream table ax.st_day_product_status created (pgt_id=1, mode=DIFFERENTIAL, initialized=true)
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-opus-spike/hackathon/sql/10_stream_tables.sql:58: NOTICE:  publication "pgtrickle_cdc_daaaeeb1fdc57e97" does not exist, skipping
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-opus-spike/hackathon/sql/10_stream_tables.sql:58: NOTICE:  publication "pgtrickle_cdc_1d8a10d0e8bcdd15" does not exist, skipping
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-opus-spike/hackathon/sql/10_stream_tables.sql:58: INFO:  Stream table ax.st_day_category_status created (pgt_id=2, mode=DIFFERENTIAL, initialized=true)
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-opus-spike/hackathon/sql/10_stream_tables.sql:75: NOTICE:  publication "pgtrickle_cdc_daaaeeb1fdc57e97" does not exist, skipping
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-opus-spike/hackathon/sql/10_stream_tables.sql:75: NOTICE:  publication "pgtrickle_cdc_1d8a10d0e8bcdd15" does not exist, skipping
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-opus-spike/hackathon/sql/10_stream_tables.sql:75: INFO:  Stream table ax.st_hour_category_status created (pgt_id=3, mode=DIFFERENTIAL, initialized=true)
+        pgt_name         | refresh_mode | effective_refresh_mode | requested_cdc_mode | status 
+-------------------------+--------------+------------------------+--------------------+--------
+ st_day_category_status  | DIFFERENTIAL | DIFFERENTIAL           | trigger            | ACTIVE
+ st_day_product_status   | DIFFERENTIAL | NO_DATA                | trigger            | ACTIVE
+ st_hour_category_status | DIFFERENTIAL | DIFFERENTIAL           | trigger            | ACTIVE
+(3 rows)
+
+mutation wall seconds: 0.655
+ wait_fresh_s 
+--------------
+       27.613
+(1 row)
+
+      stream_table       | missing_in_st | extra_in_st 
+-------------------------+---------------+-------------
+ st_day_product_status   |          1378 |        1313
+ st_day_category_status  |          1781 |        1743
+ st_hour_category_status |          1329 |        1331
+(3 rows)
+
+      stream_table       |    action    | fallback | reason | refreshes | p50_ms  | max_ms  | failed 
+-------------------------+--------------+----------+--------+-----------+---------+---------+--------
+ st_day_category_status  | DIFFERENTIAL | f        |        |         2 |  1967.1 |  3736.7 |      0
+ st_day_product_status   | DIFFERENTIAL | f        |        |         1 | 10889.6 | 10889.6 |      0
+ st_hour_category_status | DIFFERENTIAL | f        |        |         2 |  6189.6 |  6205.5 |      0
+(3 rows)
+
+
+# NOTE (added after run): the mismatches above were TRANSIENT. wait_fresh() returned while the burst
+# was still draining in bounded batches; ~15 s later the oracle was 0/0 on all three tables (handoff F1/F9).

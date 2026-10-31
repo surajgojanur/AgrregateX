@@ -1,0 +1,50 @@
+# diff-1s-trigger-nochurn  mode=DIFFERENTIAL sched=1s cdc=trigger mutations=5000 dim_churn=false  2026-10-31T09:44:04Z
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-opus-spike/hackathon/sql/90_drop_stream_tables.sql:4: INFO:  Stream table ax.st_day_category_status dropped (pgt_id=2)
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-opus-spike/hackathon/sql/90_drop_stream_tables.sql:4: INFO:  Stream table ax.st_day_product_status dropped (pgt_id=1)
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-opus-spike/hackathon/sql/90_drop_stream_tables.sql:4: NOTICE:  trigger "pg_trickle_cdc_daaaeeb1fdc57e97" for relation "ax.orders" does not exist, skipping
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-opus-spike/hackathon/sql/90_drop_stream_tables.sql:4: NOTICE:  trigger "pg_trickle_cdc_17473" for relation "ax.orders" does not exist, skipping
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-opus-spike/hackathon/sql/90_drop_stream_tables.sql:4: NOTICE:  trigger "pg_trickle_cdc_ins_17473" for relation "ax.orders" does not exist, skipping
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-opus-spike/hackathon/sql/90_drop_stream_tables.sql:4: NOTICE:  trigger "pg_trickle_cdc_upd_17473" for relation "ax.orders" does not exist, skipping
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-opus-spike/hackathon/sql/90_drop_stream_tables.sql:4: NOTICE:  trigger "pg_trickle_cdc_del_17473" for relation "ax.orders" does not exist, skipping
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-opus-spike/hackathon/sql/90_drop_stream_tables.sql:4: NOTICE:  trigger "pg_trickle_cdc_truncate_17473" for relation "ax.orders" does not exist, skipping
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-opus-spike/hackathon/sql/90_drop_stream_tables.sql:4: NOTICE:  function pgtrickle_changes.pg_trickle_cdc_fn_daaaeeb1fdc57e97() does not exist, skipping
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-opus-spike/hackathon/sql/90_drop_stream_tables.sql:4: NOTICE:  function pgtrickle_changes.pg_trickle_cdc_fn_17473() does not exist, skipping
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-opus-spike/hackathon/sql/90_drop_stream_tables.sql:4: NOTICE:  function pgtrickle_changes.pg_trickle_cdc_ins_fn_17473() does not exist, skipping
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-opus-spike/hackathon/sql/90_drop_stream_tables.sql:4: NOTICE:  function pgtrickle_changes.pg_trickle_cdc_upd_fn_17473() does not exist, skipping
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-opus-spike/hackathon/sql/90_drop_stream_tables.sql:4: NOTICE:  function pgtrickle_changes.pg_trickle_cdc_del_fn_17473() does not exist, skipping
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-opus-spike/hackathon/sql/90_drop_stream_tables.sql:4: NOTICE:  function pgtrickle_changes.pg_trickle_cdc_truncate_fn_17473() does not exist, skipping
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-opus-spike/hackathon/sql/90_drop_stream_tables.sql:4: NOTICE:  table "changes_17529" does not exist, skipping
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-opus-spike/hackathon/sql/90_drop_stream_tables.sql:4: NOTICE:  table "snapshot_17473" does not exist, skipping
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-opus-spike/hackathon/sql/90_drop_stream_tables.sql:4: NOTICE:  trigger "pg_trickle_cdc_1d8a10d0e8bcdd15" for relation "ax.products" does not exist, skipping
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-opus-spike/hackathon/sql/90_drop_stream_tables.sql:4: NOTICE:  trigger "pg_trickle_cdc_17442" for relation "ax.products" does not exist, skipping
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-opus-spike/hackathon/sql/90_drop_stream_tables.sql:4: NOTICE:  trigger "pg_trickle_cdc_ins_17442" for relation "ax.products" does not exist, skipping
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-opus-spike/hackathon/sql/90_drop_stream_tables.sql:4: NOTICE:  trigger "pg_trickle_cdc_upd_17442" for relation "ax.products" does not exist, skipping
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-opus-spike/hackathon/sql/90_drop_stream_tables.sql:4: NOTICE:  trigger "pg_trickle_cdc_del_17442" for relation "ax.products" does not exist, skipping
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-opus-spike/hackathon/sql/90_drop_stream_tables.sql:4: NOTICE:  trigger "pg_trickle_cdc_truncate_17442" for relation "ax.products" does not exist, skipping
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-opus-spike/hackathon/sql/90_drop_stream_tables.sql:4: NOTICE:  function pgtrickle_changes.pg_trickle_cdc_fn_1d8a10d0e8bcdd15() does not exist, skipping
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-opus-spike/hackathon/sql/90_drop_stream_tables.sql:4: NOTICE:  function pgtrickle_changes.pg_trickle_cdc_fn_17442() does not exist, skipping
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-opus-spike/hackathon/sql/90_drop_stream_tables.sql:4: NOTICE:  function pgtrickle_changes.pg_trickle_cdc_ins_fn_17442() does not exist, skipping
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-opus-spike/hackathon/sql/90_drop_stream_tables.sql:4: NOTICE:  function pgtrickle_changes.pg_trickle_cdc_upd_fn_17442() does not exist, skipping
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-opus-spike/hackathon/sql/90_drop_stream_tables.sql:4: NOTICE:  function pgtrickle_changes.pg_trickle_cdc_del_fn_17442() does not exist, skipping
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-opus-spike/hackathon/sql/90_drop_stream_tables.sql:4: NOTICE:  function pgtrickle_changes.pg_trickle_cdc_truncate_fn_17442() does not exist, skipping
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-opus-spike/hackathon/sql/90_drop_stream_tables.sql:4: NOTICE:  table "changes_17573" does not exist, skipping
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-opus-spike/hackathon/sql/90_drop_stream_tables.sql:4: NOTICE:  table "snapshot_17442" does not exist, skipping
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-opus-spike/hackathon/sql/90_drop_stream_tables.sql:4: INFO:  Stream table ax.st_hour_category_status dropped (pgt_id=3)
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-opus-spike/hackathon/sql/10_stream_tables.sql:44: NOTICE:  publication "pgtrickle_cdc_daaaeeb1fdc57e97" does not exist, skipping
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-opus-spike/hackathon/sql/10_stream_tables.sql:44: INFO:  Stream table ax.st_day_product_status created (pgt_id=4, mode=DIFFERENTIAL, initialized=true)
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-opus-spike/hackathon/sql/10_stream_tables.sql:65: NOTICE:  publication "pgtrickle_cdc_daaaeeb1fdc57e97" does not exist, skipping
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-opus-spike/hackathon/sql/10_stream_tables.sql:65: NOTICE:  publication "pgtrickle_cdc_1d8a10d0e8bcdd15" does not exist, skipping
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-opus-spike/hackathon/sql/10_stream_tables.sql:65: INFO:  Stream table ax.st_day_category_status created (pgt_id=5, mode=DIFFERENTIAL, initialized=true)
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-opus-spike/hackathon/sql/10_stream_tables.sql:86: NOTICE:  publication "pgtrickle_cdc_daaaeeb1fdc57e97" does not exist, skipping
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-opus-spike/hackathon/sql/10_stream_tables.sql:86: NOTICE:  publication "pgtrickle_cdc_1d8a10d0e8bcdd15" does not exist, skipping
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-opus-spike/hackathon/sql/10_stream_tables.sql:86: INFO:  Stream table ax.st_hour_category_status created (pgt_id=6, mode=DIFFERENTIAL, initialized=true)
+        pgt_name         | refresh_mode | effective_refresh_mode | requested_cdc_mode | status 
+-------------------------+--------------+------------------------+--------------------+--------
+ st_day_category_status  | DIFFERENTIAL | NO_DATA                | trigger            | ACTIVE
+ st_day_product_status   | DIFFERENTIAL | DIFFERENTIAL           | trigger            | ACTIVE
+ st_hour_category_status | DIFFERENTIAL | DIFFERENTIAL           | trigger            | ACTIVE
+(3 rows)
+
+mutation wall seconds: 0.62
+ERROR:  wait_fresh timeout after 120 s
+CONTEXT:  PL/pgSQL function ax_spike.wait_fresh(timestamp with time zone,double precision) line 9 at RAISE

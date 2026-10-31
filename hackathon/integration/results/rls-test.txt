@@ -1,0 +1,35 @@
+T1 no tenant set -> expect 0 rows everywhere (fail closed)
+ ?column? | dps | hcs | orders 
+----------+-----+-----+--------
+ T1       |   0 |   0 |      0
+(1 row)
+
+ set_config 
+------------
+ 2
+(1 row)
+
+T2 tenant 2 -> only tenant 2 rows; explicit filter on tenant 1 -> 0
+ ?column? | distinct_tenants | min_t | t1_rows_visible | t1_orders_visible 
+----------+------------------+-------+-----------------+-------------------
+ T2       |                1 |     2 |               0 |                 0
+(1 row)
+
+T3 setting is transaction-local -> after COMMIT back to 0 rows
+ ?column? | dps 
+----------+-----
+ T3       |   0
+(1 row)
+
+T4 garbage tenant value -> error (not data)
+ set_config 
+------------
+ 1 OR 1=1
+(1 row)
+
+psql:integration/rls_test.sql:18: ERROR:  invalid input syntax for type integer: "1 OR 1=1"
+T5 api role cannot read change buffers or write stream tables
+psql:integration/rls_test.sql:23: ERROR:  permission denied for schema pgtrickle_changes
+LINE 1: SELECT 'T5a', count(*) FROM pgtrickle_changes.changes_daaaee...
+                                    ^
+psql:integration/rls_test.sql:24: ERROR:  permission denied for table st_day_product_status
