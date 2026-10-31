@@ -1,0 +1,5 @@
+agrregatex-postgres-1 ghcr.io/trickle-labs/pg_trickle:latest 127.0.0.1:25432->5432/tcp
+agrregatex-api-1 docker.io/library/agrregatex-api:latest 127.0.0.1:18081->8000/tcp
+round1-db ghcr.io/trickle-labs/pg_trickle:latest 127.0.0.1:25560->5432/tcp
+round1-api localhost/aggregatex-round1-api:latest 127.0.0.1:8090->8000/tcp
+Emulate Docker CLI using podman. Create /etc/containers/nodocker to quiet msg.

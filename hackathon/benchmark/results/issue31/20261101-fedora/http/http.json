@@ -1,0 +1,1125 @@
+{
+  "scope": "small-demo read-only smoke; not G1 qualification",
+  "official_pass": false,
+  "automated_candidate_pass": false,
+  "auth_bypass_smoke": true,
+  "utc": "2026-10-31T20:49:40.145886+00:00",
+  "base": "http://127.0.0.1:8094",
+  "identity": {
+    "user": {
+      "id": "admin@demo.local",
+      "name": "Operator (all tenants)",
+      "email": "admin@demo.local",
+      "role": "admin",
+      "tenant_id": null
+    }
+  },
+  "concurrency": 1,
+  "offered_rate_cap_rps": 10,
+  "elapsed_s": 1.6807864479997079,
+  "percentile": "nearest rank ceil(p*n); successful responses only",
+  "scenarios": [
+    {
+      "scenario": "breakdown/max/1d",
+      "tenant": 1,
+      "family": "breakdown",
+      "path": "/api/tenants/1/breakdown?from=2026-09-01T00%3A00%3A00%2B00%3A00&to=2026-09-02T00%3A00%3A00%2B00%3A00&by=status"
+    },
+    {
+      "scenario": "breakdown/median/7d",
+      "tenant": 7,
+      "family": "breakdown",
+      "path": "/api/tenants/7/breakdown?from=2026-09-01T00%3A00%3A00%2B00%3A00&to=2026-09-08T00%3A00%3A00%2B00%3A00&by=category"
+    },
+    {
+      "scenario": "summary/max/1d",
+      "tenant": 1,
+      "family": "summary",
+      "path": "/api/tenants/1/summary?from=2026-09-01T00%3A00%3A00%2B00%3A00&to=2026-09-02T00%3A00%3A00%2B00%3A00"
+    },
+    {
+      "scenario": "summary/median/7d",
+      "tenant": 7,
+      "family": "summary",
+      "path": "/api/tenants/7/summary?from=2026-09-01T00%3A00%3A00%2B00%3A00&to=2026-09-08T00%3A00%3A00%2B00%3A00"
+    },
+    {
+      "scenario": "top-products/max/1d",
+      "tenant": 1,
+      "family": "top-products",
+      "path": "/api/tenants/1/top-products?from=2026-09-01T00%3A00%3A00%2B00%3A00&to=2026-09-02T00%3A00%3A00%2B00%3A00"
+    },
+    {
+      "scenario": "top-products/median/7d",
+      "tenant": 7,
+      "family": "top-products",
+      "path": "/api/tenants/7/top-products?from=2026-09-01T00%3A00%3A00%2B00%3A00&to=2026-09-08T00%3A00%3A00%2B00%3A00"
+    },
+    {
+      "scenario": "trends/max/1d",
+      "tenant": 1,
+      "family": "trends",
+      "path": "/api/tenants/1/trends?from=2026-09-01T00%3A00%3A00%2B00%3A00&to=2026-09-02T00%3A00%3A00%2B00%3A00&grain=hour"
+    },
+    {
+      "scenario": "trends/median/7d",
+      "tenant": 7,
+      "family": "trends",
+      "path": "/api/tenants/7/trends?from=2026-09-01T00%3A00%3A00%2B00%3A00&to=2026-09-08T00%3A00%3A00%2B00%3A00&grain=day"
+    }
+  ],
+  "warmup": [
+    {
+      "scenario": "breakdown/max/1d",
+      "status": 200,
+      "ok": true,
+      "timeout": false,
+      "response": {
+        "tenant_id": 1,
+        "shard": "default",
+        "from": "2026-09-01T00:00:00+00:00",
+        "to": "2026-09-02T00:00:00+00:00",
+        "source": {
+          "stream_table_range": [
+            "2026-09-01T00:00:00+00:00",
+            "2026-09-02T00:00:00+00:00"
+          ],
+          "raw_edge_ranges": []
+        },
+        "freshness": {
+          "verified_at": "2026-10-31T20:49:37.048140+00:00",
+          "age_s": 1.42,
+          "healthy": true,
+          "stream_tables": 3,
+          "rule": "oldest stream table's last completed refresh"
+        },
+        "by": "status",
+        "rows": [
+          {
+            "key": "cancelled",
+            "orders": 2,
+            "units": 3,
+            "gross_cents": 254245
+          },
+          {
+            "key": "paid",
+            "orders": 2,
+            "units": 7,
+            "gross_cents": 139751
+          },
+          {
+            "key": "pending",
+            "orders": 1,
+            "units": 1,
+            "gross_cents": 33265
+          },
+          {
+            "key": "shipped",
+            "orders": 1,
+            "units": 2,
+            "gross_cents": 48252
+          }
+        ]
+      },
+      "ms": 9.288435
+    }
+  ],
+  "samples": [
+    {
+      "scenario": "breakdown/max/1d",
+      "status": 200,
+      "ok": true,
+      "timeout": false,
+      "response": {
+        "tenant_id": 1,
+        "shard": "default",
+        "from": "2026-09-01T00:00:00+00:00",
+        "to": "2026-09-02T00:00:00+00:00",
+        "source": {
+          "stream_table_range": [
+            "2026-09-01T00:00:00+00:00",
+            "2026-09-02T00:00:00+00:00"
+          ],
+          "raw_edge_ranges": []
+        },
+        "freshness": {
+          "verified_at": "2026-10-31T20:49:37.048140+00:00",
+          "age_s": 1.42,
+          "healthy": true,
+          "stream_tables": 3,
+          "rule": "oldest stream table's last completed refresh"
+        },
+        "by": "status",
+        "rows": [
+          {
+            "key": "cancelled",
+            "orders": 2,
+            "units": 3,
+            "gross_cents": 254245
+          },
+          {
+            "key": "paid",
+            "orders": 2,
+            "units": 7,
+            "gross_cents": 139751
+          },
+          {
+            "key": "pending",
+            "orders": 1,
+            "units": 1,
+            "gross_cents": 33265
+          },
+          {
+            "key": "shipped",
+            "orders": 1,
+            "units": 2,
+            "gross_cents": 48252
+          }
+        ]
+      },
+      "ms": 11.122101
+    },
+    {
+      "scenario": "breakdown/max/1d",
+      "status": 200,
+      "ok": true,
+      "timeout": false,
+      "response": {
+        "tenant_id": 1,
+        "shard": "default",
+        "from": "2026-09-01T00:00:00+00:00",
+        "to": "2026-09-02T00:00:00+00:00",
+        "source": {
+          "stream_table_range": [
+            "2026-09-01T00:00:00+00:00",
+            "2026-09-02T00:00:00+00:00"
+          ],
+          "raw_edge_ranges": []
+        },
+        "freshness": {
+          "verified_at": "2026-10-31T20:49:37.048140+00:00",
+          "age_s": 1.42,
+          "healthy": true,
+          "stream_tables": 3,
+          "rule": "oldest stream table's last completed refresh"
+        },
+        "by": "status",
+        "rows": [
+          {
+            "key": "cancelled",
+            "orders": 2,
+            "units": 3,
+            "gross_cents": 254245
+          },
+          {
+            "key": "paid",
+            "orders": 2,
+            "units": 7,
+            "gross_cents": 139751
+          },
+          {
+            "key": "pending",
+            "orders": 1,
+            "units": 1,
+            "gross_cents": 33265
+          },
+          {
+            "key": "shipped",
+            "orders": 1,
+            "units": 2,
+            "gross_cents": 48252
+          }
+        ]
+      },
+      "ms": 4.358992
+    },
+    {
+      "scenario": "breakdown/median/7d",
+      "status": 200,
+      "ok": true,
+      "timeout": false,
+      "response": {
+        "tenant_id": 7,
+        "shard": "default",
+        "from": "2026-09-01T00:00:00+00:00",
+        "to": "2026-09-08T00:00:00+00:00",
+        "source": {
+          "stream_table_range": [
+            "2026-09-01T00:00:00+00:00",
+            "2026-09-08T00:00:00+00:00"
+          ],
+          "raw_edge_ranges": []
+        },
+        "freshness": {
+          "verified_at": "2026-10-31T20:49:37.048140+00:00",
+          "age_s": 1.42,
+          "healthy": true,
+          "stream_tables": 3,
+          "rule": "oldest stream table's last completed refresh"
+        },
+        "by": "category",
+        "rows": [
+          {
+            "key": 8,
+            "orders": 3,
+            "units": 3,
+            "sales_cents": 267295
+          },
+          {
+            "key": 5,
+            "orders": 1,
+            "units": 4,
+            "sales_cents": 251696
+          },
+          {
+            "key": 9,
+            "orders": 1,
+            "units": 2,
+            "sales_cents": 53420
+          },
+          {
+            "key": 2,
+            "orders": 1,
+            "units": 0,
+            "sales_cents": 0
+          },
+          {
+            "key": 10,
+            "orders": 1,
+            "units": 0,
+            "sales_cents": 0
+          }
+        ]
+      },
+      "ms": 3.459352
+    },
+    {
+      "scenario": "breakdown/median/7d",
+      "status": 200,
+      "ok": true,
+      "timeout": false,
+      "response": {
+        "tenant_id": 7,
+        "shard": "default",
+        "from": "2026-09-01T00:00:00+00:00",
+        "to": "2026-09-08T00:00:00+00:00",
+        "source": {
+          "stream_table_range": [
+            "2026-09-01T00:00:00+00:00",
+            "2026-09-08T00:00:00+00:00"
+          ],
+          "raw_edge_ranges": []
+        },
+        "freshness": {
+          "verified_at": "2026-10-31T20:49:37.048140+00:00",
+          "age_s": 1.42,
+          "healthy": true,
+          "stream_tables": 3,
+          "rule": "oldest stream table's last completed refresh"
+        },
+        "by": "category",
+        "rows": [
+          {
+            "key": 8,
+            "orders": 3,
+            "units": 3,
+            "sales_cents": 267295
+          },
+          {
+            "key": 5,
+            "orders": 1,
+            "units": 4,
+            "sales_cents": 251696
+          },
+          {
+            "key": 9,
+            "orders": 1,
+            "units": 2,
+            "sales_cents": 53420
+          },
+          {
+            "key": 2,
+            "orders": 1,
+            "units": 0,
+            "sales_cents": 0
+          },
+          {
+            "key": 10,
+            "orders": 1,
+            "units": 0,
+            "sales_cents": 0
+          }
+        ]
+      },
+      "ms": 4.291038
+    },
+    {
+      "scenario": "summary/max/1d",
+      "status": 200,
+      "ok": true,
+      "timeout": false,
+      "response": {
+        "tenant_id": 1,
+        "shard": "default",
+        "from": "2026-09-01T00:00:00+00:00",
+        "to": "2026-09-02T00:00:00+00:00",
+        "source": {
+          "stream_table_range": [
+            "2026-09-01T00:00:00+00:00",
+            "2026-09-02T00:00:00+00:00"
+          ],
+          "raw_edge_ranges": []
+        },
+        "freshness": {
+          "verified_at": "2026-10-31T20:49:37.048140+00:00",
+          "age_s": 1.42,
+          "healthy": true,
+          "stream_tables": 3,
+          "rule": "oldest stream table's last completed refresh"
+        },
+        "summary": {
+          "orders": 6,
+          "sale_orders": 4,
+          "units_sold": 10,
+          "sales_cents": 221268,
+          "avg_order_cents": 55317,
+          "cancelled_or_refunded": 2,
+          "cancel_rate": 0.3333,
+          "by_status": {
+            "cancelled": {
+              "orders": 2,
+              "units": 3,
+              "gross_cents": 254245
+            },
+            "paid": {
+              "orders": 2,
+              "units": 7,
+              "gross_cents": 139751
+            },
+            "pending": {
+              "orders": 1,
+              "units": 1,
+              "gross_cents": 33265
+            },
+            "shipped": {
+              "orders": 1,
+              "units": 2,
+              "gross_cents": 48252
+            }
+          }
+        }
+      },
+      "ms": 3.027258
+    },
+    {
+      "scenario": "summary/max/1d",
+      "status": 200,
+      "ok": true,
+      "timeout": false,
+      "response": {
+        "tenant_id": 1,
+        "shard": "default",
+        "from": "2026-09-01T00:00:00+00:00",
+        "to": "2026-09-02T00:00:00+00:00",
+        "source": {
+          "stream_table_range": [
+            "2026-09-01T00:00:00+00:00",
+            "2026-09-02T00:00:00+00:00"
+          ],
+          "raw_edge_ranges": []
+        },
+        "freshness": {
+          "verified_at": "2026-10-31T20:49:37.048140+00:00",
+          "age_s": 1.42,
+          "healthy": true,
+          "stream_tables": 3,
+          "rule": "oldest stream table's last completed refresh"
+        },
+        "summary": {
+          "orders": 6,
+          "sale_orders": 4,
+          "units_sold": 10,
+          "sales_cents": 221268,
+          "avg_order_cents": 55317,
+          "cancelled_or_refunded": 2,
+          "cancel_rate": 0.3333,
+          "by_status": {
+            "cancelled": {
+              "orders": 2,
+              "units": 3,
+              "gross_cents": 254245
+            },
+            "paid": {
+              "orders": 2,
+              "units": 7,
+              "gross_cents": 139751
+            },
+            "pending": {
+              "orders": 1,
+              "units": 1,
+              "gross_cents": 33265
+            },
+            "shipped": {
+              "orders": 1,
+              "units": 2,
+              "gross_cents": 48252
+            }
+          }
+        }
+      },
+      "ms": 3.231001
+    },
+    {
+      "scenario": "summary/median/7d",
+      "status": 200,
+      "ok": true,
+      "timeout": false,
+      "response": {
+        "tenant_id": 7,
+        "shard": "default",
+        "from": "2026-09-01T00:00:00+00:00",
+        "to": "2026-09-08T00:00:00+00:00",
+        "source": {
+          "stream_table_range": [
+            "2026-09-01T00:00:00+00:00",
+            "2026-09-08T00:00:00+00:00"
+          ],
+          "raw_edge_ranges": []
+        },
+        "freshness": {
+          "verified_at": "2026-10-31T20:49:37.048140+00:00",
+          "age_s": 1.42,
+          "healthy": true,
+          "stream_tables": 3,
+          "rule": "oldest stream table's last completed refresh"
+        },
+        "summary": {
+          "orders": 7,
+          "sale_orders": 4,
+          "units_sold": 9,
+          "sales_cents": 572411,
+          "avg_order_cents": 143102,
+          "cancelled_or_refunded": 3,
+          "cancel_rate": 0.4286,
+          "by_status": {
+            "cancelled": {
+              "orders": 1,
+              "units": 4,
+              "gross_cents": 226580
+            },
+            "paid": {
+              "orders": 2,
+              "units": 6,
+              "gross_cents": 436090
+            },
+            "pending": {
+              "orders": 2,
+              "units": 3,
+              "gross_cents": 136321
+            },
+            "refunded": {
+              "orders": 2,
+              "units": 4,
+              "gross_cents": 273844
+            }
+          }
+        }
+      },
+      "ms": 3.113419
+    },
+    {
+      "scenario": "summary/median/7d",
+      "status": 200,
+      "ok": true,
+      "timeout": false,
+      "response": {
+        "tenant_id": 7,
+        "shard": "default",
+        "from": "2026-09-01T00:00:00+00:00",
+        "to": "2026-09-08T00:00:00+00:00",
+        "source": {
+          "stream_table_range": [
+            "2026-09-01T00:00:00+00:00",
+            "2026-09-08T00:00:00+00:00"
+          ],
+          "raw_edge_ranges": []
+        },
+        "freshness": {
+          "verified_at": "2026-10-31T20:49:37.048140+00:00",
+          "age_s": 1.42,
+          "healthy": true,
+          "stream_tables": 3,
+          "rule": "oldest stream table's last completed refresh"
+        },
+        "summary": {
+          "orders": 7,
+          "sale_orders": 4,
+          "units_sold": 9,
+          "sales_cents": 572411,
+          "avg_order_cents": 143102,
+          "cancelled_or_refunded": 3,
+          "cancel_rate": 0.4286,
+          "by_status": {
+            "cancelled": {
+              "orders": 1,
+              "units": 4,
+              "gross_cents": 226580
+            },
+            "paid": {
+              "orders": 2,
+              "units": 6,
+              "gross_cents": 436090
+            },
+            "pending": {
+              "orders": 2,
+              "units": 3,
+              "gross_cents": 136321
+            },
+            "refunded": {
+              "orders": 2,
+              "units": 4,
+              "gross_cents": 273844
+            }
+          }
+        }
+      },
+      "ms": 2.58947
+    },
+    {
+      "scenario": "top-products/max/1d",
+      "status": 200,
+      "ok": true,
+      "timeout": false,
+      "response": {
+        "tenant_id": 1,
+        "shard": "default",
+        "from": "2026-09-01T00:00:00+00:00",
+        "to": "2026-09-02T00:00:00+00:00",
+        "source": {
+          "stream_table_range": [
+            "2026-09-01T00:00:00+00:00",
+            "2026-09-02T00:00:00+00:00"
+          ],
+          "raw_edge_ranges": []
+        },
+        "freshness": {
+          "verified_at": "2026-10-31T20:49:37.048140+00:00",
+          "age_s": 1.42,
+          "healthy": true,
+          "stream_tables": 3,
+          "rule": "oldest stream table's last completed refresh"
+        },
+        "limit": 10,
+        "products": [
+          {
+            "rank": 1,
+            "product_id": 1,
+            "name": "product-1-1",
+            "category_id": 2,
+            "sales_cents": 138966,
+            "units_sold": 2,
+            "orders": 1
+          },
+          {
+            "rank": 2,
+            "product_id": 118,
+            "name": "product-1-118",
+            "category_id": 11,
+            "sales_cents": 48252,
+            "units_sold": 2,
+            "orders": 1
+          },
+          {
+            "rank": 3,
+            "product_id": 43,
+            "name": "product-1-43",
+            "category_id": 8,
+            "sales_cents": 33265,
+            "units_sold": 1,
+            "orders": 1
+          },
+          {
+            "rank": 4,
+            "product_id": 195,
+            "name": "product-1-195",
+            "category_id": 4,
+            "sales_cents": 785,
+            "units_sold": 5,
+            "orders": 1
+          }
+        ]
+      },
+      "ms": 4.319571
+    },
+    {
+      "scenario": "top-products/max/1d",
+      "status": 200,
+      "ok": true,
+      "timeout": false,
+      "response": {
+        "tenant_id": 1,
+        "shard": "default",
+        "from": "2026-09-01T00:00:00+00:00",
+        "to": "2026-09-02T00:00:00+00:00",
+        "source": {
+          "stream_table_range": [
+            "2026-09-01T00:00:00+00:00",
+            "2026-09-02T00:00:00+00:00"
+          ],
+          "raw_edge_ranges": []
+        },
+        "freshness": {
+          "verified_at": "2026-10-31T20:49:37.048140+00:00",
+          "age_s": 1.42,
+          "healthy": true,
+          "stream_tables": 3,
+          "rule": "oldest stream table's last completed refresh"
+        },
+        "limit": 10,
+        "products": [
+          {
+            "rank": 1,
+            "product_id": 1,
+            "name": "product-1-1",
+            "category_id": 2,
+            "sales_cents": 138966,
+            "units_sold": 2,
+            "orders": 1
+          },
+          {
+            "rank": 2,
+            "product_id": 118,
+            "name": "product-1-118",
+            "category_id": 11,
+            "sales_cents": 48252,
+            "units_sold": 2,
+            "orders": 1
+          },
+          {
+            "rank": 3,
+            "product_id": 43,
+            "name": "product-1-43",
+            "category_id": 8,
+            "sales_cents": 33265,
+            "units_sold": 1,
+            "orders": 1
+          },
+          {
+            "rank": 4,
+            "product_id": 195,
+            "name": "product-1-195",
+            "category_id": 4,
+            "sales_cents": 785,
+            "units_sold": 5,
+            "orders": 1
+          }
+        ]
+      },
+      "ms": 4.474952
+    },
+    {
+      "scenario": "top-products/median/7d",
+      "status": 200,
+      "ok": true,
+      "timeout": false,
+      "response": {
+        "tenant_id": 7,
+        "shard": "default",
+        "from": "2026-09-01T00:00:00+00:00",
+        "to": "2026-09-08T00:00:00+00:00",
+        "source": {
+          "stream_table_range": [
+            "2026-09-01T00:00:00+00:00",
+            "2026-09-08T00:00:00+00:00"
+          ],
+          "raw_edge_ranges": []
+        },
+        "freshness": {
+          "verified_at": "2026-10-31T20:49:37.048140+00:00",
+          "age_s": 2.47,
+          "healthy": true,
+          "stream_tables": 3,
+          "rule": "oldest stream table's last completed refresh"
+        },
+        "limit": 10,
+        "products": [
+          {
+            "rank": 1,
+            "product_id": 64,
+            "name": "product-7-64",
+            "category_id": 5,
+            "sales_cents": 251696,
+            "units_sold": 4,
+            "orders": 1
+          },
+          {
+            "rank": 2,
+            "product_id": 187,
+            "name": "product-7-187",
+            "category_id": 8,
+            "sales_cents": 184394,
+            "units_sold": 2,
+            "orders": 1
+          },
+          {
+            "rank": 3,
+            "product_id": 151,
+            "name": "product-7-151",
+            "category_id": 8,
+            "sales_cents": 82901,
+            "units_sold": 1,
+            "orders": 1
+          },
+          {
+            "rank": 4,
+            "product_id": 128,
+            "name": "product-7-128",
+            "category_id": 9,
+            "sales_cents": 53420,
+            "units_sold": 2,
+            "orders": 1
+          }
+        ]
+      },
+      "ms": 12.227789
+    },
+    {
+      "scenario": "top-products/median/7d",
+      "status": 200,
+      "ok": true,
+      "timeout": false,
+      "response": {
+        "tenant_id": 7,
+        "shard": "default",
+        "from": "2026-09-01T00:00:00+00:00",
+        "to": "2026-09-08T00:00:00+00:00",
+        "source": {
+          "stream_table_range": [
+            "2026-09-01T00:00:00+00:00",
+            "2026-09-08T00:00:00+00:00"
+          ],
+          "raw_edge_ranges": []
+        },
+        "freshness": {
+          "verified_at": "2026-10-31T20:49:37.048140+00:00",
+          "age_s": 2.47,
+          "healthy": true,
+          "stream_tables": 3,
+          "rule": "oldest stream table's last completed refresh"
+        },
+        "limit": 10,
+        "products": [
+          {
+            "rank": 1,
+            "product_id": 64,
+            "name": "product-7-64",
+            "category_id": 5,
+            "sales_cents": 251696,
+            "units_sold": 4,
+            "orders": 1
+          },
+          {
+            "rank": 2,
+            "product_id": 187,
+            "name": "product-7-187",
+            "category_id": 8,
+            "sales_cents": 184394,
+            "units_sold": 2,
+            "orders": 1
+          },
+          {
+            "rank": 3,
+            "product_id": 151,
+            "name": "product-7-151",
+            "category_id": 8,
+            "sales_cents": 82901,
+            "units_sold": 1,
+            "orders": 1
+          },
+          {
+            "rank": 4,
+            "product_id": 128,
+            "name": "product-7-128",
+            "category_id": 9,
+            "sales_cents": 53420,
+            "units_sold": 2,
+            "orders": 1
+          }
+        ]
+      },
+      "ms": 3.006964
+    },
+    {
+      "scenario": "trends/max/1d",
+      "status": 200,
+      "ok": true,
+      "timeout": false,
+      "response": {
+        "tenant_id": 1,
+        "shard": "default",
+        "from": "2026-09-01T00:00:00+00:00",
+        "to": "2026-09-02T00:00:00+00:00",
+        "source": {
+          "stream_table_range": [
+            "2026-09-01T00:00:00+00:00",
+            "2026-09-02T00:00:00+00:00"
+          ],
+          "raw_edge_ranges": []
+        },
+        "freshness": {
+          "verified_at": "2026-10-31T20:49:37.048140+00:00",
+          "age_s": 2.47,
+          "healthy": true,
+          "stream_tables": 3,
+          "rule": "oldest stream table's last completed refresh"
+        },
+        "grain": "hour",
+        "points": [
+          {
+            "bucket": "2026-09-01T01:00:00+00:00",
+            "orders": 1,
+            "sales_cents": 48252,
+            "cancelled_or_refunded": 0
+          },
+          {
+            "bucket": "2026-09-01T08:00:00+00:00",
+            "orders": 1,
+            "sales_cents": 33265,
+            "cancelled_or_refunded": 0
+          },
+          {
+            "bucket": "2026-09-01T09:00:00+00:00",
+            "orders": 1,
+            "sales_cents": 785,
+            "cancelled_or_refunded": 0
+          },
+          {
+            "bucket": "2026-09-01T14:00:00+00:00",
+            "orders": 1,
+            "sales_cents": 0,
+            "cancelled_or_refunded": 1
+          },
+          {
+            "bucket": "2026-09-01T17:00:00+00:00",
+            "orders": 1,
+            "sales_cents": 138966,
+            "cancelled_or_refunded": 0
+          },
+          {
+            "bucket": "2026-09-01T19:00:00+00:00",
+            "orders": 1,
+            "sales_cents": 0,
+            "cancelled_or_refunded": 1
+          }
+        ]
+      },
+      "ms": 9.624024
+    },
+    {
+      "scenario": "trends/max/1d",
+      "status": 200,
+      "ok": true,
+      "timeout": false,
+      "response": {
+        "tenant_id": 1,
+        "shard": "default",
+        "from": "2026-09-01T00:00:00+00:00",
+        "to": "2026-09-02T00:00:00+00:00",
+        "source": {
+          "stream_table_range": [
+            "2026-09-01T00:00:00+00:00",
+            "2026-09-02T00:00:00+00:00"
+          ],
+          "raw_edge_ranges": []
+        },
+        "freshness": {
+          "verified_at": "2026-10-31T20:49:37.048140+00:00",
+          "age_s": 2.47,
+          "healthy": true,
+          "stream_tables": 3,
+          "rule": "oldest stream table's last completed refresh"
+        },
+        "grain": "hour",
+        "points": [
+          {
+            "bucket": "2026-09-01T01:00:00+00:00",
+            "orders": 1,
+            "sales_cents": 48252,
+            "cancelled_or_refunded": 0
+          },
+          {
+            "bucket": "2026-09-01T08:00:00+00:00",
+            "orders": 1,
+            "sales_cents": 33265,
+            "cancelled_or_refunded": 0
+          },
+          {
+            "bucket": "2026-09-01T09:00:00+00:00",
+            "orders": 1,
+            "sales_cents": 785,
+            "cancelled_or_refunded": 0
+          },
+          {
+            "bucket": "2026-09-01T14:00:00+00:00",
+            "orders": 1,
+            "sales_cents": 0,
+            "cancelled_or_refunded": 1
+          },
+          {
+            "bucket": "2026-09-01T17:00:00+00:00",
+            "orders": 1,
+            "sales_cents": 138966,
+            "cancelled_or_refunded": 0
+          },
+          {
+            "bucket": "2026-09-01T19:00:00+00:00",
+            "orders": 1,
+            "sales_cents": 0,
+            "cancelled_or_refunded": 1
+          }
+        ]
+      },
+      "ms": 3.855718
+    },
+    {
+      "scenario": "trends/median/7d",
+      "status": 200,
+      "ok": true,
+      "timeout": false,
+      "response": {
+        "tenant_id": 7,
+        "shard": "default",
+        "from": "2026-09-01T00:00:00+00:00",
+        "to": "2026-09-08T00:00:00+00:00",
+        "source": {
+          "stream_table_range": [
+            "2026-09-01T00:00:00+00:00",
+            "2026-09-08T00:00:00+00:00"
+          ],
+          "raw_edge_ranges": []
+        },
+        "freshness": {
+          "verified_at": "2026-10-31T20:49:37.048140+00:00",
+          "age_s": 2.47,
+          "healthy": true,
+          "stream_tables": 3,
+          "rule": "oldest stream table's last completed refresh"
+        },
+        "grain": "day",
+        "points": [
+          {
+            "bucket": "2026-09-01T00:00:00+00:00",
+            "orders": 1,
+            "sales_cents": 53420,
+            "cancelled_or_refunded": 0
+          },
+          {
+            "bucket": "2026-09-02T00:00:00+00:00",
+            "orders": 1,
+            "sales_cents": 251696,
+            "cancelled_or_refunded": 0
+          },
+          {
+            "bucket": "2026-09-03T00:00:00+00:00",
+            "orders": 1,
+            "sales_cents": 82901,
+            "cancelled_or_refunded": 0
+          },
+          {
+            "bucket": "2026-09-04T00:00:00+00:00",
+            "orders": 1,
+            "sales_cents": 0,
+            "cancelled_or_refunded": 1
+          },
+          {
+            "bucket": "2026-09-05T00:00:00+00:00",
+            "orders": 3,
+            "sales_cents": 184394,
+            "cancelled_or_refunded": 2
+          }
+        ]
+      },
+      "ms": 2.736097
+    },
+    {
+      "scenario": "trends/median/7d",
+      "status": 200,
+      "ok": true,
+      "timeout": false,
+      "response": {
+        "tenant_id": 7,
+        "shard": "default",
+        "from": "2026-09-01T00:00:00+00:00",
+        "to": "2026-09-08T00:00:00+00:00",
+        "source": {
+          "stream_table_range": [
+            "2026-09-01T00:00:00+00:00",
+            "2026-09-08T00:00:00+00:00"
+          ],
+          "raw_edge_ranges": []
+        },
+        "freshness": {
+          "verified_at": "2026-10-31T20:49:37.048140+00:00",
+          "age_s": 2.47,
+          "healthy": true,
+          "stream_tables": 3,
+          "rule": "oldest stream table's last completed refresh"
+        },
+        "grain": "day",
+        "points": [
+          {
+            "bucket": "2026-09-01T00:00:00+00:00",
+            "orders": 1,
+            "sales_cents": 53420,
+            "cancelled_or_refunded": 0
+          },
+          {
+            "bucket": "2026-09-02T00:00:00+00:00",
+            "orders": 1,
+            "sales_cents": 251696,
+            "cancelled_or_refunded": 0
+          },
+          {
+            "bucket": "2026-09-03T00:00:00+00:00",
+            "orders": 1,
+            "sales_cents": 82901,
+            "cancelled_or_refunded": 0
+          },
+          {
+            "bucket": "2026-09-04T00:00:00+00:00",
+            "orders": 1,
+            "sales_cents": 0,
+            "cancelled_or_refunded": 1
+          },
+          {
+            "bucket": "2026-09-05T00:00:00+00:00",
+            "orders": 3,
+            "sales_cents": 184394,
+            "cancelled_or_refunded": 2
+          }
+        ]
+      },
+      "ms": 2.975966
+    }
+  ],
+  "summary": {
+    "samples": 16,
+    "successful": 16,
+    "errors": 0,
+    "timeouts": 0,
+    "p50_ms": 3.459352,
+    "p95_ms": 12.227789,
+    "p99_ms": 12.227789,
+    "mean_ms": 4.900857,
+    "min_ms": 2.58947,
+    "max_ms": 12.227789,
+    "completed_rps": 9.519353287885851
+  },
+  "goals": {
+    "G1": "NOT TESTED",
+    "G2": "NOT TESTED",
+    "G3": "NOT TESTED",
+    "G4": "NOT TESTED",
+    "G5": "NOT TESTED"
+  }
+}

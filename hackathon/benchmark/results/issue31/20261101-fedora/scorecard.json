@@ -1,0 +1,45 @@
+{
+  "official_pass": false,
+  "automated_candidate_pass": false,
+  "dataset_orders": 1002,
+  "scope": "Fedora preserved small demo only",
+  "goals": {
+    "G1": "NOT TESTED",
+    "G2": "NOT TESTED",
+    "G3": "INCOMPLETE",
+    "G4": "FAIL",
+    "G5": "NOT TESTED"
+  },
+  "http": {
+    "samples": 16,
+    "successful": 16,
+    "errors": 0,
+    "timeouts": 0,
+    "p50_ms": 3.459352,
+    "p95_ms": 12.227789,
+    "p99_ms": 12.227789,
+    "mean_ms": 4.900857,
+    "min_ms": 2.58947,
+    "max_ms": 12.227789,
+    "completed_rps": 9.519353287885851
+  },
+  "comparisons": 16,
+  "failed": 0,
+  "reconciliation": [
+    {
+      "stream_table": "st_day_product_status",
+      "missing_in_st": 0,
+      "extra_in_st": 1
+    },
+    {
+      "stream_table": "st_day_category_status",
+      "missing_in_st": 0,
+      "extra_in_st": 0
+    },
+    {
+      "stream_table": "st_hour_category_status",
+      "missing_in_st": 0,
+      "extra_in_st": 0
+    }
+  ]
+}

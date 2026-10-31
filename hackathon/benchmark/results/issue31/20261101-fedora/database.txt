@@ -1,0 +1,15 @@
+BEGIN
+SET
+{"database" : "aggregatex", "server" : "PostgreSQL 18.6 (Debian 18.6-1.pgdg12+2) on x86_64-pc-linux-gnu, compiled by gcc (Debian 12.2.0-14+deb12u1) 12.2.0, 64-bit", "extension" : "0.108.3", "orders" : 1002, "tenants" : [{"tenant_id":6,"n":43},
+ {"tenant_id":8,"n":46},
+ {"tenant_id":3,"n":47},
+ {"tenant_id":4,"n":47},
+ {"tenant_id":7,"n":49},
+ {"tenant_id":10,"n":50},
+ {"tenant_id":9,"n":51},
+ {"tenant_id":5,"n":62},
+ {"tenant_id":2,"n":201},
+ {"tenant_id":1,"n":406}], "streams" : [{"pgt_name":"st_hour_category_status","status":"ACTIVE","refresh_mode":"DIFFERENTIAL","effective_refresh_mode":"NO_DATA"},
+ {"pgt_name":"st_day_category_status","status":"ACTIVE","refresh_mode":"DIFFERENTIAL","effective_refresh_mode":"NO_DATA"},
+ {"pgt_name":"st_day_product_status","status":"ACTIVE","refresh_mode":"DIFFERENTIAL","effective_refresh_mode":"NO_DATA"}]}
+ROLLBACK

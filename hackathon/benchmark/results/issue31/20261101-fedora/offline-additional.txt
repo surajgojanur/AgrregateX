@@ -1,0 +1,6 @@
+Executed 2026-10-31 UTC / 2026-11-01 IST:
+sharding unittest: 18 passed
+partition library fixtures (mock Docker): 11 passed
+partition demo fixtures (mock Docker): 7 passed
+No live network changes.
+Generator: reviewed existing deterministic SQL; no standalone offline generator tests found. Existing Mac test claims are historical, not rerun.

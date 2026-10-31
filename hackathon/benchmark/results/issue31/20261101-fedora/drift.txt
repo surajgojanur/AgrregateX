@@ -1,0 +1,17 @@
+BEGIN
+SET
+ direction |                                                                     row
+-----------+---------------------------------------------------------------------------------------------------------------------------------------------
+ extra     | {"units": 1, "status": "paid", "utc_day": "2026-10-31T00:00:00", "tenant_id": 2, "product_id": 116, "order_count": 1, "sales_cents": 14094}
+(1 row)
+
+    action    |  status   | count
+--------------+-----------+-------
+ DIFFERENTIAL | COMPLETED |     9
+ FULL         | COMPLETED |     3
+ NO_DATA      | COMPLETED | 61202
+ REINITIALIZE | COMPLETED |     3
+(4 rows)
+
+ROLLBACK
+Emulate Docker CLI using podman. Create /etc/containers/nodocker to quiet msg.
