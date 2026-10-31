@@ -22,8 +22,9 @@ BASE = os.environ.get("AX_BASE", "http://127.0.0.1:8091")
 PW = os.environ.get("AX_DB_SUPERUSER_PASSWORD", "local-demo-superuser")
 DEMO_PW = os.environ.get("AX_DEMO_PASSWORD", "demo1234")
 SEED = int(os.environ.get("AX_SEED_ORDERS", "10000"))
-DSN = {"a": f"host=127.0.0.1 port=25571 dbname=aggregatex user=postgres password={PW}",
-       "b": f"host=127.0.0.1 port=25572 dbname=aggregatex user=postgres password={PW}"}
+PA, PB = os.environ.get("AX_SHARD_A_PORT", "25571"), os.environ.get("AX_SHARD_B_PORT", "25572")
+DSN = {"a": f"host=127.0.0.1 port={PA} dbname=aggregatex user=postgres password={PW}",
+       "b": f"host=127.0.0.1 port={PB} dbname=aggregatex user=postgres password={PW}"}
 directory = json.load(open(os.path.join(HERE, "..", "directory.v1.json"), encoding="utf-8"))
 owner = {int(t): s for t, s in directory["tenants"].items()}
 

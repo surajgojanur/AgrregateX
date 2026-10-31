@@ -1,0 +1,5 @@
+operator: 200
+tenant:   403
+anon:     401
+  keys: ['api', 'cache_ttl_s', 'observed_at', 'query_limits', 'scope', 'shards']
+   {"observed_at": "2026-10-31T13:38:09.112833+00:00", "shards": [{"shard": "a", "state": "degraded", "engine": {"shard": "a", "pg_trickle_version": "0.108.3", "scheduler_running": true, "stream_tables": [{"name": "st_day_category_status", "refresh_mode": "DIFFERENTIAL", "effective_refresh_mode": "DIFFERENTIAL", "status": "ACTIVE", "cdc_mode": "trigger", "schedule": "1s", "consecutive_errors": 0, "last_refresh_at": "2026-10-31T13:38:08.547295+00:00", "approx_rows": 3593, "bytes": 1417216}, {"name": "st_day_product_status", "refresh_mode": "DIFFERENTIAL", "effective_refresh_mode": "DIFFERENTIAL", 

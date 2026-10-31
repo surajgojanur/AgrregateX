@@ -2,7 +2,8 @@
 usage: python3 -I sharding/measure.py [n_requests] [n_lag]  -> JSON (n=1 laptop run, indicative only)"""
 import json, statistics, sys, time, urllib.request
 from http.cookiejar import CookieJar
-B = "http://127.0.0.1:8091"
+import os
+B = os.environ.get("AX_BASE", "http://127.0.0.1:8091")
 N = int(sys.argv[1]) if len(sys.argv) > 1 else 100
 NL = int(sys.argv[2]) if len(sys.argv) > 2 else 10
 op = urllib.request.build_opener(urllib.request.HTTPCookieProcessor(CookieJar()))

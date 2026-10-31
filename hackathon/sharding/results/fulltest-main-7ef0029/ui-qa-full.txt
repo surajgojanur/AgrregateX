@@ -1,0 +1,15 @@
+PASS landing renders (dark)
+PASS landing renders (light)
+PASS landing mobile 390px: no horizontal overflow
+PASS theme toggle switches dark -> light
+PASS /login redirects to landing (PR #26)
+PASS secure mode: anonymous /app shows restricted access, no loop
+PASS tenant dashboard: KPIs, freshness badge, shard B, chart, Top-10, operator nav hidden
+PASS tenant forced #/engine is refused (stays on dashboard)
+PASS operator nav shows Shards, Engine, Monitoring
+PASS operator switches tenant (5 -> shard B) and data loads
+FAIL live write: insert order -> measured commit-to-visible shown - Locator expected to be visible
+PASS Shards page: both shards, complete
+PASS Engine page: stream tables + B-3 limits table
+PASS Monitoring page (B-5) renders
+{"mode": "full", "passed": 13, "failed": 1, "js_errors": 0}
