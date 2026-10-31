@@ -5,6 +5,17 @@ import secrets
 VERSION = "0.1.0"
 
 
+def parse_analytics_read_mode(value: str | None) -> str:
+    """Validate the server-side analytics source selector."""
+    mode = "rollup" if value in (None, "") else value
+    if mode not in {"rollup", "raw_source"}:
+        raise ValueError("AX_ANALYTICS_READ_MODE must be 'rollup' or 'raw_source'")
+    return mode
+
+
+ANALYTICS_READ_MODE = parse_analytics_read_mode(os.environ.get("AX_ANALYTICS_READ_MODE"))
+
+
 def _env(name: str, default: str | None = None) -> str | None:
     value = os.environ.get(name, default)
     return value if value not in ("",) else default

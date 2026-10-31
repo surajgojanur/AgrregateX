@@ -10,7 +10,7 @@ from fastapi.responses import FileResponse, JSONResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 
-from . import auth, config, db, engine, limits, queries
+from . import auth, config, db, engine, limits, queries, raw_queries
 
 UTC = timezone.utc
 
@@ -70,25 +70,52 @@ def window(from_: str | None = Query(None, alias="from"), to: str | None = Query
     return start, end
 
 
-def _meta(tenant_id: int, start: datetime, end: datetime, w: queries.Window, **extra) -> dict:
-    has_full = w.full_lo < w.full_hi
-    edges = [[start.isoformat(), w.edge1_end.isoformat()]] if start < w.edge1_end else []
-    if w.edge2_start < end and has_full:
-        edges.append([w.edge2_start.isoformat(), end.isoformat()])
+def _meta(tenant_id: int, start: datetime, end: datetime, w: queries.Window,
+          *, family: str, breakdown_by: str | None = None, **extra) -> dict:
+    mode = config.ANALYTICS_READ_MODE
+    rollup_sources = {
+        "summary": ["ax.st_day_product_status", "ax.orders"],
+        "trends_day": ["ax.st_day_category_status", "ax.orders"],
+        "trends_hour": ["ax.st_hour_category_status", "ax.orders"],
+        "top_products": ["ax.st_day_product_status", "ax.orders", "ax.products"],
+        "breakdown_status": ["ax.st_day_product_status", "ax.orders"],
+        "breakdown_category": ["ax.st_day_category_status", "ax.orders", "ax.products"],
+    }
+    if mode == "raw_source":
+        source = {"stream_table_range": None,
+                  "raw_edge_ranges": [[start.isoformat(), end.isoformat()]]}
+        needs_products = family == "top_products" or (family == "breakdown" and breakdown_by == "category")
+        source_tables = ["ax.orders", "ax.products"] if needs_products else ["ax.orders"]
+        provenance = {"source_tables": source_tables, "uses_stream_tables": False,
+                      "consistency": "single_sql_statement_snapshot"}
+    else:
+        has_full = w.full_lo < w.full_hi
+        edges = [[start.isoformat(), w.edge1_end.isoformat()]] if start < w.edge1_end else []
+        if w.edge2_start < end and has_full:
+            edges.append([w.edge2_start.isoformat(), end.isoformat()])
+        source = {"stream_table_range": [w.full_lo.replace(tzinfo=UTC).isoformat(),
+                                         w.full_hi.replace(tzinfo=UTC).isoformat()] if has_full else None,
+                  "raw_edge_ranges": edges}
+        source_key = f"trends_{extra.get('grain')}" if family == "trends" else \
+                     f"breakdown_{breakdown_by}" if family == "breakdown" else family
+        provenance = {"source_tables": rollup_sources[source_key],
+                      "uses_stream_tables": True, "consistency": "single_sql_statement_snapshot"}
     return {"tenant_id": tenant_id, "shard": db.shard_for(tenant_id).name,
-            "from": start.isoformat(), "to": end.isoformat(),
-            "source": {"stream_table_range": [w.full_lo.replace(tzinfo=UTC).isoformat(),
-                                              w.full_hi.replace(tzinfo=UTC).isoformat()] if has_full else None,
-                       "raw_edge_ranges": edges},
-            **extra}
+            "from": start.isoformat(), "to": end.isoformat(), "source": source,
+            "analytics_mode": mode, "provenance": provenance, **extra}
 
 
 def _run(fn, tenant_id, *args):
     """Heavy analytics query under the tenant's B-3 slot, then its B-1 freshness (same shard)."""
-    with limits.LIMITER.slot(tenant_id):
-        with db.tenant_tx("api", tenant_id) as conn:
-            data = fn(conn, tenant_id, *args)
-    return data, engine.freshness_brief(db.shard_for(tenant_id))
+    mode = config.ANALYTICS_READ_MODE
+    if mode == "raw_source":
+        fn = {"summary": raw_queries.summary, "trends": raw_queries.trends,
+              "top_products": raw_queries.top_products, "breakdown": raw_queries.breakdown}[fn.__name__]
+    with limits.LIMITER.slot(tenant_id), db.tenant_tx("api", tenant_id) as conn:
+        data = fn(conn, tenant_id, *args)
+    # Stream refresh age does not describe source-derived answers and may lag them.
+    fresh = engine.freshness_brief(db.shard_for(tenant_id)) if mode == "rollup" else None
+    return data, fresh
 
 
 # ── auth ───────────────────────────────────────────────────────────────────
@@ -169,7 +196,7 @@ def tenant_path(tenant_id: int, user: auth.User = Depends(auth.current_user)) ->
 async def summary(tenant_id: int = Depends(tenant_path), win=Depends(window)):
     w = queries.split(*win, "day")
     data, fresh = await run_in_threadpool(_run, queries.summary, tenant_id, w)
-    return _meta(tenant_id, *win, w, freshness=fresh, summary=data)
+    return _meta(tenant_id, *win, w, family="summary", freshness=fresh, summary=data)
 
 
 @app.get("/api/tenants/{tenant_id}/trends")
@@ -179,7 +206,7 @@ async def trends(tenant_id: int = Depends(tenant_path), win=Depends(window),
         raise HTTPException(422, f"Hourly trends are limited to {config.MAX_HOURLY_RANGE_DAYS} days.")
     w = queries.split(*win, grain)
     data, fresh = await run_in_threadpool(_run, queries.trends, tenant_id, w, grain)
-    return _meta(tenant_id, *win, w, freshness=fresh, grain=grain, points=data)
+    return _meta(tenant_id, *win, w, family="trends", freshness=fresh, grain=grain, points=data)
 
 
 @app.get("/api/tenants/{tenant_id}/top-products")
@@ -187,7 +214,7 @@ async def top_products(tenant_id: int = Depends(tenant_path), win=Depends(window
                        limit: int = Query(10, ge=1, le=50)):
     w = queries.split(*win, "day")
     data, fresh = await run_in_threadpool(_run, queries.top_products, tenant_id, w, limit)
-    return _meta(tenant_id, *win, w, freshness=fresh, limit=limit, products=data)
+    return _meta(tenant_id, *win, w, family="top_products", freshness=fresh, limit=limit, products=data)
 
 
 @app.get("/api/tenants/{tenant_id}/breakdown")
@@ -195,7 +222,8 @@ async def breakdown(tenant_id: int = Depends(tenant_path), win=Depends(window),
                     by: Literal["status", "category"] = "status"):
     w = queries.split(*win, "day")
     data, fresh = await run_in_threadpool(_run, queries.breakdown, tenant_id, w, by)
-    return _meta(tenant_id, *win, w, freshness=fresh, by=by, rows=data)
+    return _meta(tenant_id, *win, w, family="breakdown", breakdown_by=by,
+                 freshness=fresh, by=by, rows=data)
 
 
 @app.get("/api/tenants/{tenant_id}/freshness")
