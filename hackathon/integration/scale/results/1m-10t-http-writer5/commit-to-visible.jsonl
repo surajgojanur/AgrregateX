@@ -1,0 +1,8 @@
+{"tenant": 6, "timed_out": false, "lag_ms": 10676.4, "visible": {"st_hour_category_status": 5558.5, "st_day_product_status": 8956.3, "st_day_category_status": 10676.4}}
+{"tenant": 1, "timed_out": false, "lag_ms": 20875.5, "visible": {"st_day_product_status": 12823.5, "st_hour_category_status": 16688.8, "st_day_category_status": 20875.5}}
+{"tenant": 10, "action": "insert", "timed_out": false, "lag_ms": 15240.2}
+{"tenant": 10, "action": "cancel", "timed_out": false, "lag_ms": 13890.7}
+{"tenant": 4, "action": "insert", "timed_out": false, "lag_ms": 12040.1}
+{"tenant": 4, "action": "cancel", "timed_out": false, "lag_ms": 20014.1}
+{"tenant": 2, "action": "insert", "timed_out": false, "lag_ms": 24024.1}
+{"tenant": 2, "action": "cancel", "timed_out": false, "lag_ms": 18689.3}

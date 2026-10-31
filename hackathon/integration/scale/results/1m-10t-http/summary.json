@@ -1,0 +1,29 @@
+{
+ "api": "http://127.0.0.1:8095",
+ "orders_total": 1000000,
+ "tenants": 10,
+ "data_end": "2026-10-31T00:00:00Z",
+ "roles": {
+  "largest": [
+   1,
+   340560
+  ],
+  "median": [
+   6,
+   56965
+  ],
+  "smallest": [
+   10,
+   34091
+  ]
+ },
+ "requests": 3600,
+ "errors": 0,
+ "worst_p95_ms": 60.77,
+ "worst_p99_ms": 173.52,
+ "worst_max_ms": 173.52,
+ "scenarios_p95_under_200ms": 72,
+ "scenarios_p95_under_1000ms": 72,
+ "scenarios": 72,
+ "versions": "PostgreSQL 18.6 (Debian 18.6-1.pgdg12+2) on aarch64-unknown-linux-gnu, compiled by gcc (Debian 12.2.0-14+deb12u1) 12.2.0, 64-bit | pg_trickle 0.108.3"
+}

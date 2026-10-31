@@ -1,0 +1,7 @@
+        pgt_name         |    action    | count | avg_ms | max_ms 
+-------------------------+--------------+-------+--------+--------
+ st_day_category_status  | DIFFERENTIAL |     8 |   1648 |   1770
+ st_day_product_status   | DIFFERENTIAL |     9 |   3251 |   4357
+ st_hour_category_status | DIFFERENTIAL |     7 |   5016 |   6508
+(3 rows)
+

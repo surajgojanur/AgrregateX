@@ -1,0 +1,46 @@
+--- other two stream tables for the same 5 orders (category of products 191..195):
+     s      | category_id |  status   | order_count 
+------------+-------------+-----------+-------------
+ day_cat ST |           1 | cancelled |           1
+ day_cat ST |           2 | cancelled |           1
+ day_cat ST |           3 | cancelled |           1
+ day_cat ST |           4 | cancelled |           1
+ day_cat ST |          12 | cancelled |           1
+(5 rows)
+      s      | category_id |  status   | order_count 
+-------------+-------------+-----------+-------------
+ hour_cat ST |           1 | cancelled |           1
+ hour_cat ST |           2 | cancelled |           1
+ hour_cat ST |           3 | cancelled |           1
+ hour_cat ST |           4 | cancelled |           1
+ hour_cat ST |          12 | cancelled |           1
+(5 rows)
+--- mitigation experiment: st_day_product_status -> FULL (reversible)
+INFO:  Stream table ax.st_day_product_status refreshed (FULL)
+WARNING:  pg_trickle: stream table ax.st_day_product_status refresh mode changed from DIFFERENTIAL to FULL; a full refresh was applied. This may take time on large tables.
+ alter_stream_table 
+ 
+ 
+ 
+      s       | product_id |  status   | order_count 
+--------------+------------+-----------+-------------
+ FULL-mode ST |        181 | cancelled |           1
+ FULL-mode ST |        182 | cancelled |           1
+ FULL-mode ST |        183 | cancelled |           1
+ FULL-mode ST |        184 | cancelled |           1
+ FULL-mode ST |        185 | cancelled |           1
+(5 rows)
+       pgt_name        | action | count | avg_ms | max_ms 
+-----------------------+--------+-------+--------+--------
+ st_day_product_status | FULL   |     2 |   5774 |   6058
+--- whole-table oracle with FULL mode (expect the earlier drift repaired by FULL refresh):
+      stream_table       | missing_in_st | extra_in_st 
+-------------------------+---------------+-------------
+ st_day_product_status   |             0 |           0
+ st_day_category_status  |             5 |           5
+ st_hour_category_status |             5 |           5
+(3 rows)
+st_day_product_status 0/0
+st_day_category_status 0/0
+st_hour_category_status 0/0
+day_cat 11-21|2:cancelled=1 3:cancelled=1 4:cancelled=1 5:cancelled=1 6:cancelled=1
