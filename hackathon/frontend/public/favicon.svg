@@ -1,1 +1,24 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><defs><linearGradient id="g" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#22d3ee"/><stop offset="1" stop-color="#2563eb"/></linearGradient></defs><rect width="64" height="64" rx="15" fill="url(#g)"/><rect x="14" y="30" width="9" height="14" rx="3" fill="#fff" opacity=".72"/><rect x="27.5" y="22" width="9" height="22" rx="3" fill="#fff" opacity=".86"/><rect x="41" y="14" width="9" height="30" rx="3" fill="#fff"/><rect x="14" y="47" width="36" height="5" rx="2.5" fill="#fff"/></svg>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
+  <defs>
+    <linearGradient id="dark" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#fb923c"/>
+      <stop offset="1" stop-color="#f97316"/>
+    </linearGradient>
+    <linearGradient id="light" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#4ade80"/>
+      <stop offset="1" stop-color="#16a34a"/>
+    </linearGradient>
+  </defs>
+  <style>
+    .logo-light { display: none; }
+    @media (prefers-color-scheme: light) {
+      .logo-dark { display: none; }
+      .logo-light { display: block; }
+    }
+  </style>
+  <rect class="logo-dark" width="64" height="64" rx="17" fill="url(#dark)"/>
+  <rect class="logo-light" width="64" height="64" rx="17" fill="url(#light)"/>
+  <path d="M14 16.5 31.5 34 14 51.5" fill="none" stroke="#fff" stroke-width="7" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M50 16.5 32.5 34 50 51.5" fill="none" stroke="#fff" stroke-width="7" stroke-linecap="round" stroke-linejoin="round" opacity=".96"/>
+  <circle cx="32" cy="34" r="4.5" fill="#11264a" stroke="#dffaff" stroke-width="2"/>
+</svg>

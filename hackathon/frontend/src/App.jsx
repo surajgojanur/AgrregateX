@@ -50,7 +50,7 @@ function Shell({ user }) {
           </Suspense>
         </main>
         <footer className="app__foot">
-          <span className="mono">AGRREGATEX · powered by pg_trickle (Apache-2.0, trickle-labs)</span>
+          <span className="mono">AggregateX · powered by pg_trickle (Apache-2.0, trickle-labs)</span>
           <span>Representative demo data · not organizer data.</span>
         </footer>
       </div>

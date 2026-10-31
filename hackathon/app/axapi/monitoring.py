@@ -81,7 +81,7 @@ def collect_shards():
                         any(t["status"] != "ACTIVE" or t["consecutive_errors"] or
                             t["age_s"] is None or t["age_s"] >= 30 for t in fresh) or
                         any(r["failed"] for r in snap["refresh_stats_5m"]) or
-                        any(h["severity"] != "OK" for h in snap["health"]))
+                        any(h["severity"] in {"ERROR", "CRITICAL", "UNKNOWN"} for h in snap["health"]))
             rows.append({"shard": name, "state": "degraded" if degraded else "healthy",
                          "engine": snap, "freshness": fresh})
         except Exception:

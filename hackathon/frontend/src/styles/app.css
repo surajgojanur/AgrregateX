@@ -83,8 +83,11 @@
 }
 
 .brand-logo__x {
-  color: var(--cyan);
+  color: var(--logo-end);
 }
+
+.logo-gradient__start { stop-color: var(--logo-start); }
+.logo-gradient__end { stop-color: var(--logo-end); }
 
 .brand-logo.is-animated {
   animation: logoGlow 2.6s var(--ease-in-out) infinite;
@@ -96,6 +99,13 @@
   gap: 4px !important;
 }
 
+.sidebar__brand .brand-logo {
+  padding: 5px 7px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, rgba(40, 215, 242, 0.09), rgba(75, 123, 255, 0.06));
+  border: 1px solid rgba(40, 215, 242, 0.12);
+}
+
 .sidebar__tag {
   padding-left: 4px;
   font-family: var(--mono);
@@ -103,6 +113,18 @@
   letter-spacing: 0.1em;
   text-transform: uppercase;
   color: var(--text-3);
+}
+
+.sidebar__tag::before {
+  content: '';
+  display: inline-block;
+  width: 5px;
+  height: 5px;
+  margin-right: 7px;
+  border-radius: 50%;
+  background: var(--green);
+  box-shadow: 0 0 8px color-mix(in srgb, var(--green) 70%, transparent);
+  vertical-align: 1px;
 }
 
 .logo-mark {
@@ -114,6 +136,18 @@
 
 .logo-mark.is-animated {
   animation: logoGlow 2.6s var(--ease-in-out) infinite;
+}
+
+.topbar__logo {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  background: var(--cyan-soft);
+  border: 1px solid var(--cyan-line);
+  box-shadow: 0 8px 24px rgba(40, 215, 242, 0.08);
 }
 
 @keyframes logoGlow {
@@ -1113,9 +1147,9 @@
 }
 
 :root[data-theme='light'] .app .panel {
-  color: #273323;
-  background: linear-gradient(180deg, #fffdf6, #f5f1e2);
-  border-color: #d5e1b9;
+  color: var(--text);
+  background: linear-gradient(180deg, #ffffff, var(--panel));
+  border-color: var(--border);
 }
 
 /* The light palette also applies inside the app's dark hero card. Keep its
@@ -1177,4 +1211,3 @@
 }
 
 /* ---------- Dictation (speech to text) ---------- */
-
