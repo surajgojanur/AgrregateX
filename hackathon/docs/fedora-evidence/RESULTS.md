@@ -1,5 +1,7 @@
 # Fedora read-only demo evidence
 
+> **Later evidence update — 2026-11-01:** This file is a historical capture of the earlier 8093 read-only demo, **not a current G4 correctness qualification**. The preserved Fedora 8094 database was subsequently found to have a persistent ghost `paid` day/product/status group affecting tenant 2 summary, Top-N and status breakdown. The Mac team subsequently measured 1M/10 synthetic HTTP p95 below 200 ms across 72 serial scenarios but reproduced additional write-induced aggregate drift. See [current hackathon scorecard](../../README.md#performance-and-correctness-scorecard), [Fedora forensic report](../../benchmark/results/issue31/20261101T2100Z-forensics/REPORT.md) and [Issue #50](https://github.com/surajgojanur/AgrregateX/issues/50). No database repairs or extension fixes have been deployed.
+
 **Captured:** 2026-10-31 (Fedora host; current branch base `887743430030fb61b1bcef5169fbdaaa8b478525`).
 **Service:** existing process PID 689077 on `127.0.0.1:8093`; API database
 configuration resolved to loopback `127.0.0.1:25560`, database `aggregatex`.
@@ -103,4 +105,4 @@ tenant authorization/routing API, dashboard, operator monitoring, and
 acceptance/demo tooling. Do not present the upstream Rust DVM as code written by
 the AgrregateX team.
 
-No official 1M/10-tenant or 10M/100-tenant scorecard run has been completed.
+At the time of this original capture, no 1M/10-tenant or 10M/100-tenant HTTP scorecard had been measured. A subsequent **representative synthetic 1M/10 Mac run** is linked above; a matched 10M/100 run and official organizer qualification remain untested.
