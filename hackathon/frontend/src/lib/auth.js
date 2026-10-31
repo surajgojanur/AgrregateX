@@ -3,7 +3,3 @@
 export function safeNext(next) {
   return typeof next === 'string' && /^\/app(?:[/?#]|$)/.test(next) ? next : '/app'
 }
-
-export function loginUrl(next = window.location.pathname + window.location.search + window.location.hash) {
-  return `/login?next=${encodeURIComponent(safeNext(next))}`
-}

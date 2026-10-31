@@ -44,7 +44,7 @@ export default function Shards() {
     const id = setInterval(tick, 3000)
     return () => { live = false; clearInterval(id) }
   }, [])
-  if (err) return <p className="alert" role="alert">{err}</p>
+  if (err) return <p className="alert" role="alert">{`Shard overview unavailable: ${err}. This database may require the current sharding schema; no availability data is assumed.`}</p>
   if (!d) return <div className="skeleton" style={{ height: 300 }} />
   return (
     <div className="ax-dash">
