@@ -1,0 +1,251 @@
+[
+ {
+  "test": "monitor SELECT ax.orders denied",
+  "user": "ax_monitor",
+  "expected": "42501",
+  "got": "42501",
+  "pass": true
+ },
+ {
+  "test": "monitor SELECT ax.products denied",
+  "user": "ax_monitor",
+  "expected": "42501",
+  "got": "42501",
+  "pass": true
+ },
+ {
+  "test": "monitor SELECT ax.customers denied",
+  "user": "ax_monitor",
+  "expected": "42501",
+  "got": "42501",
+  "pass": true
+ },
+ {
+  "test": "monitor SELECT ax.st_day_product_status denied",
+  "user": "ax_monitor",
+  "expected": "42501",
+  "got": "42501",
+  "pass": true
+ },
+ {
+  "test": "monitor SELECT ax.st_day_category_status denied",
+  "user": "ax_monitor",
+  "expected": "42501",
+  "got": "42501",
+  "pass": true
+ },
+ {
+  "test": "monitor SELECT ax.st_hour_category_status denied",
+  "user": "ax_monitor",
+  "expected": "42501",
+  "got": "42501",
+  "pass": true
+ },
+ {
+  "test": "monitor SELECT pgtrickle.pgt_dependencies denied",
+  "user": "ax_monitor",
+  "expected": "42501",
+  "got": "42501",
+  "pass": true
+ },
+ {
+  "test": "monitor SELECT pgtrickle.pgt_change_tracking denied",
+  "user": "ax_monitor",
+  "expected": "42501",
+  "got": "42501",
+  "pass": true
+ },
+ {
+  "test": "monitor SELECT pgtrickle.pgt_window_states denied",
+  "user": "ax_monitor",
+  "expected": "42501",
+  "got": "42501",
+  "pass": true
+ },
+ {
+  "test": "monitor SELECT pgtrickle.pgt_outbox_config denied",
+  "user": "ax_monitor",
+  "expected": "42501",
+  "got": "42501",
+  "pass": true
+ },
+ {
+  "test": "monitor SELECT pgtrickle.pgt_scheduler_jobs denied",
+  "user": "ax_monitor",
+  "expected": "42501",
+  "got": "42501",
+  "pass": true
+ },
+ {
+  "test": "monitor SELECT pgtrickle.pgt_freshness_controller_state denied",
+  "user": "ax_monitor",
+  "expected": "42501",
+  "got": "42501",
+  "pass": true
+ },
+ {
+  "test": "monitor SELECT pgtrickle.pgt_publication_bindings denied",
+  "user": "ax_monitor",
+  "expected": "42501",
+  "got": "42501",
+  "pass": true
+ },
+ {
+  "test": "monitor SELECT pgtrickle_changes.changes_1d8a10d0e8bcdd15 denied",
+  "user": "ax_monitor",
+  "expected": "42501",
+  "got": "42501",
+  "pass": true
+ },
+ {
+  "test": "monitor native health_check() denied",
+  "user": "ax_monitor",
+  "expected": "42501",
+  "got": "42501",
+  "pass": true
+ },
+ {
+  "test": "monitor change_buffer_sizes() denied",
+  "user": "ax_monitor",
+  "expected": "42501",
+  "got": "42501",
+  "pass": true
+ },
+ {
+  "test": "monitor SET ROLE ax_health_owner denied",
+  "user": "ax_monitor",
+  "expected": "42501",
+  "got": "42501",
+  "pass": true
+ },
+ {
+  "test": "monitor SET SESSION AUTHORIZATION denied",
+  "user": "ax_monitor",
+  "expected": "42501",
+  "got": "42501",
+  "pass": true
+ },
+ {
+  "test": "monitor CREATE OR REPLACE facade denied",
+  "user": "ax_monitor",
+  "expected": "42501",
+  "got": "42501",
+  "pass": true
+ },
+ {
+  "test": "monitor ALTER facade SECURITY INVOKER denied",
+  "user": "ax_monitor",
+  "expected": "42501",
+  "got": "42501",
+  "pass": true
+ },
+ {
+  "test": "monitor ALTER facade OWNER denied",
+  "user": "ax_monitor",
+  "expected": "42501",
+  "got": "42501",
+  "pass": true
+ },
+ {
+  "test": "monitor GRANT facade to ax_api (no grant option)",
+  "user": "ax_monitor",
+  "expected": "OK",
+  "got": "OK",
+  "pass": true
+ },
+ {
+  "test": "ax_api still cannot execute after monitor GRANT attempt",
+  "user": "postgres",
+  "expected": "ROWS",
+  "got": "OK",
+  "pass": true
+ },
+ {
+  "test": "ax_api EXECUTE facade denied",
+  "user": "ax_api",
+  "expected": "42501",
+  "got": "42501",
+  "pass": true
+ },
+ {
+  "test": "ax_writer EXECUTE facade denied",
+  "user": "ax_writer",
+  "expected": "42501",
+  "got": "42501",
+  "pass": true
+ },
+ {
+  "test": "mh39_probe EXECUTE facade denied",
+  "user": "mh39_probe",
+  "expected": "42501",
+  "got": "42501",
+  "pass": true
+ },
+ {
+  "test": "superuser calling facade refused by session_user check",
+  "user": "postgres",
+  "expected": "42501",
+  "got": "42501",
+  "pass": true
+ },
+ {
+  "test": "monitor facade baseline",
+  "user": "ax_monitor",
+  "expected": "ROWS",
+  "got": "OK",
+  "pass": true
+ },
+ {
+  "test": "hostile temp-table shadowing + search_path",
+  "user": "ax_monitor",
+  "expected": "ROWS",
+  "got": "OK",
+  "pass": true
+ },
+ {
+  "test": "hostile search_path result names/severities identical to baseline (modulo stale flaps)",
+  "pass": false
+ },
+ {
+  "test": "monitor SET pg_trickle.parallel_refresh_mode=off",
+  "got": "42501",
+  "note": "SET refused"
+ },
+ {
+  "test": "monitor SET pg_trickle.disk_headroom_mb=0 then facade",
+  "user": "ax_monitor",
+  "expected": "ROWS",
+  "got": "OK",
+  "pass": true,
+  "observed": []
+ },
+ {
+  "test": "monitor SET pg_trickle.change_buffer_schema=public",
+  "got": "42501",
+  "note": "SET refused"
+ },
+ {
+  "test": "monitor SET row_security=off then facade",
+  "user": "ax_monitor",
+  "expected": "ROWS",
+  "got": "OK",
+  "pass": true,
+  "observed": [
+   [
+    "stale_tables",
+    "OK"
+   ],
+   [
+    "stale_tables",
+    "WARN"
+   ]
+  ]
+ },
+ {
+  "test": "statement_timeout 1ms -> error propagates (app sanitises)",
+  "user": "ax_monitor",
+  "expected": "57014",
+  "got": "57014",
+  "pass": true
+ }
+]

@@ -1,0 +1,299 @@
+Output format is unaligned.
+BEGIN
+role|ax_api|f|t|f|f|t|f|f
+role|ax_monitor|f|t|f|f|t|f|f
+role|ax_writer|f|t|f|f|t|f|f
+role|pgtrickle_admin|f|f|f|f|f|f|f
+role|pgtrickle_operator|f|f|f|f|f|f|f
+role|pgtrickle_reader|f|f|f|f|f|f|f
+role|postgres|t|t|t|t|t|t|t
+member|pg_monitor|ax_monitor|f|t|t|postgres
+member|pg_read_all_settings|pg_monitor|f|t|t|postgres
+member|pg_read_all_stats|pg_monitor|f|t|t|postgres
+member|pg_stat_scan_tables|pg_monitor|f|t|t|postgres
+member|pgtrickle_operator|pgtrickle_admin|f|f|t|postgres
+member|pgtrickle_reader|pgtrickle_operator|f|f|t|postgres
+nsp|ax|postgres|{postgres=UC/postgres,ax_api=U/postgres,ax_writer=U/postgres,ax_monitor=U/postgres}
+nsp|pgtrickle|postgres|{postgres=UC/postgres,pgtrickle_reader=U/postgres,pgtrickle_operator=U/postgres,pgtrickle_admin=U/postgres,ax_api=U/postgres,ax_monitor=U/postgres}
+nsp|pgtrickle_changes|postgres|{postgres=UC/postgres}
+nsp|public|pg_database_owner|{pg_database_owner=UC/pg_database_owner,=U/pg_database_owner}
+rel|ax|customers|r|postgres||f|f
+rel|ax|order_id_seq|S|postgres|{postgres=rwU/postgres,ax_writer=U/postgres}|f|f
+rel|ax|orders|r|postgres|{postgres=arwdDxtm/postgres,ax_api=r/postgres,ax_writer=arw/postgres}|t|t
+rel|ax|products|r|postgres|{postgres=arwdDxtm/postgres,ax_api=r/postgres}|t|t
+rel|ax|st_day_category_status|r|postgres|{postgres=arwdDxtm/postgres,ax_api=r/postgres}|t|t
+rel|ax|st_day_product_status|r|postgres|{postgres=arwdDxtm/postgres,ax_api=r/postgres}|t|t
+rel|ax|st_hour_category_status|r|postgres|{postgres=arwdDxtm/postgres,ax_api=r/postgres}|t|t
+rel|ax|tenants|r|postgres|{postgres=arwdDxtm/postgres,ax_monitor=r/postgres}|f|f
+rel|pgtrickle|citus_status|v|postgres||f|f
+rel|pgtrickle|pg_stat_pgtrickle|v|postgres||f|f
+rel|pgtrickle|pg_stat_progress_pgtrickle|v|postgres|{postgres=arwdDxtm/postgres,pgtrickle_reader=r/postgres,pgtrickle_operator=r/postgres,pgtrickle_admin=r/postgres}|f|f
+rel|pgtrickle|pg_stat_stream_tables|v|postgres||f|f
+rel|pgtrickle|pgt_capture_instance|r|postgres|{postgres=arwdDxtm/postgres}|f|f
+rel|pgtrickle|pgt_cdc_status|v|postgres||f|f
+rel|pgtrickle|pgt_change_buffers|r|postgres||f|f
+rel|pgtrickle|pgt_change_tracking|r|postgres||f|f
+rel|pgtrickle|pgt_cleanup_status|r|postgres||f|f
+rel|pgtrickle|pgt_cost_model_summary|r|postgres||f|f
+rel|pgtrickle|pgt_dependencies|r|postgres||f|f
+rel|pgtrickle|pgt_distance_subscriptions|r|postgres||f|f
+rel|pgtrickle|pgt_freshness_controller_state|r|postgres|{postgres=arwdDxtm/postgres}|f|f
+rel|pgtrickle|pgt_graph_refresh_id_seq|S|postgres||f|f
+rel|pgtrickle|pgt_outbox_config|r|postgres||f|f
+rel|pgtrickle|pgt_output_delta_batches|r|postgres||f|f
+rel|pgtrickle|pgt_output_delta_consumers|r|postgres||f|f
+rel|pgtrickle|pgt_output_delta_logs|r|postgres||f|f
+rel|pgtrickle|pgt_output_delta_resnapshots|r|postgres||f|f
+rel|pgtrickle|pgt_publication_bindings|r|postgres|{postgres=arwdDxtm/postgres}|f|f
+rel|pgtrickle|pgt_refresh_groups|r|postgres||f|f
+rel|pgtrickle|pgt_refresh_groups_group_id_seq|S|postgres||f|f
+rel|pgtrickle|pgt_refresh_history|r|postgres|{postgres=arwdDxtm/postgres,ax_monitor=r/postgres}|f|f
+rel|pgtrickle|pgt_refresh_history_refresh_id_seq|S|postgres||f|f
+rel|pgtrickle|pgt_refresh_summary|r|postgres||f|f
+rel|pgtrickle|pgt_row_identity_v2_consumers|r|postgres|{postgres=arwdDxtm/postgres}|f|f
+rel|pgtrickle|pgt_row_identity_v2_consumers_consumer_id_seq|S|postgres||f|f
+rel|pgtrickle|pgt_row_identity_v2_inventory|r|postgres|{postgres=arwdDxtm/postgres}|f|f
+rel|pgtrickle|pgt_scheduler_jobs|r|postgres||f|f
+rel|pgtrickle|pgt_scheduler_jobs_job_id_seq|S|postgres||f|f
+rel|pgtrickle|pgt_schema_version|r|postgres||f|f
+rel|pgtrickle|pgt_set_operation_states|r|postgres||f|f
+rel|pgtrickle|pgt_snapshots|r|postgres||f|f
+rel|pgtrickle|pgt_snapshots_snapshot_id_seq|S|postgres||f|f
+rel|pgtrickle|pgt_source_gates|r|postgres||f|f
+rel|pgtrickle|pgt_st_locks|r|postgres||f|f
+rel|pgtrickle|pgt_stream_tables|r|postgres|{postgres=arwdDxtm/postgres,ax_monitor=r/postgres}|f|f
+rel|pgtrickle|pgt_stream_tables_pgt_id_seq|S|postgres||f|f
+rel|pgtrickle|pgt_subscriptions|r|postgres||f|f
+rel|pgtrickle|pgt_template_cache|r|postgres||f|f
+rel|pgtrickle|pgt_wal_receipts|r|postgres|{postgres=arwdDxtm/postgres}|f|f
+rel|pgtrickle|pgt_wal_receipts_receipt_id_seq|S|postgres||f|f
+rel|pgtrickle|pgt_watermark_groups|r|postgres||f|f
+rel|pgtrickle|pgt_watermark_groups_group_id_seq|S|postgres||f|f
+rel|pgtrickle|pgt_watermarks|r|postgres||f|f
+rel|pgtrickle|pgt_window_states|r|postgres|{postgres=arwdDxtm/postgres}|f|f
+rel|pgtrickle|pgt_worker_slots|r|postgres||f|f
+rel|pgtrickle|quick_health|v|postgres||f|f
+rel|pgtrickle|stream_tables_info|v|postgres|{postgres=arwdDxtm/postgres,ax_monitor=r/postgres}|f|f
+rel|pgtrickle_changes|changes_1d8a10d0e8bcdd15|r|postgres||f|f
+rel|pgtrickle_changes|changes_1d8a10d0e8bcdd15_change_id_seq|S|postgres||f|f
+rel|pgtrickle_changes|changes_daaaeeb1fdc57e97|r|postgres||f|f
+rel|pgtrickle_changes|changes_daaaeeb1fdc57e97_change_id_seq|S|postgres||f|f
+fn|ax|ax.current_tenant()|postgres|f|||f595f61b342881ae209e347615bad844
+fn|ax|ax.oracle_mismatches()|postgres|f|||de8add3dd22dd6d657f410b52213cdea
+fn|ax|ax.orders_derive_buckets()|postgres|f|||c3c716a94e98ec79cee79e058c0c777b
+fn|ax|ax._pgt_guard_st_day_category_status()|postgres|f|||087264564dc457fc60b6a6dafc746b5e
+fn|ax|ax._pgt_guard_st_day_product_status()|postgres|f|||087264564dc457fc60b6a6dafc746b5e
+fn|ax|ax._pgt_guard_st_hour_category_status()|postgres|f|||087264564dc457fc60b6a6dafc746b5e
+fn|ax|ax.refresh_audit(timestamp with time zone)|postgres|f|||8ce628f24d4fde1699d82aec6969bd62
+fn|ax|ax.tenant_order_counts()|postgres|t|{"search_path=pg_catalog, ax"}|{postgres=X/postgres,ax_monitor=X/postgres}|b9dfb012def5c9c774c287384d50e6cb
+fn|pgtrickle|pgtrickle.ack_output_delta_resnapshot(uuid,uuid)|postgres|t|{"search_path=pgtrickle, pg_catalog, pg_temp"}|{postgres=X/postgres}|1dfb8a6f0635b465d8eb160007fdbc55
+fn|pgtrickle|pgtrickle.ack_output_delta(uuid,bigint,text)|postgres|t|{"search_path=pgtrickle, pg_catalog, pg_temp"}|{postgres=X/postgres}|3cf0f87b9ec8db0714107b74154c9474
+fn|pgtrickle|pgtrickle.active_profile()|postgres|f||{postgres=X/postgres,pgtrickle_reader=X/postgres,=X/postgres}|b187ff4d5034db46fb7b1f7181f7d56e
+fn|pgtrickle|pgtrickle.advance_watermark(text,timestamp with time zone)|postgres|f||{postgres=X/postgres}|e2ecc8bae1f36a14810c2bd7a91072ba
+fn|pgtrickle|pgtrickle.alter_stream_table(text,text,text,text,text,text,text,text,boolean,boolean,text,text,bigint,integer,text,integer,double precision,text,double precision,text)|postgres|t|{"search_path=pgtrickle, pg_catalog, pg_temp"}|{postgres=X/postgres,pgtrickle_admin=X/postgres}|e8ce496bd640d5cb4c9e50e62dbf9b3c
+fn|pgtrickle|pgtrickle.attach_embedding_outbox(text,text,integer,integer)|postgres|t|{"search_path=pgtrickle, pg_catalog, pg_temp"}|{postgres=X/postgres}|1c272c8526991cedd93a6892b439dfac
+fn|pgtrickle|pgtrickle.attach_outbox(text,integer,integer)|postgres|t|{"search_path=pgtrickle, pg_catalog, pg_temp"}|{postgres=X/postgres}|54dd2a3e24cd9748780e654dc6d8a6ff
+fn|pgtrickle|pgtrickle.begin_output_delta_resnapshot(uuid)|postgres|t|{"search_path=pgtrickle, pg_catalog, pg_temp"}|{postgres=X/postgres}|ccf1c561c7e6722c916d32ed1203cc5d
+fn|pgtrickle|pgtrickle.bootstrap_gate_status()|postgres|f||{postgres=X/postgres,=X/postgres}|b7d7123ec65f1d0ab6c016ab5751bac6
+fn|pgtrickle|pgtrickle.bulk_alter_stream_tables(text[],json)|postgres|t|{"search_path=pgtrickle, pg_catalog, pg_temp"}|{postgres=X/postgres}|8f52ab462d8be952a7954d7d8a8012f7
+fn|pgtrickle|pgtrickle.bulk_create(jsonb)|postgres|t|{"search_path=pgtrickle, pg_catalog, pg_temp"}|{postgres=X/postgres}|7b1573e999a2318e556dd23d7adf86fb
+fn|pgtrickle|pgtrickle.bulk_drop_stream_tables(text[])|postgres|t|{"search_path=pgtrickle, pg_catalog, pg_temp"}|{postgres=X/postgres}|d6774547b20c613d95df03afde5690d0
+fn|pgtrickle|pgtrickle._bump_contract_generation()|postgres|f|{"search_path=pgtrickle, pg_catalog, pg_temp"}|{postgres=X/postgres}|dc41a7db96ef61b380cd99da94a47419
+fn|pgtrickle|pgtrickle._bump_dependency_contract_generation()|postgres|f|{"search_path=pgtrickle, pg_catalog, pg_temp"}|{postgres=X/postgres}|fe9690f23b245d53203f1889b9bc3453
+fn|pgtrickle|pgtrickle.cache_stats()|postgres|f||{postgres=X/postgres,=X/postgres}|8ce2ee3c267ee9474a590bc68cf27dd3
+fn|pgtrickle|pgtrickle.canary_begin(text,text)|postgres|f||{postgres=X/postgres}|444f40b3bdbaefa66690b6d36e71c5d0
+fn|pgtrickle|pgtrickle.canary_diff(text)|postgres|f||{postgres=X/postgres}|eb692a0bb99a5ca13bc93c53573f1660
+fn|pgtrickle|pgtrickle.canary_promote(text)|postgres|f||{postgres=X/postgres}|2f50a91e17b32a3199686cc3a0126818
+fn|pgtrickle|pgtrickle.capture_instance_status()|postgres|f||{postgres=X/postgres,=X/postgres}|70c598a615e3efd5956867d4f5be421f
+fn|pgtrickle|pgtrickle.cdc_pause_status()|postgres|f||{postgres=X/postgres,=X/postgres}|3de26af46b53910a5ce889f0c83cad9c
+fn|pgtrickle|pgtrickle.change_buffer_sizes()|postgres|f||{postgres=X/postgres,=X/postgres}|3c82d79d46b73b3c5bec146bbe26c245
+fn|pgtrickle|pgtrickle.check_cdc_health()|postgres|f||{postgres=X/postgres,=X/postgres}|d524db963afeebda4d81d93940caaddf
+fn|pgtrickle|pgtrickle.clear_caches()|postgres|f||{postgres=X/postgres}|8f06fb8a3199ba0391feeb99f8028c87
+fn|pgtrickle|pgtrickle.cluster_worker_summary()|postgres|f||{postgres=X/postgres,=X/postgres}|677c4ab8b6e253b4b6794e13ffce1df2
+fn|pgtrickle|pgtrickle.commit_latency_stats()|postgres|f||{postgres=X/postgres,=X/postgres}|55d6e806235d599197e8730586988a96
+fn|pgtrickle|pgtrickle.convert_buffers_to_unlogged()|postgres|f||{postgres=X/postgres}|ff9fb013a7f2a019553a3740a4aae696
+fn|pgtrickle|pgtrickle.create_or_replace_stream_table(text,text,text,text,boolean,text,text,text,boolean,boolean,text,integer,double precision,text,boolean,text,text)|postgres|t|{"search_path=pgtrickle, pg_catalog, pg_temp"}|{postgres=X/postgres}|8f30a7c52a60c42ef03cf8520e16a8c4
+fn|pgtrickle|pgtrickle.create_refresh_group(text,text[],text)|postgres|f||{postgres=X/postgres}|4d6e24c2bee521591d66aeb1d972da93
+fn|pgtrickle|pgtrickle.create_stream_table_batch(text,text,text,boolean,text,integer,double precision)|postgres|t|{"search_path=pgtrickle, pg_catalog, pg_temp"}|{postgres=X/postgres}|334d5eaec7401d885b4722d1f1238241
+fn|pgtrickle|pgtrickle.create_stream_table_cost_optimized(text,text,text,boolean,text,integer,double precision)|postgres|t|{"search_path=pgtrickle, pg_catalog, pg_temp"}|{postgres=X/postgres}|19e66738bd2f09504297e73bb11f943c
+fn|pgtrickle|pgtrickle.create_stream_table_fast_append_only(text,text,text,text,text,integer,double precision)|postgres|t|{"search_path=pgtrickle, pg_catalog, pg_temp"}|{postgres=X/postgres}|7d6036dfe8d77e45c1f2a0f33c5133d5
+fn|pgtrickle|pgtrickle.create_stream_table_if_not_exists(text,text,text,text,boolean,text,text,text,boolean,boolean,text,integer,double precision,text,boolean,text,integer,text,text)|postgres|t|{"search_path=pgtrickle, pg_catalog, pg_temp"}|{postgres=X/postgres}|b5e8daef5fbc275530cf97f44203297e
+fn|pgtrickle|pgtrickle.create_stream_table_realtime(text,text,text,boolean,text,integer,double precision)|postgres|t|{"search_path=pgtrickle, pg_catalog, pg_temp"}|{postgres=X/postgres}|af7cbe17d90f7561c50fdba1b2a77ed2
+fn|pgtrickle|pgtrickle.create_stream_table(text,text,text,text,boolean,text,text,text,boolean,boolean,text,integer,double precision,text,boolean,text,integer,text,text)|postgres|t|{"search_path=pgtrickle, pg_catalog, pg_temp"}|{postgres=X/postgres,pgtrickle_admin=X/postgres}|c441d8659726edbf37c51fa4e91d2daf
+fn|pgtrickle|pgtrickle.create_watermark_group(text,text[],double precision)|postgres|f||{postgres=X/postgres}|9ca2ab3cb69c3125f8220e165c8728fe
+fn|pgtrickle|pgtrickle.dedup_stats()|postgres|f||{postgres=X/postgres,=X/postgres}|0416b56d5fb98895bd713006d9ed6470
+fn|pgtrickle|pgtrickle.dependency_tree()|postgres|f||{postgres=X/postgres,=X/postgres}|b1a998b9e3586b84763bc4fefb270d7d
+fn|pgtrickle|pgtrickle.detach_outbox(text,boolean)|postgres|t|{"search_path=pgtrickle, pg_catalog, pg_temp"}|{postgres=X/postgres}|a647092ddaa8b36b7b8b33eeacfb660b
+fn|pgtrickle|pgtrickle.diagnose_errors(text)|postgres|f||{postgres=X/postgres,=X/postgres}|070fcd699816f9293c43571b32b6469f
+fn|pgtrickle|pgtrickle.diamond_groups()|postgres|f||{postgres=X/postgres,=X/postgres}|bdfbd174fc723fa83f80bf3163bbc062
+fn|pgtrickle|pgtrickle.disk_usage()|postgres|f||{postgres=X/postgres,pgtrickle_reader=X/postgres,=X/postgres}|0efce743a1109242f89421c1e2e6b064
+fn|pgtrickle|pgtrickle.drain(integer)|postgres|f||{postgres=X/postgres,pgtrickle_operator=X/postgres}|13bfb21acdef23c9998263da895c5123
+fn|pgtrickle|pgtrickle.drop_refresh_group(text)|postgres|f||{postgres=X/postgres}|eee648e8868b3e336a88088c406efc20
+fn|pgtrickle|pgtrickle.drop_snapshot(text)|postgres|t|{"search_path=pgtrickle, pg_catalog, pg_temp"}|{postgres=X/postgres}|6fdaa03d49c87d1ea78da058d3b4b728
+fn|pgtrickle|pgtrickle.drop_stream_table_publication(text)|postgres|t|{"search_path=pgtrickle, pg_catalog, pg_temp"}|{postgres=X/postgres}|80f84348715401ab1e7bc5e34b6b9957
+fn|pgtrickle|pgtrickle.drop_stream_table(text,boolean)|postgres|t|{"search_path=pgtrickle, pg_catalog, pg_temp"}|{postgres=X/postgres,pgtrickle_admin=X/postgres}|1bd47deebf4dd23f052cd0b99aecfe33
+fn|pgtrickle|pgtrickle.drop_watermark_group(text)|postgres|f||{postgres=X/postgres}|41a0e2c558907ac237c69ddd19cfc7bb
+fn|pgtrickle|pgtrickle.embedding_stream_table(text,text,text,text,text,text,boolean)|postgres|f||{postgres=X/postgres}|07107d0fe93e94f2e6e8691ae276ebf6
+fn|pgtrickle|pgtrickle.encode_row_id_v2(text,anyelement)|postgres|f||{postgres=X/postgres,=X/postgres}|431fbf2daee482f8b9bdd394c00e368b
+fn|pgtrickle|pgtrickle.encode_row_id_v3(text,anyelement)|postgres|f||{postgres=X/postgres,=X/postgres}|5ef082fe2a11eda95eaed12a8038f5b3
+fn|pgtrickle|pgtrickle.error_catalog()|postgres|f||{postgres=X/postgres,pgtrickle_reader=X/postgres,=X/postgres}|22f1be2198d8323c1780912f3597fa4a
+fn|pgtrickle|pgtrickle.exec_stream_ddl(text)|postgres|f||{postgres=X/postgres}|af4386ac348a3d3270c22f49975e8558
+fn|pgtrickle|pgtrickle.explain_alter(text,text)|postgres|f||{postgres=X/postgres,=X/postgres}|d1ca7eac61820a274276593b7ae49f63
+fn|pgtrickle|pgtrickle.explain_dag(text)|postgres|f||{postgres=X/postgres,=X/postgres}|be71a047a20be625f8c8d4b3b6fe6411
+fn|pgtrickle|pgtrickle.explain_delta_plan(bigint)|postgres|f||{postgres=X/postgres,=X/postgres}|da6657586e2a698b34dc4ccb43dd64ec
+fn|pgtrickle|pgtrickle.explain_delta(text,text)|postgres|f||{postgres=X/postgres,=X/postgres}|2e158655c156533418fd6e811b7963e5
+fn|pgtrickle|pgtrickle.explain_diff_sql(text)|postgres|f||{postgres=X/postgres,=X/postgres}|12596f4b5063a238e61486c29763f7b7
+fn|pgtrickle|pgtrickle.explain_json(text)|postgres|f||{postgres=X/postgres,=X/postgres}|e28757f015bf3b315c9c6f7e8045bd41
+fn|pgtrickle|pgtrickle.explain_query_rewrite(text)|postgres|f||{postgres=X/postgres,=X/postgres}|93df9b84a95d51940fdc9a304cdf7926
+fn|pgtrickle|pgtrickle.explain_refresh_mode(text)|postgres|f||{postgres=X/postgres,=X/postgres}|7d53c79a716d1409f1cadfaa1da22786
+fn|pgtrickle|pgtrickle.explain_stream_table(text)|postgres|f||{postgres=X/postgres,=X/postgres}|7ff0878bf1666f0f53cdc7537ed12de2
+fn|pgtrickle|pgtrickle.explain_st(text,boolean)|postgres|f||{postgres=X/postgres,=X/postgres}|1a0ab9afedf3c639be03deef1aff505f
+fn|pgtrickle|pgtrickle.explain(text)|postgres|f||{postgres=X/postgres,=X/postgres}|ac0346cfafc4f1833a135ea1a6cf83ed
+fn|pgtrickle|pgtrickle.export_definition(text)|postgres|f||{postgres=X/postgres,=X/postgres}|66332b513e2616076c2ae34976a97a7f
+fn|pgtrickle|pgtrickle.freshness()|postgres|f||{postgres=X/postgres,=X/postgres}|a6379f588940eeb1f92266752ec2d59b
+fn|pgtrickle|pgtrickle.fuse_status()|postgres|f||{postgres=X/postgres,=X/postgres}|a72d39e20fca5830f5da09b038cca757
+fn|pgtrickle|pgtrickle.gate_source(text)|postgres|f||{postgres=X/postgres}|58c671fdf80538f3971c6eae8f22b85a
+fn|pgtrickle|pgtrickle.get_refresh_history(text,integer)|postgres|f||{postgres=X/postgres,=X/postgres}|d743d38b9bb4e930f496c514e0245f1e
+fn|pgtrickle|pgtrickle.get_staleness(text)|postgres|f||{postgres=X/postgres,=X/postgres}|f4aeea7927de706394631757e6470752
+fn|pgtrickle|pgtrickle.graph_contract(regclass[])|postgres|t|{"search_path=pgtrickle, pg_catalog, pg_temp"}|{postgres=X/postgres}|f0c6b937eb246f1c0dd4c75e34e52ac9
+fn|pgtrickle|pgtrickle.handle_vp_promoted(text)|postgres|f||{postgres=X/postgres}|9ad718cd2d6f8cbf360adb1e3cddb927
+fn|pgtrickle|pgtrickle.health_check()|postgres|f||{postgres=X/postgres,=X/postgres}|190907cc2ece6eab3ff797eb87a94c14
+fn|pgtrickle|pgtrickle.health_summary()|postgres|f||{postgres=X/postgres,=X/postgres}|1ed981cf2c74d688872ed618861d3008
+fn|pgtrickle|pgtrickle.history_prune_status()|postgres|f||{postgres=X/postgres,=X/postgres}|c42b78f0b6b9adeb10ecf71cc6f7e1b4
+fn|pgtrickle|pgtrickle.integration_capabilities()|postgres|f||{postgres=X/postgres}|0b4dde9750e328f0f58fe1b41a628fbb
+fn|pgtrickle|pgtrickle.is_drained()|postgres|f||{postgres=X/postgres,=X/postgres}|14f6e7f633a404757f245b33b5ac159d
+fn|pgtrickle|pgtrickle.lifecycle_preflight()|postgres|f||{postgres=X/postgres}|e4a32b437ade951c6abf3e4ecf24913a
+fn|pgtrickle|pgtrickle.list_auxiliary_columns(text)|postgres|f||{postgres=X/postgres,=X/postgres}|c5cf14e5dd6c9975619e5198bcc140f6
+fn|pgtrickle|pgtrickle.list_distance_subscriptions(text)|postgres|f||{postgres=X/postgres,=X/postgres}|7a873839adb4b02979a9aaa68d51bf1f
+fn|pgtrickle|pgtrickle.list_snapshots(text)|postgres|t|{"search_path=pgtrickle, pg_catalog, pg_temp"}|{postgres=X/postgres,=X/postgres}|2a5bdb3f87d591b7c5afc6b730a9061d
+fn|pgtrickle|pgtrickle.list_sources(text)|postgres|f||{postgres=X/postgres,=X/postgres}|75d3f9a8756d88ac997e60c98f56f1e7
+fn|pgtrickle|pgtrickle.list_subscriptions()|postgres|f||{postgres=X/postgres,=X/postgres}|73df9fa891eae3d1464c56233b1c32ba
+fn|pgtrickle|pgtrickle.metrics_summary()|postgres|f||{postgres=X/postgres,=X/postgres}|907fb856b6df9ce94ac27ae753355650
+fn|pgtrickle|pgtrickle.migrate()|postgres|f||{postgres=X/postgres}|4d36f5bbb7086318b1ab383fb96a4786
+fn|pgtrickle|pgtrickle._on_ddl_end()|postgres|t|{"search_path=pgtrickle, pg_catalog, pg_temp"}|{postgres=X/postgres}|96ef9218910d391ba6e605a65b066502
+fn|pgtrickle|pgtrickle._on_sql_drop()|postgres|t|{"search_path=pgtrickle, pg_catalog, pg_temp"}|{postgres=X/postgres}|e218f9a2f25b9a1a6a470bd43c3d84c1
+fn|pgtrickle|pgtrickle.output_delta_batches(uuid,bigint)|postgres|t|{"search_path=pgtrickle, pg_catalog, pg_temp"}|{postgres=X/postgres}|7b00f4e8fcf46ed51dcea3e8209161c2
+fn|pgtrickle|pgtrickle.output_delta_consumer_status()|postgres|t|{"search_path=pgtrickle, pg_catalog, pg_temp"}|{postgres=X/postgres}|e30b62717f2dcb94bf6a36d9178e182e
+fn|pgtrickle|pgtrickle.parallel_job_status(integer)|postgres|f||{postgres=X/postgres,=X/postgres}|17896c633800d7f1ca746c2b2abcbc7f
+fn|pgtrickle|pgtrickle.parse_duration_seconds(text)|postgres|f||{postgres=X/postgres,=X/postgres}|dfaeabb91e6f5c356fcb99a7e0e33bb3
+fn|pgtrickle|pgtrickle.pause_all()|postgres|f||{postgres=X/postgres}|8bb0984355791de379f50466ef6bd5ba
+fn|pgtrickle|pgtrickle.pause_scheduler(text[])|postgres|f||{postgres=X/postgres}|cd91de611e760ad4d8d5bd1a4f45ffe0
+fn|pgtrickle|pgtrickle.pause_stream_table(text)|postgres|t|{"search_path=pgtrickle, pg_catalog, pg_temp"}|{postgres=X/postgres,pgtrickle_operator=X/postgres}|1e63802addf9e1fa8bca6ea4a0194253
+fn|pgtrickle|pgtrickle.pgt_ivm_apply_delta(bigint,integer,boolean,boolean)|postgres|f||{postgres=X/postgres}|3a14b4c937c6e3d0d51039b4e400867e
+fn|pgtrickle|pgtrickle.pgt_ivm_apply_delta_enr(bigint,integer,boolean,boolean)|postgres|f||{postgres=X/postgres}|6b369d883b3924782b4c70ce68dd4bb9
+fn|pgtrickle|pgtrickle.pgt_ivm_handle_truncate(bigint)|postgres|f||{postgres=X/postgres}|a1960c2486d1209295326ad1b9f8f03a
+fn|pgtrickle|pgtrickle.pg_trickle_hash_multi(text[])|postgres|f||{postgres=X/postgres,=X/postgres}|d4fa81310e13881318637feeb3479187
+fn|pgtrickle|pgtrickle.pg_trickle_hash(text)|postgres|f||{postgres=X/postgres,=X/postgres}|e57572eed7268730b5525689fa312bf7
+fn|pgtrickle|pgtrickle.pgtrickle_refresh_stats()|postgres|f||{postgres=X/postgres,=X/postgres}|78f68f272a42b06973c8c342d21c124f
+fn|pgtrickle|pgtrickle.pgt_scc_status()|postgres|f||{postgres=X/postgres,=X/postgres}|ada8191e5546323804a9b14d0fc7fd82
+fn|pgtrickle|pgtrickle.pgt_status()|postgres|f||{postgres=X/postgres,=X/postgres}|58561a1b04b29fb6d29947ed1c45267c
+fn|pgtrickle|pgtrickle.preflight()|postgres|f||{postgres=X/postgres,=X/postgres}|3b16cf503a121902a6f4713389b3dc24
+fn|pgtrickle|pgtrickle.preflight_upgrade()|postgres|f||{postgres=X/postgres,=X/postgres}|1b8748e5e2c26c0c081f4156a877816e
+fn|pgtrickle|pgtrickle.preview_stream_table(text,text,text,text)|postgres|f||{postgres=X/postgres,=X/postgres}|4acaf8181ddd41e151568015d6b895bd
+fn|pgtrickle|pgtrickle.qualify_output_delta_recovery(uuid,text)|postgres|t|{"search_path=pgtrickle, pg_catalog, pg_temp"}|{postgres=X/postgres}|ee1c4c82c2fdfc6e82a494efde74549c
+fn|pgtrickle|pgtrickle.quiesce(integer)|postgres|f||{postgres=X/postgres}|e1b46b3f74949fb0219c4cc00cf3ba40
+fn|pgtrickle|pgtrickle.rebuild_cdc_triggers()|postgres|f||{postgres=X/postgres}|3510deef99541309b984ae609815d031
+fn|pgtrickle|pgtrickle.recommend_refresh_mode(text)|postgres|f||{postgres=X/postgres,=X/postgres}|6cd2b7ed99ed9f58b90883e6120442ac
+fn|pgtrickle|pgtrickle.recommend_schedule(text)|postgres|f||{postgres=X/postgres,=X/postgres}|97359d247a6c24cb54ff983018172afa
+fn|pgtrickle|pgtrickle.recommend_target_freshness(text)|postgres|f||{postgres=X/postgres}|3fa9a66b97ab90b4dd1e9be6bdc5f280
+fn|pgtrickle|pgtrickle.recover_capture_instance()|postgres|t|{"search_path=pgtrickle, pg_catalog, pg_temp"}|{postgres=X/postgres}|a75e18bcecbb545bdaae6cd4f4c8a533
+fn|pgtrickle|pgtrickle.refresh_efficiency()|postgres|f||{postgres=X/postgres}|fe403603756999b7422ecde112528512
+fn|pgtrickle|pgtrickle.refresh_graph_strict(regclass[],bytea,text)|postgres|t|{"search_path=pgtrickle, pg_catalog, pg_temp"}|{postgres=X/postgres}|379a8447cd9f315de73cb041b6eabaf9
+fn|pgtrickle|pgtrickle.refresh_groups()|postgres|f||{postgres=X/postgres}|e15bf69129a54b0746e793bce7ff5d51
+fn|pgtrickle|pgtrickle.refresh_if_stale(text,interval)|postgres|f||{postgres=X/postgres,pgtrickle_operator=X/postgres}|fa3df130ce127a2df2c52cbff23588b9
+fn|pgtrickle|pgtrickle.refresh_stream_table(text)|postgres|t|{"search_path=pgtrickle, pg_catalog, pg_temp"}|{postgres=X/postgres,pgtrickle_operator=X/postgres}|966dc5ef43d216bf7e24f9cd2899ac6d
+fn|pgtrickle|pgtrickle.refresh_timeline(integer)|postgres|f||{postgres=X/postgres}|5425cb19f39592f33df04663ac19fcdd
+fn|pgtrickle|pgtrickle.register_output_delta_consumer(oid,text,bytea,text)|postgres|t|{"search_path=pgtrickle, pg_catalog, pg_temp"}|{postgres=X/postgres}|9d21ae9d2c35f74fa598a8dc49e01cbf
+fn|pgtrickle|pgtrickle.reinitialize_stream_table(text)|postgres|t|{"search_path=pgtrickle, pg_catalog, pg_temp"}|{postgres=X/postgres,pgtrickle_operator=X/postgres}|cb0b5d735b6283b3be5c8122f0b6d9e9
+fn|pgtrickle|pgtrickle._reject_output_delta_contract_change()|postgres|f|{"search_path=pgtrickle, pg_catalog, pg_temp"}|{postgres=X/postgres}|9b9b121be3bd94fba66bd643f958751b
+fn|pgtrickle|pgtrickle.reliability_counters()|postgres|f||{postgres=X/postgres,=X/postgres}|8e61dc90342b8473d6d7ea7fee9a3ef9
+fn|pgtrickle|pgtrickle.repair_stream_table(text)|postgres|t|{"search_path=pgtrickle, pg_catalog, pg_temp"}|{postgres=X/postgres,pgtrickle_operator=X/postgres}|0549d26fb30a2ca1d38b20daa32e86f1
+fn|pgtrickle|pgtrickle.request_output_delta_resnapshot(uuid)|postgres|t|{"search_path=pgtrickle, pg_catalog, pg_temp"}|{postgres=X/postgres,=X/postgres}|2079c3f48989417c85cb44fd7a225171
+fn|pgtrickle|pgtrickle.reset_fuse(text,text)|postgres|t|{"search_path=pgtrickle, pg_catalog, pg_temp"}|{postgres=X/postgres}|de87f5558ad077a2b04da2486ed12a4b
+fn|pgtrickle|pgtrickle.restore_from_snapshot(text,text)|postgres|t|{"search_path=pgtrickle, pg_catalog, pg_temp"}|{postgres=X/postgres}|1cd5c8646a9d444fd4dd647068257403
+fn|pgtrickle|pgtrickle.restore_stream_tables()|postgres|f||{postgres=X/postgres}|6dcf41d6610b6f223bbb438c22f462bd
+fn|pgtrickle|pgtrickle.resume_after_drain()|postgres|f||{postgres=X/postgres}|04ade8af4f123471586e481aec5cacb5
+fn|pgtrickle|pgtrickle.resume_all()|postgres|f||{postgres=X/postgres}|ce29d745de0f57c55ceda6a1f5ec046e
+fn|pgtrickle|pgtrickle.resume_scheduler(text[])|postgres|f||{postgres=X/postgres}|5f14e345e35565bbf49cb8107b6f3bf1
+fn|pgtrickle|pgtrickle.resume_stream_table(text)|postgres|t|{"search_path=pgtrickle, pg_catalog, pg_temp"}|{postgres=X/postgres,pgtrickle_operator=X/postgres}|82128c965465de46ec96abeba05ba6f3
+fn|pgtrickle|pgtrickle.row_identity_v2_acknowledge_consumer(bigint,text)|postgres|f|{"search_path=pgtrickle, pg_catalog, pg_temp"}|{postgres=X/postgres}|499354842d6cfc6d1eb02f1bf6fe4baf
+fn|pgtrickle|pgtrickle.row_identity_v2_acknowledge_inventory()|postgres|f|{"search_path=pgtrickle, pg_catalog, pg_temp"}|{postgres=X/postgres}|120389963dd90a6bd5561b3b9fcaf2e6
+fn|pgtrickle|pgtrickle._row_identity_v2_admin()|postgres|f|{"search_path=pgtrickle, pg_catalog, pg_temp"}|{postgres=X/postgres}|fb75cea60ba78aa83a714558663d8ec3
+fn|pgtrickle|pgtrickle.row_identity_v2_consumer_inventory()|postgres|f|{"search_path=pgtrickle, pg_catalog, pg_temp"}|{postgres=X/postgres}|53087a127ae0e174dee2a91686c31349
+fn|pgtrickle|pgtrickle.row_identity_v2_record_inventory(text)|postgres|f|{"search_path=pgtrickle, pg_catalog, pg_temp"}|{postgres=X/postgres}|1adfa055a029b0cf6e604cd7e35a6d6e
+fn|pgtrickle|pgtrickle.row_identity_v2_recreation_preflight()|postgres|f|{"search_path=pgtrickle, pg_catalog, pg_temp"}|{postgres=X/postgres}|08cbb2a72d78c4766f598eba13dd0bc3
+fn|pgtrickle|pgtrickle.row_identity_v2_register_consumer(text,text,text[],boolean,boolean,text)|postgres|f|{"search_path=pgtrickle, pg_catalog, pg_temp"}|{postgres=X/postgres}|7ffcca284c795090129f7179aa1c34c0
+fn|pgtrickle|pgtrickle.row_probe_v1(bytea)|postgres|f||{postgres=X/postgres,=X/postgres}|29c402c514d6aeb523b895d7d0a3b366
+fn|pgtrickle|pgtrickle.schedule_recommendations()|postgres|f||{postgres=X/postgres,=X/postgres}|66c38502c610670f895ed72c3d553705
+fn|pgtrickle|pgtrickle.scheduler_overhead()|postgres|f||{postgres=X/postgres,=X/postgres}|b338756ca062618dfb4fc92e0176cc68
+fn|pgtrickle|pgtrickle.self_monitoring_status()|postgres|f||{postgres=X/postgres,=X/postgres}|fb6f4dd013c9f6e27236611c59483d8c
+fn|pgtrickle|pgtrickle.set_orchestration_mode(regclass,text)|postgres|t|{"search_path=pgtrickle, pg_catalog, pg_temp"}|{postgres=X/postgres}|1db7adf1c8a9d9cd0ef5a97e7de3ea05
+fn|pgtrickle|pgtrickle.set_stream_table_refresh_policy(text,text)|postgres|t|{"search_path=pgtrickle, pg_catalog, pg_temp"}|{postgres=X/postgres}|5258cbe46206b1010dddcdef4b920ab3
+fn|pgtrickle|pgtrickle.set_stream_table_sla(text,interval)|postgres|t|{"search_path=pgtrickle, pg_catalog, pg_temp"}|{postgres=X/postgres}|67ba2ed1b660dfb166b9bc316eb35c45
+fn|pgtrickle|pgtrickle.set_stream_table_storage_policy(text,boolean,text)|postgres|t|{"search_path=pgtrickle, pg_catalog, pg_temp"}|{postgres=X/postgres}|033c62f3879f74f8b6daa478aed94ade
+fn|pgtrickle|pgtrickle.setup_self_monitoring()|postgres|f||{postgres=X/postgres}|102cd232bef9356e0d56db84ec828092
+fn|pgtrickle|pgtrickle.shared_buffer_stats()|postgres|f||{postgres=X/postgres,=X/postgres}|5f025027f6a6a3f57fdb7c0b54791572
+fn|pgtrickle|pgtrickle._signal_launcher_rescan()|postgres|f||{postgres=X/postgres}|577e7b4a0ed391261171be0135bdf3c5
+fn|pgtrickle|pgtrickle.sla_summary()|postgres|f||{postgres=X/postgres,=X/postgres}|9199380acb7d291abd1d57026ff05c43
+fn|pgtrickle|pgtrickle.slot_health()|postgres|f||{postgres=X/postgres,=X/postgres}|e33970d5af7d25c1dcdaa2955100807e
+fn|pgtrickle|pgtrickle.snapshot_stream_table(text,text)|postgres|t|{"search_path=pgtrickle, pg_catalog, pg_temp"}|{postgres=X/postgres}|68695e1759242825bacbc0c86d6ed8a8
+fn|pgtrickle|pgtrickle.source_gates()|postgres|f||{postgres=X/postgres,=X/postgres}|1efab13bfcf2d79312ed0dc30ef8a79e
+fn|pgtrickle|pgtrickle.source_stable_name(oid)|postgres|f||{postgres=X/postgres,=X/postgres}|7286af922f5a7c5f55480c843a412cfe
+fn|pgtrickle|pgtrickle.stat_reset_all()|postgres|f||{postgres=X/postgres}|8ffd29cb026ac17caa61a7e5bd5e7b68
+fn|pgtrickle|pgtrickle.stat_reset(bigint)|postgres|t|{"search_path=pgtrickle, pg_catalog, pg_temp"}|{postgres=X/postgres}|7208f555020dee111be89d844063605e
+fn|pgtrickle|pgtrickle.st_auto_threshold(text)|postgres|f||{postgres=X/postgres,=X/postgres}|fe0a453bb60536081a386bcfd47bda85
+fn|pgtrickle|pgtrickle.stream_table_contract(regclass)|postgres|t|{"search_path=pgtrickle, pg_catalog, pg_temp"}|{postgres=X/postgres}|c36665545623c14462fc399e480b7788
+fn|pgtrickle|pgtrickle.stream_table_definition(text)|postgres|f||{postgres=X/postgres,=X/postgres}|7f85d7a2b3bd3f92e8628cf759e18ea4
+fn|pgtrickle|pgtrickle.stream_table_lineage(text)|postgres|f||{postgres=X/postgres,=X/postgres}|eb7dbca606e75d47b081ef465ac776ea
+fn|pgtrickle|pgtrickle.stream_table_spec(oid)|postgres|f||{postgres=X/postgres,=X/postgres}|fe5027ec488269f7ba5ab71628b4052c
+fn|pgtrickle|pgtrickle.stream_table_spec(text)|postgres|f||{postgres=X/postgres,=X/postgres}|5a319c92e4c744a105583d957eae9829
+fn|pgtrickle|pgtrickle.stream_table_to_publication(text)|postgres|t|{"search_path=pgtrickle, pg_catalog, pg_temp"}|{postgres=X/postgres}|a34007084a6ee1f8ded34e6c3ecd4e96
+fn|pgtrickle|pgtrickle.st_refresh_stats()|postgres|f||{postgres=X/postgres,=X/postgres}|9005519930eb682462237baa8d4c0662
+fn|pgtrickle|pgtrickle.subscribe_distance(text,text,text,text,text,double precision)|postgres|f||{postgres=X/postgres}|795b67525b0d6e46fb73e0edf71bc996
+fn|pgtrickle|pgtrickle.subscribe(text,text)|postgres|f||{postgres=X/postgres}|19a488a62ced490588f29b4b7c1a9e2c
+fn|pgtrickle|pgtrickle.teardown_self_monitoring()|postgres|f||{postgres=X/postgres}|9b40d48e4c08bdd587f23ba31d38853d
+fn|pgtrickle|pgtrickle.trigger_inventory()|postgres|f||{postgres=X/postgres,=X/postgres}|f3ce587fe0378cc5d3b9ffa1a6b1a763
+fn|pgtrickle|pgtrickle.tune_recommendations()|postgres|f||{postgres=X/postgres,=X/postgres}|066c608a7e74a1795b680a3f5027841b
+fn|pgtrickle|pgtrickle.ungate_source(text)|postgres|f||{postgres=X/postgres}|646a122069dbc1cad58f15058707c3fc
+fn|pgtrickle|pgtrickle.unsubscribe_distance(text,text)|postgres|f||{postgres=X/postgres}|7ce8d10ceabee6a7a272d0f68ed48b9f
+fn|pgtrickle|pgtrickle.unsubscribe(text,text)|postgres|f||{postgres=X/postgres}|e98fa3a484962fbd87ab95dd8bafedc0
+fn|pgtrickle|pgtrickle.validate_output_delta_consumer(uuid)|postgres|t|{"search_path=pgtrickle, pg_catalog, pg_temp"}|{postgres=X/postgres,=X/postgres}|2a3f3a46caee0eb13a385e15d897504a
+fn|pgtrickle|pgtrickle.validate_query(text)|postgres|f||{postgres=X/postgres,=X/postgres}|02001c48ca4ece33b7d70a6539b8ffc1
+fn|pgtrickle|pgtrickle.validate_recovery()|postgres|f||{postgres=X/postgres,=X/postgres}|69d0cd6f899bdee3713956b0b7cbe385
+fn|pgtrickle|pgtrickle.vector_status()|postgres|f||{postgres=X/postgres,=X/postgres}|5fc6cded3eba668ac815cba1e443a4f0
+fn|pgtrickle|pgtrickle.version()|postgres|f||{postgres=X/postgres,=X/postgres}|979bbcc52da593216ae3baafcda0e6e8
+fn|pgtrickle|pgtrickle.version_check()|postgres|f||{postgres=X/postgres,=X/postgres}|e407cb1dbf512dd0c8ec37ab5bd036c9
+fn|pgtrickle|pgtrickle.view_evolution_status()|postgres|f||{postgres=X/postgres,=X/postgres}|62d8b5cc92cc991ccd54c7c748415dbd
+fn|pgtrickle|pgtrickle.wal_source_status()|postgres|f||{postgres=X/postgres,=X/postgres}|68d09d2715aa8e584c62074cc060f10f
+fn|pgtrickle|pgtrickle.watermark_groups()|postgres|f||{postgres=X/postgres,=X/postgres}|31a4293d5fe8a4f4421f9c74fe733382
+fn|pgtrickle|pgtrickle.watermarks()|postgres|f||{postgres=X/postgres,=X/postgres}|e7094dfae934905b4661e5ae8658f5c7
+fn|pgtrickle|pgtrickle.watermark_status()|postgres|f||{postgres=X/postgres,=X/postgres}|74d40d035ffbda49b2725aa10f2fdfbd
+fn|pgtrickle|pgtrickle.worker_allocation_status()|postgres|f||{postgres=X/postgres,=X/postgres}|c7dccd2ae3ff50ab476237f005ac182b
+fn|pgtrickle|pgtrickle.worker_pool_status()|postgres|f||{postgres=X/postgres,=X/postgres}|b99d55ce4d6fff29313cf5dbb8d79dbf
+fn|pgtrickle|pgtrickle.write_and_refresh(text,text)|postgres|t|{"search_path=pgtrickle, pg_catalog, pg_temp"}|{postgres=X/postgres}|de5d79d2b7d0620d01db3c969a41d719
+fn|pgtrickle_changes|pgtrickle_changes.pg_trickle_cdc_del_fn_1d8a10d0e8bcdd15()|postgres|t|{"search_path=pgtrickle_changes, pgtrickle, pg_catalog, pg_temp"}||9e8553a5472b09b7ee83857ecdc6a88c
+fn|pgtrickle_changes|pgtrickle_changes.pg_trickle_cdc_del_fn_daaaeeb1fdc57e97()|postgres|t|{"search_path=pgtrickle_changes, pgtrickle, pg_catalog, pg_temp"}||e39c54ef506acc354af90f0c4faaca4b
+fn|pgtrickle_changes|pgtrickle_changes.pg_trickle_cdc_ins_fn_1d8a10d0e8bcdd15()|postgres|t|{"search_path=pgtrickle_changes, pgtrickle, pg_catalog, pg_temp"}||0e13c8d034d8dc582543909f3bd1c35d
+fn|pgtrickle_changes|pgtrickle_changes.pg_trickle_cdc_ins_fn_daaaeeb1fdc57e97()|postgres|t|{"search_path=pgtrickle_changes, pgtrickle, pg_catalog, pg_temp"}||68e8d10364bfbf556dc3493b3c436f37
+fn|pgtrickle_changes|pgtrickle_changes.pg_trickle_cdc_truncate_fn_1d8a10d0e8bcdd15()|postgres|t|{"search_path=pgtrickle_changes, pgtrickle, pg_catalog, pg_temp"}||886a3a8ce75a9fac192080414c414dbe
+fn|pgtrickle_changes|pgtrickle_changes.pg_trickle_cdc_truncate_fn_daaaeeb1fdc57e97()|postgres|t|{"search_path=pgtrickle_changes, pgtrickle, pg_catalog, pg_temp"}||8bdc2fb5b0d5512611d9e6c35f537c5f
+fn|pgtrickle_changes|pgtrickle_changes.pg_trickle_cdc_upd_fn_1d8a10d0e8bcdd15()|postgres|t|{"search_path=pgtrickle_changes, pgtrickle, pg_catalog, pg_temp"}||c48ebd4cbef0c3d6b3d1b1cd58e051c7
+fn|pgtrickle_changes|pgtrickle_changes.pg_trickle_cdc_upd_fn_daaaeeb1fdc57e97()|postgres|t|{"search_path=pgtrickle_changes, pgtrickle, pg_catalog, pg_temp"}||3074648838c9835e0a1a8d518c3692e0
+policy|ax.products|tenant_read|r|{ax_api}|(tenant_id = ax.current_tenant())|
+policy|ax.orders|tenant_read|r|{ax_api}|(tenant_id = ax.current_tenant())|
+policy|ax.orders|tenant_write|*|{ax_writer}|(tenant_id = ax.current_tenant())|(tenant_id = ax.current_tenant())
+policy|ax.st_day_product_status|tenant_read|r|{ax_api}|(tenant_id = ax.current_tenant())|
+policy|ax.st_day_category_status|tenant_read|r|{ax_api}|(tenant_id = ax.current_tenant())|
+policy|ax.st_hour_category_status|tenant_read|r|{ax_api}|(tenant_id = ax.current_tenant())|
+db|aggregatex|
+data|1|4776|605242600|717400a3242279e58a5c3e2ca9544e10
+data|2|2784|295588364|8da7b8a5bdd0d2c8d9563b67a3be0a32
+data|3|1280|75757185|74b029d9d5f66c6cc7e48326d78886d0
+data|4|1269|67740060|4af82f2d9495a8d0381937fd11e45b77
+data|5|1263|80982328|d5a2a09bfad657e6a078209aa7179fed
+data|6|1243|71252461|b21156d6c70f91e49037d2e9e032a77c
+data|7|1269|78352453|0cc7bb403aa6d7140bc3816669258ce2
+data|8|1182|74538417|ddb9ca3d71ac6baee1d1a5e466118d90
+data|9|1217|81354944|c052cd04a98bedc29f7e14b26bbebdaf
+data|10|1270|75638947|3b199e73f27aac21a23b32bf3c59c1ac
+COMMIT

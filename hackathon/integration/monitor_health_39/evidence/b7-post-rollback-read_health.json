@@ -1,0 +1,1 @@
+{"rows": 1, "severities": {"UNKNOWN": 1}, "monitor_contract": [{"check_name": "monitor_contract", "severity": "UNKNOWN", "detail": "Operator health diagnostics unavailable (SQLSTATE 42883); verification required."}], "b5_degraded": true}

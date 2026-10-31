@@ -1,0 +1,7 @@
+number of transactions actually processed: 7553
+number of failed transactions: 0 (0.000%)
+latency average = 10.616 ms
+tps = 100.772388 (without initial connection time)
+DIFFERENTIAL|COMPLETED|133
+NO_DATA|COMPLETED|27
+FULL|COMPLETED|6

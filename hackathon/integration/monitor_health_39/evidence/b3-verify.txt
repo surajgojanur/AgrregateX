@@ -1,0 +1,55 @@
+BEGIN
+SET
+SET
+SET
+SET
+DO
+       check_name       | severity 
+------------------------+----------
+ adaptive_workers       | OK
+ attachment_owner_check | OK
+ buffer_growth          | OK
+ consecutive_errors     | OK
+ disk_forecast          | OK
+ dvm_fallbacks          | OK
+ error_tables           | OK
+ freshness_breach       | OK
+ freshness_evidence     | OK
+ freshness_infeasible   | OK
+ freshness_override     | OK
+ immediate_ivm_triggers | OK
+ job_queue              | OK
+ memory_budget          | OK
+ monitor_contract       | OK
+ needs_reinit           | OK
+ publication_bindings   | OK
+ ring_overflow_trend    | OK
+ scheduler_load         | OK
+ scheduler_running      | OK
+ slot_lag               | OK
+ stale_tables           | WARN
+ worker_pool            | OK
+(23 rows)
+
+ pgt_schema |        pgt_name         | stale 
+------------+-------------------------+-------
+ ax         | st_day_category_status  | f
+ ax         | st_day_product_status   | f
+ ax         | st_hour_category_status | t
+(3 rows)
+
+ tenant_id | orders | seed_orders 
+-----------+--------+-------------
+         1 |   4017 |        4017
+         2 |   2014 |        2014
+         3 |    502 |         502
+         4 |    463 |         463
+         5 |    518 |         518
+         6 |    489 |         489
+         7 |    496 |         496
+         8 |    480 |         480
+         9 |    510 |         510
+        10 |    511 |         511
+(10 rows)
+
+ROLLBACK
