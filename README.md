@@ -15,6 +15,8 @@
 
 > For a plain-language description of the problem pg_trickle solves, the differential dataflow approach, and the hybrid CDC architecture, read **[ESSENCE.md](ESSENCE.md)**.
 
+> **Local development folders:** [workspace-checkouts/README.md](workspace-checkouts/README.md) explains the related AgrregateX, benchmark, and demo checkouts and their Git states.
+
 ## Stream Tables for PostgreSQL 18
 
 pg_trickle brings declarative, automatically-refreshing materialized views to PostgreSQL, inspired by the [DBSP](https://arxiv.org/abs/2203.16684) differential dataflow framework ([comparison](docs/research/DBSP_COMPARISON.md)). Define a SQL query and a schedule; the extension handles the rest.
