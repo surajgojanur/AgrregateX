@@ -3,8 +3,11 @@
 ## Why this mode exists
 
 The Fedora demo and the Mac 1M synthetic run exposed an incorrect paid group in
-`ax.st_day_product_status` after order status changes. The exact upstream
-incremental-maintenance mechanism remains under investigation in Issue #50.
+`ax.st_day_product_status` after order status changes. The approved controlled Mac reproduction now **observes** the negative `D(paid)`
+CDC event disappearing between the raw buffer and the final post-stage relation
+([#50](https://github.com/surajgojanur/AgrregateX/issues/50), completed as a diagnosis).
+The narrower reducer-versus-visibility boundary and the multi-row Mac paid-only
+variant remain unresolved; upstream correction is tracked by [#54](https://github.com/surajgojanur/AgrregateX/issues/54).
 This optional application mode calculates each analytics answer from current
 `ax.orders` rows (and the tenant-matched `ax.products` rows for product and
 category labels), avoiding the three pg_trickle stream tables for those answers.
@@ -82,8 +85,9 @@ days as stream-table data and partial ranges as source data. This backend change
 adds authoritative provenance to API responses, but does not make that caption
 mode-aware. Do not activate the setting for dashboard use until the UI renders
 the response's `analytics_mode`/`provenance` (or otherwise clearly identifies
-raw-source results) and that UI change is reviewed. This task intentionally keeps
-the frontend outside its change scope.
+raw-source results) and that UI change is reviewed. The follow-up UI and authorized disposable
+PostgreSQL/security validation are tracked in [#55](https://github.com/surajgojanur/AgrregateX/issues/55).
+This PR intentionally kept the frontend outside its change scope.
 
 ## Judge explanation
 
@@ -93,8 +97,9 @@ the frontend outside its change scope.
 > performance tradeoffs while the engine-level issue is investigated.
 
 Do not claim this mode works on the live demo until an authorized runtime test
-has confirmed it. The upstream defect and Issue #50 remain open; raw-source mode
-does not make the rollup correct or close G4.
+has confirmed it. The upstream **correctness failure remains**; [#50](https://github.com/surajgojanur/AgrregateX/issues/50)
+is closed for the completed diagnostic only, while fix/acceptance issues [#54](https://github.com/surajgojanur/AgrregateX/issues/54)
+and [#31](https://github.com/surajgojanur/AgrregateX/issues/31) stay open. Raw-source mode does not repair the maintained rollup or close G4.
 
 ## Offline checks
 
