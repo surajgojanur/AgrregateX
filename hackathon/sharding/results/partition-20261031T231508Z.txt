@@ -1,0 +1,2 @@
+# partition demo 2026-10-31T23:15:08Z hold=20s project=ax-demo42 network=ax-demo42_net_a
+RESULT: FAIL (exit 1)

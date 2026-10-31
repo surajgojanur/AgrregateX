@@ -1,0 +1,28 @@
+# partition demo 2026-10-31T23:15:34Z hold=20s project=ax-demo42 network=ax-demo42_net_a
+preflight OK: containers ax-demo42-api-1 ax-demo42-writer-1 ax-demo42-shard_a-1 ax-demo42-shard_b-1; 1283 MiB available; ax-demo42_net_a members verified
+writer initially running: true
+login enabled: signing in as operator
+## 0. baseline
+  GET /api/tenants/1/summary -> 200 in 30ms (want 200, <= 5000ms)
+  GET /api/tenants/2/summary -> 200 in 23ms (want 200, <= 5000ms)
+  GET /api/shards -> 200 in 9ms (want 200, <= 5000ms)
+  shard A rows=5884 shard B rows=5919
+## 1. partition: detach ax-demo42-api-1 and ax-demo42-writer-1 from ax-demo42_net_a
+  GET /api/tenants/1/summary -> 503 in 3221ms (want 503, <= 10000ms)
+  GET /api/tenants/3/top-products -> 503 in 3017ms (want 503, <= 10000ms)
+  POST /api/tenants/1/live-write -> 503 in 3014ms (want 503, <= 10000ms)
+  GET /api/tenants/2/summary -> 200 in 21ms (want 200, <= 5000ms)
+  GET /api/tenants/5/trends -> 200 in 11ms (want 200, <= 5000ms)
+  POST /api/tenants/2/live-write -> 200 in 1818ms (want 200, <= 40000ms)
+  GET /api/shards -> 200 in 3014ms (want 200, <= 10000ms)
+  GET /api/health -> 200 in 3012ms (want 200, <= 10000ms)
+  25 local inserts on shard A during the partition
+  GET /api/tenants/1/summary -> 503 in 3019ms (want 503, <= 10000ms)
+## 2. restore
+  tenant 1 served again 3s after restore; partition lasted 42s
+  GET /api/shards -> 200 in 18ms (want 200, <= 5000ms)
+## 3. oracle (writer quiesced)
+  oracle 0/0 on shard A and shard B
+  GET /api/tenants/1/summary?from=2026-10-31T23:06:26Z -> 200 in 72ms (want 200, <= 5000ms)
+  tenant 1 last 10 min: API=29 SQL=29 (includes partition-time local inserts)
+RESULT: PASS
