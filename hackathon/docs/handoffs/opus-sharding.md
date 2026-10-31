@@ -72,12 +72,13 @@ valid upper bounds.
 ## 4. Runbook
 ```bash
 cd hackathon
-docker compose -f compose.sharded.yaml up -d --build             # http://127.0.0.1:8091 (no login by default)
-AX_AUTH_DISABLED=0 docker compose -f compose.sharded.yaml up -d --no-deps api   # login on, for the 403 checks
+docker compose -f compose.sharded.yaml up -d --build             # http://127.0.0.1:8091 (login ON by default)
 docker compose -f compose.sharded.yaml stop writer && sleep 6     # quiesce before the oracles
 python3 -I sharding/tests/shard_check.py                          # acceptance checks (JSON)
 AX_BASE=http://127.0.0.1:8091 AX_TENANT_DSNS='{"1":"host=127.0.0.1 port=25571 dbname=aggregatex user=postgres password=local-demo-superuser","2":"host=127.0.0.1 port=25572 dbname=aggregatex user=postgres password=local-demo-superuser"}' python3 -I app/tests/api_oracle.py 10
-sharding/partition_demo.sh 20                                     # partition and recovery; touches net_a only
+bash sharding/tests/test_lib_partition.sh && bash sharding/tests/test_partition_demo.sh   # simulated fault-script tests
+AX_DRY_RUN=1 sharding/partition_demo.sh 20                        # preflight only (no change)
+sharding/partition_demo.sh 20                                     # LIVE: partition + recovery; net_a only; needs human OK
 python3 -I sharding/measure.py 100 10                             # latency and lag
 docker compose -f compose.sharded.yaml stop                       # keeps volumes
 ```
@@ -90,15 +91,17 @@ The single-DB stack (`compose.yaml`, port 8090) is untouched and can run alongsi
 | Host endpoints | API `http://127.0.0.1:8091` · shard A `127.0.0.1:25571` · shard B `127.0.0.1:25572` (superuser `postgres`, password `$AX_DB_SUPERUSER_PASSWORD`, demo default `local-demo-superuser`) |
 | Networks | `aggregatex-sharded_net_a` = **API + writer + shard_a only** (the A-only fault target); `aggregatex-sharded_net_b` = API + writer + shard_b; `aggregatex-sharded_edge` = API + writer only, with `gw_priority 10` so the published port never depends on a shard network. Shard B is never on `net_a`. |
 | Aliases | Shards are reached by compose service names `shard_a` / `shard_b`. Those aliases belong to the **shard** containers, so detaching or reattaching the API or writer does not need aliases restored. Neither the API nor the writer has a static IP. |
-| Auth | **Not Bearer.** HttpOnly cookie `ax_session` from `POST /api/auth/login {"email","password"}` (demo users `tenant<N>@demo.local`, `admin@demo.local`, password `$AX_DEMO_PASSWORD`). With `AX_AUTH_DISABLED=1` (compose default) every request is the operator. Never print the cookie. |
+| Auth | **Not Bearer.** HttpOnly cookie `ax_session` from `POST /api/auth/login {"email","password"}` (demo users `tenant<N>@demo.local`, `admin@demo.local`, password `$AX_DEMO_PASSWORD`). **Login is ON by default** in `compose.sharded.yaml`; `AX_AUTH_DISABLED=1` is an explicit, local-only opt-in in which every request is the operator. Never print the cookie. |
 | HTTP client | Probe from the **host** against `127.0.0.1:8091`. The API image (`python:3.14-slim`) has **no curl**; `docker exec … python -c 'urllib…'` works if an in-container probe is required. |
 | Read probe | `GET /api/tenants/{id}/summary` → 200, or **503** `{"shard":"a","retryable":true}` with `Retry-After: 5` within about 3 s when the owner is unreachable |
 | Write probe | `POST /api/tenants/{id}/live-write {"action":"insert"}` → 200 `{"committed":true,"shard":…,"order_id":…,"lag_ms":…}`, or 503 (not confirmed) |
 | Global view | `GET /api/shards` (operator) → `complete`, `missing_shards`, `total_orders` (null unless complete), `partial_total_orders` |
 | Directory | `sharding/directory.v1.json`: A = {1,3,4}, B = {2,5,6,7,8,9,10} |
 | Oracle | `SELECT * FROM ax.oracle_mismatches()` on each shard (missing and extra, all three grains); quiesce the writer first |
-| Reference fault script | `sharding/partition_demo.sh`: preflights Docker and containers, aborts if shard B is on `net_a` or the API lacks `net_b`, detaches only the API and writer, re-attaches only what it detached, and exits nonzero unless the restore is verified (attachment + tenant-1 200 + `/api/shards complete=true`). The hardened revision is **NOT RUN** yet: the Docker daemon stopped on the Opus Mac after the first run. The first run (results above) used the earlier, less defensive restore. |
-| Image | `AX_PG_TRICKLE_IMAGE`; the default digest `sha256:94344bb9…` is an OCI index with **only linux/arm64**, so amd64 hosts must supply their own image |
+| Reference fault script | `sharding/partition_demo.sh` + `sharding/lib_partition.sh` (hardened after the PR #22 reviews). Before any change: Docker reachable; host memory ≥ `AX_MIN_AVAILABLE_MB` (default 1024); containers resolved **by Compose labels** of project `aggregatex-sharded`; the fault network carries the project's `net_a` labels and contains **exactly** {api, writer, shard_a}; shard B is not on it; API and writer have `net_b`. It captures each endpoint's aliases and static IPv4/IPv6, disconnects (aborting on any failure), and restores **exactly**. Restore is verified, propagated on failure, and the failed containers stay listed with the state kept for manual repair. The writer's original running/stopped state is restored. INT/TERM/HUP are trapped. Every expectation is an assertion (A 503 with `shard:a`, no phantom write, B read **and** write 200 committed on B only, `/api/shards` partial, recovery within `AX_RECOVERY_TIMEOUT_S`, oracle 0/0 on **both** shards, API = SQL). Exit 0 + `RESULT: PASS` is the only pass. `AX_DRY_RUN=1` runs preflight only. |
+| Fault-script tests | `sharding/tests/test_lib_partition.sh` (11) and `test_partition_demo.sh` (7) run against fake `docker`/`curl`/`psql`. They cover: exact alias/IP restore, failed reconnect propagated, alias loss detected, failed disconnect aborts, writer state in both directions, ownership/membership/project scoping, a fail-open shard-A answer caught *with* the network still restored, failed restore not masked, and the hold, memory and dry-run gates. **These are simulated tests, not evidence of partition tolerance.** |
+| Live status of the hardened script | **NOT RUN.** The 2026-10-31T12:20Z evidence used the earlier, less defensive revision (no ownership checks, shard-A oracle only). Live re-execution needs a Docker host that passes the memory gate, and a human go-ahead. |
+| Image | Default `ghcr.io/trickle-labs/pg_trickle@sha256:94344bb9…`, a **multi-arch** OCI index: linux/arm64 `sha256:e3490ecc…` and linux/amd64 `sha256:92f271e27f8d3b9b5aaf568df10ee377937f48d79825e73adaf469768b0208a5`, both labelled pg_trickle 0.108.3 / PG 18.6-1.pgdg12+2. **Correction:** an earlier note here said arm64-only; that was wrong (truncated `imagetools` output, caught by Codex on #12). Manifest verified on 2026-10-31; runtime verified on arm64 only. `AX_PG_TRICKLE_IMAGE` pins one child explicitly. |
 
 ## 6. Limits and next steps (proposals, not done)
 - **No replica or leader election:** while shard A is down its tenants are unavailable (CP per shard). Follow-up proposal: a streaming replica per shard plus manual or automatic promotion, with directory v2 carrying the endpoints.
