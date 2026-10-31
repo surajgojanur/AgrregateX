@@ -5,409 +5,25 @@
    never hold a transform that would block hover states.
    ========================================================================== */
 
-@keyframes signalPulse {
-  0%, 100% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--cyan) 35%, transparent); }
-  50% { box-shadow: 0 0 0 6px color-mix(in srgb, var(--cyan) 0%, transparent); }
-}
-
-@keyframes barSlide {
-  from { background-position: -45% 0; }
-  to { background-position: 145% 0; }
-}
-
-@keyframes enterUp {
-  from { opacity: 0; transform: translateY(8px); }
-  to { opacity: 1; transform: none; }
-}
-
-@keyframes nodePop {
-  0% { transform: scale(0.6); }
-  70% { transform: scale(1.08); }
-  100% { transform: none; }
-}
-
 /* ---------- 1. Generation status ---------- */
-.gen-status { container-type: inline-size; }
-.gen-status .panel__body { display: flex; flex-direction: column; gap: 12px; }
-.gen-status.is-idle .panel__body { color: var(--text-3); }
-
-.gen-status__stages {
-  display: grid;
-  grid-template-columns: repeat(5, minmax(0, 1fr));
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-
-.gen-stage {
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: 6px;
-  min-width: 0;
-  text-align: center;
-  --c: var(--text-3);
-}
-
-.gen-stage + .gen-stage::before {
-  content: '';
-  position: absolute;
-  top: 11px;
-  right: 50%;
-  width: 100%;
-  height: 2px;
-  background: var(--border);
-  transition: background-color var(--t) ease;
-}
-
-.gen-stage.is-done + .gen-stage::before,
-.gen-stage.is-done + .gen-stage.is-active::before { background: var(--green); }
-
-.gen-stage.is-done { --c: var(--green); }
-.gen-stage.is-active { --c: var(--cyan); }
-.gen-stage.is-fail { --c: var(--red); }
-
-.gen-stage__node {
-  position: relative;
-  z-index: 1;
-  display: grid;
-  place-items: center;
-  width: 24px;
-  height: 24px;
-  border-radius: 50%;
-  border: 2px solid var(--c);
-  background: var(--panel);
-  color: var(--c);
-  transition: border-color var(--t) ease, background-color var(--t) ease;
-}
-
-.gen-stage__node .icon { width: 13px; height: 13px; }
-.gen-stage.is-done .gen-stage__node { background: color-mix(in srgb, var(--green) 16%, var(--panel)); animation: nodePop 360ms var(--ease) backwards; }
-.gen-stage.is-fail .gen-stage__node { background: color-mix(in srgb, var(--red) 16%, var(--panel)); }
-.gen-stage.is-active .gen-stage__node { animation: signalPulse 1.6s ease-in-out infinite; }
-.gen-stage.is-active .gen-stage__node::after { content: ''; width: 6px; height: 6px; border-radius: 50%; background: var(--cyan); }
-
-.gen-stage__label { font-size: 11.5px; line-height: 1.3; color: var(--text-2); }
-.gen-stage.is-idle .gen-stage__label { color: var(--text-3); }
-.gen-stage.is-fail .gen-stage__label { color: var(--red); }
-
-.gen-status__bar {
-  height: 3px;
-  border-radius: 3px;
-  overflow: hidden;
-  background: color-mix(in srgb, var(--cyan) 12%, transparent);
-}
-
-.gen-status__bar span {
-  display: block;
-  height: 100%;
-  background: linear-gradient(90deg, transparent, var(--cyan), transparent) no-repeat;
-  background-size: 40% 100%;
-  animation: barSlide 1.4s var(--ease-in-out) infinite;
-}
-
-.gen-status__msg { margin: 0; font-size: 12px; color: var(--text-2); overflow-wrap: anywhere; }
-.gen-status__hint { margin: 0; font-size: 12px; }
-
-@container (max-width: 460px) {
-  .gen-status__stages { grid-template-columns: minmax(0, 1fr); gap: 8px; }
-  .gen-stage { flex-direction: row; text-align: left; }
-  .gen-stage + .gen-stage::before { display: none; }
-}
 
 /* ---------- 2. Preview processing and reveal ---------- */
-.viewer__processing {
-  position: absolute;
-  inset: 0;
-  z-index: 0;
-  display: grid;
-  place-items: center;
-  overflow: hidden;
-  pointer-events: none;
-}
-
-.viewer__stage > .viewer__frame,
-.viewer__stage > .viewer__empty,
-.viewer__stage > .viewer__compare { position: relative; z-index: 1; }
-
-.viewer__reticle {
-  width: min(46%, 220px);
-  fill: none;
-  stroke: var(--cyan);
-  stroke-width: 1.2;
-  opacity: 0.32;
-  animation: reticlePulse 2.4s ease-in-out infinite;
-}
-
-@keyframes reticlePulse {
-  0%, 100% { opacity: 0.22; transform: scale(0.97); }
-  50% { opacity: 0.42; transform: scale(1); }
-}
-
-.viewer__sweep {
-  position: absolute;
-  inset: 0 0 auto;
-  height: 16%;
-  background: linear-gradient(180deg, transparent, color-mix(in srgb, var(--cyan) 14%, transparent) 85%, color-mix(in srgb, var(--cyan) 55%, transparent));
-  border-bottom: 1px solid color-mix(in srgb, var(--cyan) 70%, transparent);
-  animation: scanSweep 2.6s var(--ease-in-out) infinite;
-}
-
-.viewer__stage.is-processing > .viewer__empty {
-  padding: 14px 18px;
-  border-radius: var(--r-md);
-  background: color-mix(in srgb, var(--bg) 82%, transparent);
-  backdrop-filter: blur(3px);
-}
-
-.viewer__busy { z-index: 2; text-transform: uppercase; letter-spacing: 0.12em; }
-
-.viewer__img { animation: sketchSharpen 560ms var(--ease) backwards; }
-
-@keyframes sketchSharpen {
-  from { opacity: 0; filter: blur(8px); }
-  to { opacity: 1; filter: none; }
-}
 
 /* ---------- 3. Description to traits ---------- */
-.describe .field { position: relative; }
-
-.describe__progress {
-  position: absolute;
-  left: 1px;
-  right: 1px;
-  bottom: 0;
-  height: 2px;
-  border-radius: 2px;
-  opacity: 0;
-  transition: opacity var(--t) ease;
-  background: linear-gradient(90deg, transparent, var(--cyan), transparent) no-repeat;
-  background-size: 40% 100%;
-}
-
-.describe.is-extracting .describe__progress { opacity: 1; animation: barSlide 1.1s var(--ease-in-out) infinite; }
-.describe.is-extracting .describe__text { border-color: var(--cyan-line); }
-
-.traits__list > li {
-  animation: enterUp 320ms var(--ease) backwards;
-  animation-delay: calc(var(--g, 0) * 80ms + var(--n, 0) * 28ms);
-}
-
-.traits__list > li:nth-child(2) { --n: 1; }
-.traits__list > li:nth-child(3) { --n: 2; }
-.traits__list > li:nth-child(4) { --n: 3; }
-.traits__list > li:nth-child(5) { --n: 4; }
-.traits__list > li:nth-child(6) { --n: 5; }
-.traits__list > li:nth-child(n + 7) { --n: 6; }
-
-.trait { transition: border-color var(--t-fast) ease, background-color var(--t) ease, box-shadow var(--t) ease, opacity var(--t) ease; }
-.trait:focus-within { border-color: var(--cyan-line); }
-.trait.state-extracted { border-left: 2px solid var(--cyan-line); }
-.trait.state-described { border-left: 2px solid rgba(75, 123, 255, 0.55); }
-.trait.state-manual { border-left: 2px solid rgba(167, 139, 250, 0.6); background: color-mix(in srgb, rgb(167, 139, 250) 5%, var(--bg-2)); }
-.trait.state-unknown { opacity: 0.82; }
-.trait.state-unknown:hover, .trait.state-unknown:focus-within { opacity: 1; }
-
-.trait.state-uncertain {
-  border-left: 2px solid color-mix(in srgb, var(--amber) 70%, transparent);
-  animation: enterUp 320ms var(--ease) backwards, warnPulse 1.8s ease-in-out 380ms 2;
-  --pulse: var(--amber);
-}
-
-.trait.state-conflict {
-  box-shadow: 0 0 0 1px color-mix(in srgb, var(--red) 40%, transparent);
-  animation: enterUp 320ms var(--ease) backwards, warnPulse 1.6s ease-in-out 380ms 2;
-  --pulse: var(--red);
-}
-
-@keyframes warnPulse {
-  50% { box-shadow: 0 0 0 3px color-mix(in srgb, var(--pulse) 22%, transparent); }
-}
-
-/* WitnessTrace Character Lab: recollection and source states. */
-.wt-lab-field { border-left: 2px solid transparent; padding-left: 10px; transition: border-color var(--t) ease, background-color var(--t) ease; }
-.wt-lab-field.is-certain { border-left-color: color-mix(in srgb, var(--green) 65%, transparent); }
-.wt-lab-field.is-tentative { border-left-color: color-mix(in srgb, var(--amber) 70%, transparent); }
-.wt-lab-field.is-unknown { border-left: 2px dashed var(--border); }
-.wt-lab-field.from-operator:not(.is-unknown) { background: color-mix(in srgb, rgb(167, 139, 250) 4%, transparent); }
-.wt-lab-field:focus-within { border-left-color: var(--cyan); }
 
 /* ---------- 4. Workflow stepper ---------- */
-.wflow { margin: 0 0 16px; }
-
-.wflow__list {
-  display: grid;
-  grid-template-columns: repeat(5, minmax(0, 1fr));
-  gap: 6px;
-  margin: 0;
-  padding: 0;
-  list-style: none;
-}
-
-.wflow__step { position: relative; min-width: 0; --c: var(--text-3); }
-.wflow__step.is-done { --c: var(--green); }
-.wflow__step.is-current, .wflow__step.is-active { --c: var(--cyan); }
-.wflow__step.is-error { --c: var(--red); }
-
-.wflow__item {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  width: 100%;
-  height: 100%;
-  padding: 10px 12px;
-  border: 1px solid var(--border);
-  border-radius: var(--r-md);
-  background: var(--panel);
-  color: var(--text);
-  font: inherit;
-  text-align: left;
-  transition: border-color var(--t-fast) ease, transform var(--t-fast) var(--ease), background-color var(--t) ease, box-shadow var(--t-fast) ease;
-}
-
-button.wflow__item { cursor: pointer; }
-button.wflow__item:hover { border-color: var(--border-strong); transform: translateY(-1px); }
-button.wflow__item:focus-visible { outline: none; box-shadow: var(--focus); }
-.wflow__step.is-current .wflow__item, .wflow__step.is-active .wflow__item { border-color: color-mix(in srgb, var(--cyan) 55%, transparent); background: color-mix(in srgb, var(--cyan) 6%, var(--panel)); }
-.wflow__step.is-error .wflow__item { border-color: color-mix(in srgb, var(--red) 50%, transparent); }
-.wflow__step.is-blocked .wflow__item { opacity: 0.62; border-style: dashed; cursor: not-allowed; }
-
-.wflow__node {
-  flex: none;
-  display: grid;
-  place-items: center;
-  width: 26px;
-  height: 26px;
-  border-radius: 50%;
-  border: 2px solid var(--c);
-  color: var(--c);
-  font-size: 12px;
-  transition: border-color var(--t) ease, background-color var(--t) ease;
-}
-
-.wflow__node .icon { width: 13px; height: 13px; }
-.wflow__step.is-done .wflow__node { background: color-mix(in srgb, var(--green) 16%, transparent); animation: nodePop 360ms var(--ease) backwards; }
-.wflow__step.is-current .wflow__node, .wflow__step.is-active .wflow__node { animation: signalPulse 2s ease-in-out infinite; }
-.wflow__step.is-error .wflow__node { background: color-mix(in srgb, var(--red) 14%, transparent); }
-
-.wflow__text { display: flex; flex-direction: column; min-width: 0; }
-.wflow__label { font-size: 13px; font-weight: 600; }
-.wflow__detail {
-  font-size: 11.5px;
-  line-height: 1.3;
-  color: var(--text-3);
-  display: -webkit-box;
-  -webkit-line-clamp: 2;
-  -webkit-box-orient: vertical;
-  overflow: hidden;
-}
-
-@media (max-width: 900px) {
-  .wflow__item { flex-direction: column; align-items: flex-start; gap: 6px; padding: 8px; }
-  .wflow__detail { display: none; }
-  .wflow__step.is-current .wflow__detail, .wflow__step.is-blocked:first-of-type .wflow__detail { display: -webkit-box; }
-}
-
-@media (max-width: 560px) {
-  .wflow__list { gap: 4px; }
-  .wflow__item { align-items: center; text-align: center; padding: 8px 4px; }
-  .wflow__label { font-size: 11px; }
-  .wflow__step .wflow__detail { display: none; }
-}
 
 /* ---------- 5. Revisions ---------- */
-.wt-revision {
-  padding: 12px 8px;
-  border-radius: var(--r-sm);
-  transition: background-color var(--t) ease, box-shadow var(--t) ease;
-}
-
-.wt-revision:hover, .wt-revision:focus-within { background: color-mix(in srgb, var(--text) 3%, transparent); }
-.wt-revision.is-selected { box-shadow: inset 2px 0 0 var(--cyan); }
-.wt-revision.is-new { animation: revisionIn 420ms var(--ease) backwards, revisionGlow 2.4s ease-out 1; }
-
-@keyframes revisionIn {
-  from { opacity: 0; transform: translateY(-8px); }
-  to { opacity: 1; transform: none; }
-}
-
-@keyframes revisionGlow {
-  0%, 30% { background-color: color-mix(in srgb, var(--green) 12%, transparent); box-shadow: inset 2px 0 0 var(--green); }
-  100% { background-color: transparent; }
-}
-
-.wt-revision__saved {
-  display: inline-block;
-  margin-bottom: 6px;
-  padding: 2px 8px;
-  border-radius: 999px;
-  border: 1px solid color-mix(in srgb, var(--green) 45%, transparent);
-  color: var(--green);
-  font-size: 11px;
-  animation: enterUp 260ms var(--ease) backwards;
-}
 
 /* Integrity: status changes cross-fade; checks pop in only when they turn green. */
-.wt-int-status { transition: background-color 320ms ease, border-color 320ms ease; }
-.wt-int-status strong { transition: color 320ms ease; }
-.wt-int-step.is-ok .wt-int-step__node, .wt-int-step.is-fail .wt-int-step__node { animation: nodePop 360ms var(--ease) backwards; }
-.wt-int-step::before { transition: background-color 320ms ease; }
 
 /* ---------- 6. Compare ---------- */
-.wt-compare__controls { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 12px; }
-.wt-compare__controls label { flex: 1 1 200px; display: flex; flex-direction: column; gap: 4px; }
-.wt-compare__view { width: 100%; max-width: 720px; margin: 0 auto; }
-.wt-side-by-side figure { margin: 0; display: flex; flex-direction: column; gap: 6px; }
-.wt-side-by-side figcaption { font-size: 11px; color: var(--text-3); text-align: center; }
-.wt-compare__summary { display: flex; flex-direction: column; gap: 8px; padding: 12px; border: 1px solid var(--border); border-radius: var(--r-md); }
-.wt-compare__summary p { margin: 0; }
-.wt-diff { display: flex; flex-direction: column; margin: 0; padding: 0; list-style: none; }
-.wt-diff li { display: grid; grid-template-columns: minmax(120px, 1fr) auto auto auto; justify-content: start; gap: 8px; align-items: baseline; padding: 6px 0; border-bottom: 1px solid var(--border); animation: enterUp 260ms var(--ease) backwards; }
-.wt-diff li:last-child { border-bottom: 0; }
-.wt-diff__from { color: var(--text-3); text-decoration: line-through; overflow-wrap: anywhere; }
-.wt-diff__to { color: var(--cyan); overflow-wrap: anywhere; }
-
-@media (max-width: 560px) {
-  .wt-diff li { grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr); }
-  .wt-diff li > span:first-child { grid-column: 1 / -1; font-weight: 600; }
-}
 
 /* ---------- 7. Cases and library ---------- */
-.lib-card--enter { animation: enterUp 340ms var(--ease) backwards; animation-delay: calc(var(--i, 0) * 35ms); }
-.lib-card.is-active { border-color: color-mix(in srgb, var(--cyan) 55%, transparent); }
-.lib-card:focus-within { border-color: var(--cyan-line); }
-.lib-card.is-removing { opacity: 0; transform: scale(0.97); transition: opacity 200ms ease, transform 200ms ease; pointer-events: none; }
-.lib-count { margin-left: auto; font-size: 11.5px; }
-.lib-empty { animation: enterUp 300ms var(--ease) backwards; }
-.wt-report { animation: enterUp 260ms var(--ease) backwards; }
 
 /* The studio remounts per case, so the case header settles in on every switch. */
-.wt-studio .studio__ident { animation: enterUp 300ms var(--ease) backwards; }
 
 /* ---------- 8. Empty-state illustrations ---------- */
-.empty-art {
-  width: 76px;
-  height: 76px;
-  fill: none;
-  stroke: var(--cyan);
-  stroke-width: 1.6;
-  stroke-linecap: round;
-  stroke-linejoin: round;
-  opacity: 0.85;
-}
-
-.empty--compact .empty-art { width: 56px; height: 56px; }
-.empty-art__ring { transform-box: fill-box; transform-origin: center; animation: artBreathe 3.2s ease-in-out infinite; }
-.empty-art__dot { fill: var(--cyan); animation: dotPulse 2.4s ease-in-out infinite; }
-.empty-art--connection { stroke: var(--text-3); }
-.empty-art--connection .empty-art__break { stroke: var(--red); }
-.empty-art__line { opacity: 0.6; }
-
-@keyframes artBreathe {
-  0%, 100% { opacity: 0.55; transform: scale(0.97); }
-  50% { opacity: 1; transform: none; }
-}
 
 /* ---------- 9. Theme transition ---------- */
 html.theme-anim,
@@ -429,29 +45,18 @@ html.theme-anim *::after {
 .btn--primary:active:not(:disabled) { transform: none; }
 .btn .icon { transition: transform var(--t-fast) var(--ease); }
 .btn:hover:not(:disabled) .icon { transform: translateY(-1px); }
-.wt-fields a, .lib-card__export a { text-underline-offset: 3px; transition: color var(--t-fast) ease; }
-.wt-fields a:hover, .lib-card__export a:hover { color: var(--cyan); }
-.segmented button:focus-visible { box-shadow: var(--focus); }
 
 /* ---------- 11. Reduced motion ----------
    Continuous and entrance animations are removed outright (not just shortened),
    leaving static states: a still reticle, a solid progress line and plain lists. */
 @media (prefers-reduced-motion: reduce) {
-  .gen-stage__node, .gen-status__bar span, .viewer__reticle, .viewer__img, .describe__progress,
-  .traits__list > li, .trait, .wflow__node, .wt-revision, .wt-revision__saved, .wt-int-step__node,
-  .wt-diff li, .lib-card--enter, .lib-empty, .wt-report, .studio__ident, .empty-art__ring, .empty-art__dot,
-  .theme-toggle__icon, .viewer__scan, .wt-int-step__node { animation: none !important; }
-  .viewer__sweep { display: none; }
-  .gen-status__bar span, .describe.is-extracting .describe__progress { background: color-mix(in srgb, var(--cyan) 55%, transparent); }
-  .btn--primary:hover:not(:disabled), button.wflow__item:hover, .btn:hover:not(:disabled) .icon { transform: none; }
+  
+  .theme-toggle__icon { animation: none !important; }
+  
+  
+  .btn--primary:hover:not(:disabled), .btn:hover:not(:disabled) .icon { transform: none; }
 }
 
-.reduce-motion .gen-stage__node, .reduce-motion .gen-status__bar span, .reduce-motion .viewer__reticle,
-.reduce-motion .viewer__img, .reduce-motion .describe__progress, .reduce-motion .traits__list > li,
-.reduce-motion .trait, .reduce-motion .wflow__node, .reduce-motion .wt-revision, .reduce-motion .wt-revision__saved,
-.reduce-motion .wt-int-step__node, .reduce-motion .wt-diff li, .reduce-motion .lib-card--enter, .reduce-motion .lib-empty,
-.reduce-motion .wt-report, .reduce-motion .studio__ident, .reduce-motion .empty-art__ring, .reduce-motion .empty-art__dot,
-.reduce-motion .theme-toggle__icon, .reduce-motion .viewer__scan { animation: none !important; }
-.reduce-motion .viewer__sweep { display: none; }
-.reduce-motion .gen-status__bar span, .reduce-motion .describe.is-extracting .describe__progress { background: color-mix(in srgb, var(--cyan) 55%, transparent); }
-.reduce-motion .btn--primary:hover:not(:disabled), .reduce-motion button.wflow__item:hover, .reduce-motion .btn:hover:not(:disabled) .icon { transform: none; }
+.reduce-motion .theme-toggle__icon { animation: none !important; }
+
+.reduce-motion .btn--primary:hover:not(:disabled), .reduce-motion .btn:hover:not(:disabled) .icon { transform: none; }

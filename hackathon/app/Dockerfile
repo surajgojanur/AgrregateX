@@ -4,7 +4,7 @@ WORKDIR /ui
 COPY frontend/package.json frontend/package-lock.json ./
 RUN npm ci --no-audit --no-fund
 COPY frontend/ ./
-RUN VITE_BACKEND_ENABLED=1 VITE_WITNESSTRACE_LOCAL=0 npm run build
+RUN npm run build
 
 FROM python:3.14-slim
 WORKDIR /srv
