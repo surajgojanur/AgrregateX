@@ -38,6 +38,6 @@ python3 benchmarks/acceptance.py --bounded
 python3 benchmarks/growth.py
 ```
 
-Latest run: 10 unit tests passed; Python compilation and `git diff --check` passed. The bounded acceptance runner completed all five stages with stable before/after snapshots. The growth scorer returned NOT TESTED because there is no valid 10M artifact pair.
+Latest run: 11 unit tests passed; Python compilation and `git diff --check` passed. The bounded acceptance runner completed all five stages with stable before/after snapshots. The growth scorer returned NOT TESTED because there is no valid 10M artifact pair.
 
 No loader, API/backend, shared schema, Compose, or upstream demo files were modified. No commit has been merged and no 10M import was started.
