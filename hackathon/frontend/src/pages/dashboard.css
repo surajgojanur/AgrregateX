@@ -53,3 +53,16 @@
   .ax-bars li { grid-template-columns: 80px minmax(0, 1fr) 80px; }
   .ax-range { margin-left: 0; }
 }
+
+.ax-fresh { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; padding: 3px 10px;
+  border: 1px solid color-mix(in srgb, var(--green) 45%, transparent); border-radius: 999px; color: var(--text); }
+.ax-fresh--warn { border-color: color-mix(in srgb, var(--amber) 55%, transparent); }
+.ax-shardline { margin: -6px 0 0; font-size: 11.5px; }
+.ax-outage { border-color: var(--red); }
+.ax-shards { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+.ax-shard__head { display: flex; align-items: center; gap: 8px; }
+.ax-shard__head h3 { margin: 0; font-size: 18px; }
+.ax-kv { display: grid; grid-template-columns: max-content 1fr; gap: 4px 14px; font-size: 13px; margin: 10px 0; }
+.ax-kv dt { color: var(--text-3); }
+.ax-kv dd { margin: 0; }
+@media (max-width: 1000px) { .ax-shards { grid-template-columns: minmax(0, 1fr); } }

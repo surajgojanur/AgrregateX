@@ -28,3 +28,14 @@ GRANT pg_monitor TO ax_monitor;
 GRANT USAGE ON SCHEMA pgtrickle, ax TO ax_monitor;
 GRANT SELECT ON pgtrickle.pgt_stream_tables, pgtrickle.pgt_refresh_history TO ax_monitor;
 GRANT SELECT ON ax.tenants TO ax_monitor;
+
+-- Aggregate-only order counts for the operator /api/shards view: ax_monitor never reads order
+-- rows, only per-tenant totals. SECURITY DEFINER with a pinned search_path.
+CREATE OR REPLACE FUNCTION ax.tenant_order_counts()
+RETURNS TABLE (tenant_id integer, orders bigint, seed_orders bigint)
+LANGUAGE sql STABLE SECURITY DEFINER SET search_path = pg_catalog, ax AS $f$
+    SELECT o.tenant_id, count(*), count(*) FILTER (WHERE o.order_id < 100000000)
+      FROM ax.orders o GROUP BY o.tenant_id
+$f$;
+REVOKE ALL ON FUNCTION ax.tenant_order_counts() FROM PUBLIC;
+GRANT EXECUTE ON FUNCTION ax.tenant_order_counts() TO ax_monitor;

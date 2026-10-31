@@ -27,15 +27,6 @@ export function AppProvider({ user = null, children }) {
     }
   }, [])
 
-  const logout = useCallback(async () => {
-    try {
-      await api.logout()
-    } catch {
-      /* cookie is cleared server-side when reachable; leave either way */
-    }
-    window.location.assign('/login')
-  }, [])
-
   const dismissToast = useCallback((id) => setToasts((t) => t.filter((x) => x.id !== id)), [])
 
   const notify = useCallback(
@@ -72,11 +63,11 @@ export function AppProvider({ user = null, children }) {
   const value = useMemo(
     () => ({
       health, engineError, refreshHealth, toasts, notify, dismissToast, notifications,
-      clearNotifications: () => setNotifications([]), prefs, updatePrefs, user, logout,
+      clearNotifications: () => setNotifications([]), prefs, updatePrefs, user,
       // kept for shared shell components
       activeCase: null, providers: {},
     }),
-    [health, engineError, refreshHealth, toasts, notify, dismissToast, notifications, prefs, updatePrefs, user, logout],
+    [health, engineError, refreshHealth, toasts, notify, dismissToast, notifications, prefs, updatePrefs, user],
   )
   return <AppContext.Provider value={value}>{children}</AppContext.Provider>
 }

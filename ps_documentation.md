@@ -739,44 +739,58 @@ cancelled and refunded orders. Each is configurable and labelled in API response
 
 ## 18. Final Evaluation Checklist
 
+> **Status as of 2026-10-31 ~13:25 UTC** (checked against the repository: `main` @ b632bd9 with P3 sharding merged (#22), plus PR #24 (B-1/B-2/B-3) and PR #25 (frontend conversion) under review).
+> ✅ = done **with evidence in the repo**. ⚠️ = done with a caveat. ❌ = not done.
+> **All measurements are on REPRESENTATIVE data (10k orders sharded, 100k single-DB) on one Apple M1 laptop, n=1.**
+> They are **not** the PRD's 1M/10 and 10M/100 datasets, so no scorecard target is ticked yet.
+
 ### Mandatory functional requirements [PRD]
-- [ ] FR-1 counts and totals for a time range
-- [ ] FR-2 trends over time (daily and hourly)
-- [ ] FR-3 Top-N lists (top 10 products by sales)
-- [ ] FR-4 breakdown by category (placed / shipped / cancelled)
-- [ ] FR-5 tenant filter on every query (API, summaries, cache)
-- [ ] FR-6 new and updated orders appear within a few minutes
-- [ ] FR-7 simple REST analytics API
+- [x] ✅ **FR-1** counts and totals for a time range: `GET /api/tenants/{id}/summary`. API vs raw SQL 200/200 (sharded) and 180/180 (single DB). `hackathon/app/tests/api_oracle.py`, `hackathon/sharding/results/baseline-api-oracle.txt`
+- [x] ✅ **FR-2** trends over time (daily and hourly): `…/trends?grain=day|hour`, covered by the same oracle (day and hour buckets)
+- [x] ✅ **FR-3** Top-N lists: `…/top-products?limit=10`, exact for any range with deterministic ties; oracle-checked
+- [x] ⚠️ **FR-4** breakdown by category: `…/breakdown?by=status|category`, oracle-checked. *Caveat:* our representative statuses are `pending/paid/shipped/cancelled/refunded`; the PRD example says `placed/shipped/cancelled`. Map them once the organiser schema is known.
+- [x] ✅ **FR-5** tenant filter on every query: API check before routing (403) **and** FORCE row-level security in the database. `hackathon/integration/results/rls-test.txt` (5/5); `sharding/results/baseline-shard-check.json` (cross-tenant 403/401). There is no cache layer, so no cache can leak.
+- [x] ⚠️ **FR-6** new and updated orders appear within minutes: inserts and cancellations measured visible in about 1.2–2 s (`sharding/results/measure-latency-lag.json`). *Caveat:* under **sustained heavy writes** refresh falls behind (22 s and growing in the P1 test, `integration/results/oltp-B.txt`) because of the upstream engine bottleneck (PROPOSAL P1).
+- [x] ✅ **FR-7** simple REST analytics API: FastAPI `hackathon/app`, OpenAPI at `/api/docs`; endpoint list in `hackathon/app/README.md`
 
 ### Non-functional requirements
-- [ ] Performance measured over HTTP
-- [ ] Freshness measured from commit to visible
-- [ ] Database safety measured with paired runs
-- [ ] Tenant isolation verified with negative tests
-- [ ] Correctness verified with the oracle
-- [ ] Scalability verified at 1M/10 and 10M/100 with skew
+- [x] ✅ Performance measured over HTTP: 100 requests per endpoint, p50 3.5–5.5 ms, p95 6–10 ms (`sharding/results/measure-latency-lag.json`)
+- [x] ✅ Freshness measured from commit to visible: data-based check per stream table (`…/live-write`), p50 ~1.25 s, max 1.85 s
+- [x] ⚠️ Database safety measured with paired runs: measured, and **it FAILS**. −28% tps (single DB, `integration/results/oltp-B.txt`) and −52% under dashboard load (sharded, `sharding/results/oltp-delta-shard-a.txt`)
+- [x] ✅ Tenant isolation verified with negative tests: RLS fail-closed, cross-tenant 403, forged cookie 401, cross-tenant cancel blocked by RLS
+- [x] ✅ Correctness verified with the oracle: stream tables 0/0 on both shards; API vs SQL 200/200 + 180/180; also after a network partition and recovery
+- [ ] ❌ Scalability verified at 1M/10 and 10M/100 with skew: **not run** (laptop memory and disk limits; 10M needs human approval)
 
 ### Benchmark targets [PRD] (tick Good / Great only with evidence)
-| Metric | Good | Great | Evidence link |
-|---|---|---|---|
-| Query speed (< 1 s / < 200 ms) | [ ] | [ ] | |
-| Freshness (< 5 min / < 30 s) | [ ] | [ ] | |
-| Database safety (< 25% / < 10% slower) | [ ] | [ ] | |
-| Correctness (most / all queries match) | [ ] | [ ] | |
-| Growth (< 5x / < 2x slower at 10M) | [ ] | [ ] | |
+| Metric | Good | Great | Provisional result (10k–100k, M1, n=1; not PRD scale) | Evidence link |
+|---|---|---|---|---|
+| Query speed (< 1 s / < 200 ms) | [ ] | [ ] | p95 6–10 ms, max 47 ms: would meet Great at this scale | `hackathon/sharding/results/measure-latency-lag.json` |
+| Freshness (< 5 min / < 30 s) | [ ] | [ ] | ~1.2–2 s at light load; **falls behind under sustained heavy writes** | same; `hackathon/integration/results/oltp-B.txt` |
+| Database safety (< 25% / < 10% slower) | [ ] | [ ] | **FAIL:** −28% (single DB) and −52% (sharded, under dashboard load) | `hackathon/sharding/results/oltp-delta-shard-a.txt` |
+| Correctness (most / all queries match) | [ ] | [ ] | every checked query matched (380/380 API checks; oracle 0/0) | `hackathon/sharding/results/baseline-*.json/txt` |
+| Growth (< 5x / < 2x slower at 10M) | [ ] | [ ] | **not measured** | — |
 
 ### Bonus [PRD, optional]
-- [ ] B-1 freshness shown in responses ("Updated 20 seconds ago")
-- [ ] B-2 rebuild everything from scratch
-- [ ] B-3 per-tenant limit on concurrent heavy queries
-- [ ] B-4 new metric via configuration file
-- [ ] B-5 monitoring page (query time, data lag)
+- [x] ✅ **B-1** freshness shown: **every analytics response** carries `freshness.verified_at` / `age_s` / `healthy` (oldest stream table's last completed refresh; single-flight cache ≤ 1 query per shard per second), and the dashboard shows "Updated N s ago" (amber > 30 s). **Live-verified** on a disposable two-shard stack: all 4 endpoints, operator and tenant sessions, `age_s` 0.8–1.3 s (`hackathon/app/tests/results/live-bonus-20261031T132216Z.txt`). Unit tests in `hackathon/app/tests/test_bonus.py`.
+- [x] ✅ **B-2** rebuild everything from scratch: operator CLI `python -m axapi.rebuild --shard all`. It reinitializes all 3 stream tables per shard (full recompute from source), waits for the completed rebuild, then requires the oracle to cover **exactly** the 3 stream tables with 0/0. Exit 0 only if rebuilt **and** verified (fail-closed after review: empty, partial or duplicate oracle results fail). **Live-verified** on a disposable two-shard stack **with live writes running**: both shards rebuilt in 8.6 s; pg_trickle history shows `REINITIALIZE:COMPLETED` for all 6 stream tables; an independent oracle is 0/0 on both shards before and after; a wrong owner password fails closed (`live-bonus-20261031T132216Z.txt`). It is a CLI, not an endpoint, by design: pg_trickle authorises only the stream-table owner (it checks the outer session user), and the web API must not hold superuser credentials.
+- [x] ✅ **B-3** per-tenant limit on concurrent heavy queries: ≤ `AX_TENANT_MAX_CONCURRENT` (default 4) per tenant; excess → **429** + `Retry-After: 1`; counters at operator-only `/api/limits` and on the Engine page. **Live-verified** (limit set to 1 for the test): a 16-request flood on tenant 1 → 3 × 200 + 13 × 429, all with `Retry-After: 1`; tenant 2 meanwhile `[200, 200, 200]`; counters match; `/api/limits` returns 403 for tenants. Also unit-tested (exact cap, fairness, slot release on error). *Scope: per API process (one uvicorn worker in the demo).*
+- [ ] ❌ **B-4** new metric via configuration file: not built
+- [x] ⚠️ **B-5** monitoring page: the **Engine** page (refresh counts, p50/p95/max refresh time, fallbacks, CDC backlog, health checks), the **Shards** page (per-shard health and freshness) and per-panel HTTP time on the Dashboard. *Caveat:* query time is measured in the browser; there is no server-side latency history.
 
 ### Process
-- [ ] Organiser schema and generator obtained, or their absence documented
-- [ ] All §16 unknowns resolved or documented
-- [ ] Datasets and versions recorded for every benchmark
-- [ ] No unverified claims in the demo or README
+- [x] ✅ Organiser schema and generator **absence documented**: §16; every dataset is labelled REPRESENTATIVE
+- [x] ✅ All §16 unknowns documented (none resolved yet; they need organiser answers)
+- [x] ✅ Datasets and versions recorded for benchmarks: image digest, PG 18.6 / pg_trickle 0.108.3, seed, hardware (`hackathon/docs/handoffs/opus.md`, `opus-sharding.md`)
+- [ ] ❌ No unverified claims in the demo or README: **pending a final review.** There is no project README yet, and the converted landing page is not committed or visually checked.
+
+### Other open work (not PRD checklist items)
+- [ ] Live run of the **hardened** partition script (18 simulated tests pass; the live partition demo used the earlier revision)
+- [ ] Browser/visual QA of the Dashboard, Shards, Engine and outage banner
+- [ ] Fedora/amd64 runtime test (manifest verified only)
+- [ ] Decision on the upstream pg_trickle patch (PROPOSAL P1), the main path to fixing database safety
+- [ ] CI cannot run until the GitHub Actions billing/spending limit is fixed (jobs are refused before starting)
+- [ ] B-4 config-driven metric (the only bonus not built)
+- [ ] Failover / replication (explicitly out of scope for now)
 
 ---
 

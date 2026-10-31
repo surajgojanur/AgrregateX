@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 
-export const THEME_KEY = 'revelio.theme'
-const THEME_EVENT = 'revelio-theme'
+export const THEME_KEY = 'aggregatex.theme'
+const THEME_EVENT = 'aggregatex-theme'
 export const THEMES = ['dark', 'light']
 
 export function getStoredTheme() {

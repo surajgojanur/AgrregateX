@@ -26,6 +26,32 @@ function Ms({ ms }) {
   return ms == null ? null : <span className="mono faint ax-ms" title="Measured HTTP round trip from this browser">{ms} ms</span>
 }
 
+function Pending({ h, down }) {
+  return down
+    ? <p className="muted" style={{ minHeight: h / 3 }}>Unavailable: shard {String(down).toUpperCase()} is unreachable. No data shown rather than stale data.</p>
+    : <div className="skeleton" style={{ height: h }} />
+}
+
+// B-1: "Updated N s ago" from the response's freshness block (oldest stream table's last
+// completed refresh). Ticks every second; amber beyond 30 s (the PRD's great-freshness line).
+function FreshBadge({ fresh }) {
+  const [now, setNow] = useState(() => Date.now())
+  useEffect(() => {
+    const id = setInterval(() => setNow(Date.now()), 1000)
+    return () => clearInterval(id)
+  }, [])
+  if (!fresh) return null
+  if (!fresh.verified_at) return <span className="ax-fresh ax-fresh--warn" role="status">Freshness unknown</span>
+  const age = Math.max(0, Math.round((now - Date.parse(fresh.verified_at)) / 1000))
+  const text = age < 60 ? `${age} s` : `${Math.floor(age / 60)} min ${age % 60} s`
+  return (
+    <span className={`ax-fresh ${age > 30 || !fresh.healthy ? 'ax-fresh--warn' : ''}`} role="status"
+      title={`Every number shown is at least as fresh as ${new Date(fresh.verified_at).toLocaleTimeString()} (${fresh.rule})`}>
+      <span className={`dot ${age > 30 || !fresh.healthy ? 'dot--warn' : 'dot--ok dot--pulse'}`} /> Updated {text} ago
+    </span>
+  )
+}
+
 function Kpi({ label, value, sub }) {
   return (
     <div className="stat panel">
@@ -165,7 +191,7 @@ function LiveWrite({ tenant, onDone }) {
   }
   return (
     <div>
-      <p className="muted">Commits a real order for this tenant, then waits until each stream table's pg_trickle frontier LSN passes the commit.</p>
+      <p className="muted">Commits a real order on this tenant's shard, then polls until each stream table's affected row equals the same aggregate computed from raw orders.</p>
       <div className="ax-row">
         <button className="btn btn--primary" disabled={busy} onClick={() => run('insert')}>
           {busy ? <span className="spinner" /> : <Icon name="plus" />} Insert order
@@ -176,7 +202,7 @@ function LiveWrite({ tenant, onDone }) {
       </div>
       {last && (
         <div className="ax-live">
-          <span className="label">Order {last.order_id} · {last.status} · commit LSN {last.commit_lsn}</span>
+          <span className="label">Order {last.order_id} · {last.status}{last.shard ? ` · shard ${last.shard.toUpperCase()}` : ''}</span>
           <ul>
             {Object.entries(last.visible_after_ms).map(([k, v]) => <li key={k}><span className="mono">{k}</span> <b className="mono">{v} ms</b></li>)}
           </ul>
@@ -198,9 +224,11 @@ export default function Dashboard() {
   const [state, setState] = useState({ loading: true })
   const [tick, setTick] = useState(0)
 
+  const [dirVersion, setDirVersion] = useState(null)
   useEffect(() => {
-    api.tenants().then((r) => setTenants(r.tenants)).catch(() => setTenants([]))
+    api.tenants().then((r) => { setTenants(r.tenants); setDirVersion(r.directory_version) }).catch(() => setTenants([]))
   }, [])
+  const shardOf = tenants.find((x) => x.tenant_id === tenant)?.shard
 
   const range = useMemo(() => {
     const to = new Date(Math.ceil(Date.now() / 60000) * 60000) // minute-aligned so auto-refresh is cache-friendly
@@ -219,7 +247,9 @@ export default function Dashboard() {
       setState({ loading: false, s, t, p, b, at: new Date() })
     } catch (err) {
       if (err.name === 'AbortError') return
-      setState((st) => ({ ...st, loading: false, error: err.message }))
+      // Shard outage: drop previous numbers so nothing stale is shown as current.
+      if (err.status === 503) setState({ loading: false, error: err.message, unavailable: err.data?.shard || '?' })
+      else setState((st) => ({ ...st, loading: false, error: err.message }))
       notify({ kind: 'error', title: 'Could not load dashboard', message: err.message })
     }
   }, [tenant, range, grain, by, notify])
@@ -250,7 +280,7 @@ export default function Dashboard() {
           <label className="ax-field">
             <span className="label">Tenant</span>
             <select className="select" value={tenant} onChange={(e) => setTenant(Number(e.target.value))}>
-              {tenants.map((x) => <option key={x.tenant_id} value={x.tenant_id}>{x.tenant_id} · {x.name}</option>)}
+              {tenants.map((x) => <option key={x.tenant_id} value={x.tenant_id}>{x.tenant_id} · {x.name}{x.shard ? ` · shard ${x.shard.toUpperCase()}` : ''}</option>)}
             </select>
           </label>
         ) : (
@@ -278,9 +308,16 @@ export default function Dashboard() {
           <span>Auto-refresh 5 s</span>
         </label>
         <span className="mono faint ax-range">{range.from.slice(0, 16)}Z → {range.to.slice(0, 16)}Z</span>
+        <FreshBadge fresh={state.s?.data.freshness} />
       </div>
 
-      {state.error && <p className="alert" role="alert">{state.error}</p>}
+      {shardOf && <p className="mono faint ax-shardline">Tenant {tenant} lives on shard {shardOf.toUpperCase()} (directory v{dirVersion})</p>}
+      {state.unavailable ? (
+        <div className="alert ax-outage" role="alert">
+          <strong>Shard {String(state.unavailable).toUpperCase()} unavailable.</strong> {state.error}
+          <span className="faint"> Retrying every 5 s. Tenants on other shards are unaffected.</span>
+        </div>
+      ) : state.error && <p className="alert" role="alert">{state.error}</p>}
 
       <div className="stats ax-kpis">
         <Kpi label="Sales" value={sum ? money(sum.sales_cents) : '—'} sub="excl. cancelled & refunded" />
@@ -291,7 +328,7 @@ export default function Dashboard() {
 
       <section className="panel ax-panel">
         <div className="panel__head"><span className="panel__title">Sales by {grain}</span><Ms ms={t?.ms} /></div>
-        {t ? <TrendChart points={t.data.points} grain={grain} /> : <div className="skeleton" style={{ height: 220 }} />}
+        {t ? <TrendChart points={t.data.points} grain={grain} /> : <Pending h={220} down={state.unavailable} />}
       </section>
 
       <div className="ax-grid2">
@@ -311,7 +348,7 @@ export default function Dashboard() {
                 ))}
               </tbody>
             </table>
-          ) : <div className="skeleton" style={{ height: 260 }} />}
+          ) : <Pending h={260} down={state.unavailable} />}
         </section>
 
         <section className="panel ax-panel">
@@ -328,7 +365,7 @@ export default function Dashboard() {
             b.data.by === 'category'
               ? <Bars rows={b.data.rows} value={(r) => r.sales_cents} label={(r) => `Category ${r.key}`} />
               : <Bars rows={b.data.rows} value={(r) => r.gross_cents} label={(r) => r.key} />
-          ) : <div className="skeleton" style={{ height: 260 }} />}
+          ) : <Pending h={260} down={state.unavailable} />}
           {b?.data.by === 'status' && <p className="faint ax-note">Status view shows gross order value per status, including cancelled and refunded.</p>}
         </section>
       </div>

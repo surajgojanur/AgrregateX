@@ -7,19 +7,38 @@ const sev = { OK: 'dot--ok', WARN: 'dot--warn', ERROR: 'dot--err', UNKNOWN: 'dot
 export default function Engine() {
   const [e, setE] = useState(null)
   const [err, setErr] = useState(null)
+  const [shard, setShard] = useState(null)
+  const [limits, setLimits] = useState(null)
   useEffect(() => {
     let live = true
-    const tick = () => api.engine().then((d) => { if (live) { setE(d); setErr(null) } }).catch((x) => live && setErr(x.message))
+    const tick = () => api.limits().then((d) => live && setLimits(d)).catch(() => live && setLimits(null))
     tick()
     const id = setInterval(tick, 3000)
     return () => { live = false; clearInterval(id) }
   }, [])
+  useEffect(() => {
+    let live = true
+    const tick = () => api.engine(shard).then((d) => { if (live) { setE(d); setErr(null) } }).catch((x) => live && setErr(x.message))
+    tick()
+    const id = setInterval(tick, 3000)
+    return () => { live = false; clearInterval(id) }
+  }, [shard])
 
-  if (err) return <p className="alert" role="alert">{err}</p>
+  const picker = e?.shards?.length > 1 && (
+    <div className="ax-filters panel">
+      <div className="ax-field"><span className="label">Shard</span>
+        <div className="ax-seg">{e.shards.map((s) => (
+          <button key={s} className={`btn btn--sm ${(shard || e.shard) === s ? 'btn--primary' : 'btn--ghost'}`} onClick={() => { setE(null); setShard(s) }}>{s.toUpperCase()}</button>
+        ))}</div>
+      </div>
+    </div>
+  )
+  if (err) return <div className="ax-dash">{picker}<p className="alert" role="alert">{err}</p>{!e && <button className="btn" onClick={() => setShard(shard === 'a' ? 'b' : 'a')}>Try the other shard</button>}</div>
   if (!e) return <div className="skeleton" style={{ height: 300 }} />
   const problems = e.health.filter((h) => h.severity !== 'OK')
   return (
     <div className="ax-dash">
+      {picker}
       <div className="stats ax-kpis">
         <div className="stat panel"><span className="label">pg_trickle</span><span className="stat__value">{e.pg_trickle_version}</span><span className="stat__sub muted">upstream engine (trickle-labs)</span></div>
         <div className="stat panel"><span className="label">Scheduler</span><span className="stat__value">{e.scheduler_running ? 'running' : 'stopped'}</span><span className="stat__sub muted">background worker for this DB</span></div>
@@ -88,6 +107,22 @@ export default function Engine() {
           </tbody>
         </table>
       </section>
+
+      {limits && (
+        <section className="panel ax-panel">
+          <div className="panel__head"><span className="panel__title">Per-tenant query limits (B-3)</span>
+            <span className="label">max {limits.max_concurrent_per_tenant} concurrent / tenant · wait {limits.queue_wait_s} s · {limits.scope}</span></div>
+          {limits.tenants.length === 0 ? <p className="muted">No analytics queries yet.</p> : (
+            <table className="ax-table">
+              <thead><tr><th>Tenant</th><th className="num">In flight</th><th className="num">Peak</th><th className="num">Admitted</th><th className="num">Rejected (429)</th></tr></thead>
+              <tbody>{limits.tenants.map((t) => (
+                <tr key={t.tenant_id}><td className="mono">{t.tenant_id}</td><td className="num mono">{t.in_flight}</td><td className="num mono">{t.peak}</td>
+                  <td className="num mono">{t.admitted}</td><td className={`num mono ${t.rejected_429 ? 'text-amber' : ''}`}>{t.rejected_429}</td></tr>
+              ))}</tbody>
+            </table>
+          )}
+        </section>
+      )}
 
       <section className="panel ax-panel">
         <div className="panel__head"><span className="panel__title">Settings (live SHOW)</span></div>
