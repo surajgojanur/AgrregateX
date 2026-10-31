@@ -1,0 +1,8 @@
+--- shard port 25591 (writer stopped, settled)
+st_day_product_status|0|0
+st_day_category_status|0|0
+st_hour_category_status|0|0
+--- shard port 25592 (writer stopped, settled)
+st_day_product_status|0|0
+st_day_category_status|0|0
+st_hour_category_status|0|0

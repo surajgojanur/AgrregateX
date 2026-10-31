@@ -1,0 +1,8 @@
+--- port 25591
+st_day_product_status|0|0
+st_day_category_status|0|0
+st_hour_category_status|0|0
+--- port 25592
+st_day_product_status|0|0
+st_day_category_status|0|0
+st_hour_category_status|0|0

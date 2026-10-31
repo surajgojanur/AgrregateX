@@ -1,0 +1,84 @@
+{
+ "samples": 113,
+ "backend_states": [
+  [
+   "ax_api|client backend|idle",
+   555
+  ],
+  [
+   "ax_writer|client backend|idle",
+   226
+  ],
+  [
+   "ax_monitor|client backend|idle",
+   113
+  ],
+  [
+   "postgres|pg_trickle scheduler|None",
+   113
+  ],
+  [
+   "ax_api|client backend|idle in transaction",
+   7
+  ],
+  [
+   "ax_api|client backend|active",
+   3
+  ],
+  [
+   "postgres|pg_trickle refresh worker|None",
+   1
+  ]
+ ],
+ "xmin_values_seen": [
+  [
+   "postgres:None:30854",
+   1
+  ],
+  [
+   "ax_api:active:30898",
+   1
+  ],
+  [
+   "ax_api:active:30906",
+   1
+  ],
+  [
+   "ax_api:idle in transaction:30909",
+   1
+  ],
+  [
+   "ax_api:idle in transaction:30933",
+   1
+  ],
+  [
+   "ax_api:idle in transaction:30935",
+   1
+  ]
+ ],
+ "xid_values_seen": [
+  [
+   "postgres:None:30854",
+   1
+  ]
+ ],
+ "metrics_summary": [
+  {
+   "db_name": "aggregatex",
+   "total_stream_tables": 3,
+   "active_stream_tables": 3,
+   "suspended_stream_tables": 0,
+   "total_refreshes": null,
+   "successful_refreshes": null,
+   "failed_refreshes": null,
+   "total_rows_processed": null,
+   "active_workers": 0,
+   "ivm_lock_parse_error_count": 0,
+   "holdback_probe_calls": 2943,
+   "holdback_probe_cache_hits": 0,
+   "holdback_probe_avg_ms": 0.7115188583078491,
+   "cleanup_backlog_count": 0,
+   "cleanup_blocked_count": 0
+  }
+ ]
+}

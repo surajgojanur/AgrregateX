@@ -1,0 +1,6 @@
+main: 2cc3a757cee37efc75586780df56fbefd2737e94
+project: ax-demo42 (API 8092, shard A 25591, shard B 25592)
+image: sha256:94344bb98995b19c826f939739672481abaab8c25710e3910b48bdb7cf5b3b8d
+server_version_num=180006 pg_trickle=0.108.3
+host: Apple M1, 8 GB RAM, Docker VM 3.8 GiB
+captured: 2026-10-31T19:26Z-19:50Z

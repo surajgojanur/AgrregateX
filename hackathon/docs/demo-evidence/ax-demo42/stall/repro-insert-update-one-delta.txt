@@ -1,0 +1,50 @@
+=== CASE 1: insert + status update of the same row inside ONE refresh delta
+INFO:  Stream table ax.st_day_product_status paused (pgt_id=1); use pgtrickle.resume_stream_table() to re-enable.
+ pause_stream_table 
+--------------------
+ 
+
+INSERT 0 1
+UPDATE 1
+INFO:  Stream table ax.st_day_product_status resumed (pgt_id=1)
+ resume_stream_table 
+---------------------
+ 
+
+INFO:  Stream table ax.st_day_product_status: needs_reinit is set, performing FULL reinitialization
+INFO:  Stream table ax.st_day_product_status refreshed (FULL)
+ refresh_stream_table 
+----------------------
+ 
+
+ side | status  | order_count | units | sales_cents 
+------+---------+-------------+-------+-------------
+ SRC  | shipped |           1 |     2 |        2000
+ ST   | shipped |           1 |     2 |        2000
+
+    action    | merge_strategy_used | delta_row_count 
+--------------+---------------------+-----------------
+ REINITIALIZE | FULL                |            5512
+
+=== CASE 2 (control): insert, refresh, update, refresh
+INSERT 0 1
+NOTICE:  stream table "ax"."st_day_product_status" using FULL refresh: Predicted differential cost 47.1 ms exceeds the 45.9 ms full-refresh threshold for 1 changes.
+WARNING:  [pg_trickle] Falling back to FULL refresh for ax.st_day_product_status: COST_MODEL_PREFERRED_FULL (Predicted differential cost 47.1 ms exceeds the 45.9 ms full-refresh threshold for 1 changes.)
+INFO:  Stream table ax.st_day_product_status refreshed (DIFFERENTIAL: +5513 -0)
+ refresh_stream_table 
+----------------------
+ 
+
+UPDATE 1
+NOTICE:  stream table "ax"."st_day_product_status" using FULL refresh: Predicted differential cost 94.1 ms exceeds the 45.9 ms full-refresh threshold for 2 changes.
+WARNING:  [pg_trickle] Falling back to FULL refresh for ax.st_day_product_status: COST_MODEL_PREFERRED_FULL (Predicted differential cost 94.1 ms exceeds the 45.9 ms full-refresh threshold for 2 changes.)
+INFO:  Stream table ax.st_day_product_status refreshed (DIFFERENTIAL: +5513 -0)
+ refresh_stream_table 
+----------------------
+ 
+
+ side | status  | order_count | units | sales_cents 
+------+---------+-------------+-------+-------------
+ SRC  | shipped |           1 |     2 |        2000
+ ST   | shipped |           1 |     2 |        2000
+
