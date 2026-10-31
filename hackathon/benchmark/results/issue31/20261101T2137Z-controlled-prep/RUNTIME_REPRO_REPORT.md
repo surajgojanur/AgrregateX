@@ -1,4 +1,4 @@
-# Controlled runtime reproduction — PREPARED / BLOCKED, NOT EXECUTED
+# Controlled runtime reproduction — offline protocol review (e312912a + review)
 
 No disposable database was started. No mutation, refresh, setting change or
 query was issued against the preserved Fedora database or APIs in this turn.
@@ -9,12 +9,13 @@ remains separate. The runtime classification for this requested experiment is
 ## Gate observations
 
 Fetched main remains `c19b89a24370d29412fc42c250a86b0ea68f791f`;
-PR #48 remote branch matches local `d049da665b7999f4400ea3b249213b79380a1b5b`;
+PR #48 remote branch was verified at `e312912acdfc000c8800e206eb9f19038717b8f8`
+before edits (local and remote matched; latest fetch re-confirmed that base);
 PR #49 source branch remains `5c8580b62f4738e22709b24c3e5f7c2053fd8cba`.
 Issue #31/#12 and both PR discussions were reread. Existing worktrees/untracked
 files were retained; only this new evidence/preparation directory is staged.
 
-The observed host has about **1.17 GiB available RAM**, below the required 4 GiB.
+The earlier observed host had about **1.17 GiB available RAM**, below the required 4 GiB.
 Swap used about 5.56 GiB; interval vmstat samples include swap-in 1572 KiB/s,
 swap-out 6764 and 12300 KiB/s. The first vmstat row is an average since boot;
 the interval rows independently demonstrate current swapping. Persistent /home
@@ -38,6 +39,76 @@ target-specific approval has been supplied. The resource failure independently
 prohibits launch, even if approval is later supplied. **Do not free memory by
 stopping the demo or someone else's services.**
 
+## Offline review against pinned source
+
+The pinned source is tag `v0.108.3`, commit
+`ce709f06327b4801f79fc48934bc96107b450907` (PostgreSQL 18.6 runtime image
+digest documented below). This validates source behavior, not binary/source
+equivalence for the Fedora runtime.
+
+- `pg_trickle.aggregate_fast_path` defaults to `true`; `merge_strategy` defaults
+  to `auto`; threshold defaults to `0.01` (`src/config/dvm.rs`). The primary
+  `primary_default` protocol now issues no SET for these three controls.
+- Separate labelled `comparison_fast_off_merge` and
+  `comparison_fast_off_auto` runs turn the fast path off. The latter sets
+  threshold `1.0` only as a DELETE+INSERT candidate; only that refresh's
+  completed `pgt_refresh_history.merge_strategy_used` can establish the actual
+  apply path.
+- **P5** is the direct aggregate SQL delta producer/eligibility path. **B-1**
+  is aggregate fast-path application (`agg_fast_path`); they are different
+  decisions. Vector planning may replace the SQL delta producer and actual
+  execution records `vector_agg`. Other source-selected application labels
+  include `delete_insert`, `merge`, `merge_prepared`, and `pipeline`. A requested
+  GUC, P5 eligibility/logged SQL, temp-table existence, or selected-plan
+  candidate is not evidence of the executed path.
+- v0.108.3 logs the resolved delta SQL at DEBUG1 when
+  `pg_trickle.log_delta_sql=on`; this can be retained from the disposable
+  container's PostgreSQL logs and correlated by backend PID, stream and time.
+  It is still a SQL text diagnostic, not proof that this producer executed.
+  `PGS_VECTOR_AGG` / `MT-8 vector aggregate` execution messages identify the
+  vector branch. If logs do not unambiguously distinguish P5 from standard SQL
+  or vector execution for this refresh, record producer as unknown and the
+  root-cause verdict remains INCONCLUSIVE. The exact refresh-history strategy
+  records the actual apply label, unlike requested GUCs.
+- `pgt_refresh_history` for the exact new `refresh_id` is captured after manual
+  refresh. Runtime evidence must show completed `DIFFERENTIAL`, no fallback,
+  and actual `merge_strategy_used`. The script also records requested settings
+  and effective GUC values for comparison, never substitutes them for history.
+- `pg_trickle.enabled=off` gates the scheduler loop; v0.108.3 manual
+  `refresh_stream_table` has no master-enabled check and follows the manual
+  refresh path. Thus disabling the scheduler is compatible with this design
+  according to source inspection. Runtime startup and a bounded manual refresh
+  remain unverified. CDC trigger capture uses separate capture controls.
+- `__pgt_cdc_<pgt_id>_<source_oid>` is produced by `DeltaStage::table_name`,
+  with `ON COMMIT DROP`; it is the staged relation after reducer and visibility
+  filtering, not the intermediate reducer input. `__pgt_delta_<pgt_id>` is
+  prepared only for selected materialized apply paths (including vector); it
+  is not guaranteed for MERGE. Same-backend, pre-COMMIT lookup is source-backed
+  but runtime lifetime/privilege behavior is unverified. Absence is explicitly
+  INCONCLUSIVE, not an empty delta or failed refresh.
+- The raw CDC query is only a pre-refresh buffer copy. It does not prove the
+  exact stage pre-reducer rows, and comparing it to post-filter stage alone
+  cannot localize reduction versus visibility filtering. Current stock
+  diagnostics do not expose all three required stage boundaries. That portion
+  remains INCONCLUSIVE unless separately approved instrumentation provides
+  pre-reducer, post-reducer, and post-visibility row images.
+- The trace preserves a single backend and transaction across refresh/temp
+  inspection; however, issuing independent fixture commits before this
+  transaction does not itself prove both mutations lie in its consumed CDC
+  LSN interval. The protocol requires exact before/after per-source frontiers
+  and ordered event LSNs. `txid_current_snapshot()` is recorded as transaction
+  context, not misrepresented as a CDC frontier.
+- Psql SQL and guard structure received offline static review and unit tests;
+  no PostgreSQL parser/server was run. SQL executable syntax, temp-table
+  accessibility, capture-window behavior, history values, actual producer and
+  apply operation all still need approved runtime evidence.
+
+Offline policy tests live in `hackathon/benchmark/test_g4_protocol.py`; they
+test named configuration policy, target/scheduler/destructive-operation
+tripwires, missing-evidence classification, and the prepared-script guards.
+They synthesize input evidence only to test the classifier contract and are not
+runtime observations.
+
 ## Prepared artifacts and bounded target
 
 - `compose.yaml`: project `ax-issue31-g4-repro`, container
@@ -57,9 +128,10 @@ stopping the demo or someone else's services.**
 - `cases.sql`: deterministic Case A and split Case B phases; separate explicit
   commits, no sleep. Final two principal cases add two orders (82 total).
 - `trace_refresh.sql`: one connection and explicit transaction captures raw
-  buffer before refresh, frontier before/after, post-staging and materialized
-  aggregate rows before COMMIT, selected target rows, and actual history strategy.
-  Missing internal tables produce an explicit blocker and rollback/exit 4.
+  buffer before refresh, effective settings, frontier before/after, post-stage
+  and any materialized delta before COMMIT, selected target rows and exact new
+  history. Primary defaults are preserved. Missing intermediate tables emit
+  explicit INCONCLUSIVE markers and do not become empty-row evidence.
 - `oracle_select.sql`: independent three-table EXCEPT ALL SELECTs, one read-only
   consistent snapshot, no installation of helper functions.
 
@@ -112,7 +184,7 @@ If B fails, preserve it and stop; do not reset the fixture to obtain an A PASS.
    2026-11-20 absent; no background writer/scheduler work.
 2. Execute `cases.sql` with `-v phase=A`, recording COMMIT returns and exact source
    rows after both transactions. Its INSERT and UPDATE use order1001.
-3. Execute `trace_refresh.sql` with `-v stream=st_day_product_status -v strategy=auto`
+3. Execute `trace_refresh.sql` with `-v stream=st_day_product_status -v experiment=primary_default -v case_id=A`
    as one psql invocation, retaining full stdout/stderr. Do not autocommit the
    refresh before temp-table inspection. Capture logs bounded by test PID/times.
 4. Filter externally saved raw rows using **that refresh's exact** previous/new
@@ -120,8 +192,9 @@ If B fails, preserve it and stop; do not reset the fixture to obtain an A PASS.
    with correct identities/payloads. A global pre-refresh WAL position or elapsed
    sleep is insufficient. If any event lies outside, classify capture/frontier
    difference; do not call it the intended same-window test.
-5. Confirm latest history identifies this command as completed DIFFERENTIAL,
-   no fallback, actual strategy delete_insert; then inspect joined tables in
+5. Confirm the exact new history row identifies this command as completed
+   DIFFERENTIAL, no fallback, and record its actual strategy (do not predict
+   `delete_insert` for the primary default); then inspect joined tables in
    separate manual captures, preserving their own frontiers. Save post-commit
    source/target/oracle. Require source cancelled only, paid absent in expectation.
 
@@ -141,12 +214,13 @@ separate fresh owned target lifecycle/volume approval for independent repetition
    all three complete streams with the independent oracle and report all residual
    mismatches, distinguishing prior A contamination from new B behavior.
 
-Repeat clean A and B for MERGE using `strategy=merge`, with GUC
-aggregate_fast_path=off as prepared. For DELETE+INSERT use auto and threshold1.0
-against the analyzed 80-group fixture. The obsolete literal strategy
-`delete_insert` is **not** a forcing mechanism in the available release source.
-Actual history/trace must prove the path; if auto chooses another path, mark
-DELETE+INSERT untested. Repetition/fresh-volume targets require approval, not
+Repeat clean A and B for the separately labelled
+`comparison_fast_off_merge`. For a DELETE+INSERT candidate use
+`comparison_fast_off_auto` and threshold1.0 against the analyzed 80-group
+fixture. The obsolete literal strategy `delete_insert` is **not** a forcing
+mechanism in the available release source. Actual history/trace must prove the
+path; if auto chooses another path, mark DELETE+INSERT untested. Primary default
+behavior must be measured separately. Repetition/fresh-volume targets require approval, not
 automatic resource recreation or silent fixture resets. All attempts share the
 100-order/10-minute cap unless explicitly re-budgeted.
 

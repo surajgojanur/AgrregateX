@@ -26,9 +26,23 @@ SELECT :'phase'='A' AS case_a, :'phase'='B_setup' AS case_b_setup,
   -- Controller must refresh all three, capture exact frontiers/oracle=0/0,
   -- and prove the source AND stream contain B paid before invoking B_update.
 \elif :case_b_update
+  SELECT count(*)=1 AND bool_and(status='paid') AS b_update_precondition
+    FROM ax.orders WHERE tenant_id=1 AND order_id=1002 \gset
+  \if :b_update_precondition
+  \else
+    \echo 'REFUSED: B_update requires exactly one paid order 1002'
+    \quit 3
+  \endif
   BEGIN;
   UPDATE ax.orders SET status='cancelled',updated_at=clock_timestamp() WHERE tenant_id=1 AND order_id=1002;
+  SELECT count(*)=1 AS b_update_affected_one FROM ax.orders
+    WHERE tenant_id=1 AND order_id=1002 AND status='cancelled' \gset
   COMMIT;
+  \if :b_update_affected_one
+  \else
+    \echo 'INCONCLUSIVE: B_update did not produce exactly one cancelled row'
+    \quit 4
+  \endif
 \else
   \echo 'REFUSED: unrecognized phase'
   \quit 3

@@ -31,4 +31,26 @@ OK
 bash: just: command not found
 bash: just: command not found
 
-Offline bundle checks PASS: all seven deliverables present; approval/resource failure remains fail-closed; runtime oracle counts UNKNOWN; six EXCEPT ALL directions; wrong-database guards; missing-temp rollback/exit; original SQL mount resolves; principal fixture82<=100; pinned memory/CPU/port/image; previous proposal manifest unchanged. Prepared SQL was not executed or PostgreSQL syntax-validated. No new runtime defect confirmation.
+Historical checks above were from preparation commit e312912a and remain historical.
+
+Offline final review (2026-11-01):
+- `PYTHONPATH=/tmp/ax31-evidence python3 -m unittest discover -v` from
+  `hackathon/benchmark`: 41 tests passed (16 G4 protocol, 16 acceptance,
+  9 HTTP baseline).
+- New G4 checks cover named default/comparison configurations, wrong database,
+  enabled scheduler, destructive SQL tripwire, fixture/case guards, missing or
+  ambiguous runtime artifacts, failed/fallback/non-differential history, and
+  negative-event loss at an observed reducer boundary.
+- The earlier `missing-temp rollback/exit` characterization is superseded:
+  absent internal stage/delta now emits INCONCLUSIVE and continues capturing
+  history/final-state/oracle evidence.
+- Static source comparison used upstream tag `v0.108.3` at
+  `ce709f06327b4801f79fc48934bc96107b450907`. It validates defaults, manual
+  refresh control flow, temp relation naming/lifetime, and history field names;
+  it does not validate the runtime binary equivalence or PostgreSQL execution.
+- `just fmt` and `just lint` could not run because `just` is not installed.
+- No PostgreSQL syntax parser/server was used; prepared psql scripts remain
+  runtime-unvalidated. No container, database, live mutation or refresh was run.
+- Runtime evidence, including all three internal stage boundaries and actual
+  producer/apply trace, remains NOT COLLECTED. G4 defect verdict remains
+  INCONCLUSIVE until those artifacts exist.

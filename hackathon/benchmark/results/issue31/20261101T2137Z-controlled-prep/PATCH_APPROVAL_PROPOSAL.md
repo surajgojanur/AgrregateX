@@ -8,11 +8,28 @@ swap gates; authorization alone cannot override them. No demo service may be
 stopped to make room. A different host or teammate stack needs a new exact target
 and owner coordination. No automatic retry/launch is scheduled.
 
-Stock diagnostics first: same-backend temporary staging/delta inspection,
-bounded source/window capture and actual executed-operation evidence. If stock
-observations are insufficient, the minimum instrumentation request is specified
-in STAGING_TRACE.md and AGGREGATE_DELTA_TRACE.md. Stop there for separate approval;
-no custom source build or instrumentation is included in target approval.
+Stock diagnostics first, with `primary_default` leaving `aggregate_fast_path`,
+`merge_strategy`, and its threshold untouched. The separately labelled
+`comparison_fast_off_merge` and `comparison_fast_off_auto` settings are controls,
+not the primary result. Source inspection shows the automatic strategy can
+choose a path; use the completed refresh-history row's `merge_strategy_used` to
+record the actual application. P5 direct aggregate SQL production, B-1
+aggregate-fast-path application, vector aggregate execution, PH-D1
+DELETE+INSERT, and ordinary MERGE are separate dimensions. See the revised
+report and tests.
+
+The existing same-backend script observes only raw buffer copy and (if present)
+the post-reducer/post-visibility stage. It cannot prove the reducer's input or
+separate RLS visibility pruning. A materialized delta is not guaranteed on MERGE
+and its absence is now explicitly INCONCLUSIVE. If stock diagnostics do not
+expose the required boundary/output, request diagnostic-only custom-build
+instrumentation separately as scoped in STAGING_TRACE.md and
+AGGREGATE_DELTA_TRACE.md. Current target approval does not include that build.
+
+Source review of v0.108.3 shows `pg_trickle.enabled=off` disables scheduler
+work, while manual `refresh_stream_table` has no master-enabled guard. This is
+source-validated but still needs disposable-runtime verification before relying
+on it operationally.
 
 ## Conditional correction, not authorized or applied
 

@@ -43,6 +43,11 @@ SELECT pgtrickle.refresh_stream_table('ax.st_hour_category_status');
 ANALYZE ax.st_day_product_status;
 ANALYZE ax.st_day_category_status;
 ANALYZE ax.st_hour_category_status;
-SELECT count(*) <= 100 AS fixture_budget_ok FROM ax.orders;
+SELECT count(*) <= 100 AS fixture_budget_ok FROM ax.orders \gset
+\if :fixture_budget_ok
+\else
+  \echo 'REFUSED: baseline exceeds 100-order fixture budget'
+  \quit 3
+\endif
 -- Before cases: execute oracle_select.sql, require all 0/0, populated frontiers,
 -- no needs_reinit, and no scheduler-driven refreshes. Abort otherwise.
