@@ -81,7 +81,8 @@ export const api = {
   breakdown: (t, r, signal) => request(`${T(t)}/breakdown${range(r)}`, { signal }),
   freshness: (t, signal) => request(`${T(t)}/freshness`, { signal }),
   liveWrite: (t, body) => request(`${T(t)}/live-write`, { method: 'POST', body }),
-  engine: (signal) => request('/engine', { signal }),
+  engine: (shard, signal) => request(`/engine${shard ? `?shard=${encodeURIComponent(shard)}` : ''}`, { signal }),
+  shards: (signal) => request('/shards', { signal }),
 
   // ── legacy Revelio endpoints (no longer served) ──
   me: () => request('/auth/me'),

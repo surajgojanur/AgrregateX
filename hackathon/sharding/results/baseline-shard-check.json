@@ -1,0 +1,181 @@
+{
+ "health": "ok",
+ "checks": [
+  {
+   "check": "shard a: tenants == directory",
+   "pass": true,
+   "tenants": [
+    1,
+    3,
+    4
+   ],
+   "order_tenants": [
+    1,
+    3,
+    4
+   ],
+   "expected": [
+    1,
+    3,
+    4
+   ]
+  },
+  {
+   "check": "shard b: tenants == directory",
+   "pass": true,
+   "tenants": [
+    2,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10
+   ],
+   "order_tenants": [
+    2,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10
+   ],
+   "expected": [
+    2,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10
+   ]
+  },
+  {
+   "check": "no tenant on both shards",
+   "pass": true,
+   "overlap": []
+  },
+  {
+   "check": "seed union == AX_SEED_ORDERS and ids disjoint",
+   "pass": true,
+   "shard_a": 5013,
+   "shard_b": 4987,
+   "duplicate_ids": 0
+  },
+  {
+   "check": "shard a: joins tenant-local (no orphan refs)",
+   "pass": true,
+   "orphans": 0
+  },
+  {
+   "check": "shard b: joins tenant-local (no orphan refs)",
+   "pass": true,
+   "orphans": 0
+  },
+  {
+   "check": "shard a: stream-table oracle 0/0",
+   "pass": true,
+   "rows": [
+    [
+     "st_day_product_status",
+     0,
+     0
+    ],
+    [
+     "st_day_category_status",
+     0,
+     0
+    ],
+    [
+     "st_hour_category_status",
+     0,
+     0
+    ]
+   ]
+  },
+  {
+   "check": "shard b: stream-table oracle 0/0",
+   "pass": true,
+   "rows": [
+    [
+     "st_day_product_status",
+     0,
+     0
+    ],
+    [
+     "st_day_category_status",
+     0,
+     0
+    ],
+    [
+     "st_hour_category_status",
+     0,
+     0
+    ]
+   ]
+  },
+  {
+   "check": "tenant 1 (shard a): live insert lands on owner only and becomes visible",
+   "pass": true,
+   "http": 200,
+   "order_id": 100000048,
+   "lag_ms": 1530.8,
+   "visible_after_ms": {
+    "st_day_product_status": 636.8,
+    "st_hour_category_status": 878.3,
+    "st_day_category_status": 1530.8
+   }
+  },
+  {
+   "check": "tenant 1 (shard a): cancel visible",
+   "pass": true,
+   "http": 200,
+   "lag_ms": 1464.6
+  },
+  {
+   "check": "tenant 2 (shard b): live insert lands on owner only and becomes visible",
+   "pass": true,
+   "http": 200,
+   "order_id": 200000056,
+   "lag_ms": 1476.0,
+   "visible_after_ms": {
+    "st_day_category_status": 151.9,
+    "st_hour_category_status": 761.6,
+    "st_day_product_status": 1476.0
+   }
+  },
+  {
+   "check": "tenant 2 (shard b): cancel visible",
+   "pass": true,
+   "http": 200,
+   "lag_ms": 1477.5
+  },
+  {
+   "check": "tenant 2 (B) reads own summary",
+   "pass": true
+  },
+  {
+   "check": "tenant 2 (B) -> tenant 1 (A) is 403 (auth before routing)",
+   "pass": true
+  },
+  {
+   "check": "tenant 2 (B) -> tenant 3 (A) is 403",
+   "pass": true
+  },
+  {
+   "check": "tenant 2 cannot cancel tenant 1's order",
+   "pass": true
+  },
+  {
+   "check": "tenant 2 -> /api/shards is 403",
+   "pass": true
+  },
+  {
+   "check": "unauthenticated is 401",
+   "pass": true
+  }
+ ],
+ "passed": 18,
+ "failed": 0
+}

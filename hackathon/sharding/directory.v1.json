@@ -1,0 +1,10 @@
+{
+  "version": 1,
+  "created": "2026-10-31",
+  "note": "Stable tenant->shard directory. Never reassign by modulo once rows exist; moving a tenant needs a migration and a new version.",
+  "shards": ["a", "b"],
+  "tenants": {
+    "1": "a", "3": "a", "4": "a",
+    "2": "b", "5": "b", "6": "b", "7": "b", "8": "b", "9": "b", "10": "b"
+  }
+}
