@@ -30,6 +30,39 @@ from . import config, db
 ST_NAMES = ("ax.st_day_product_status", "ax.st_day_category_status", "ax.st_hour_category_status")
 
 
+def verify(stream_tables: list[dict], oracle_rows: list[dict] | None) -> tuple[bool, bool, list[str]]:
+    """Fail-closed success test (review of PR #24). Returns (rebuilt, oracle_clean, problems).
+
+    rebuilt:      EXACTLY the expected stream tables, each with a COMPLETED rebuild and ACTIVE after.
+    oracle_clean: oracle rows are EXACTLY the expected set (no missing, extra or duplicate names) and
+                  every missing/extra count is 0. Zero rows or partial rows are NOT clean.
+    """
+    problems: list[str] = []
+    expected = set(ST_NAMES)
+    names = [i.get("name") for i in stream_tables]
+    if sorted(names) != sorted(expected):
+        problems.append(f"rebuilt set {sorted(names)} != expected {sorted(expected)}")
+    for i in stream_tables:
+        if i.get("rebuild_status") != "COMPLETED":
+            problems.append(f"{i.get('name')}: rebuild {i.get('rebuild_status') or 'not observed'}")
+        if i.get("status_after") != "ACTIVE":
+            problems.append(f"{i.get('name')}: status after rebuild {i.get('status_after')}")
+    rebuilt = not problems
+    rows = oracle_rows or []
+    got = ["ax." + r["stream_table"] if not str(r["stream_table"]).startswith("ax.") else r["stream_table"] for r in rows]
+    oracle_problems = []
+    if not rows:
+        oracle_problems.append("oracle returned no rows")
+    if len(got) != len(set(got)):
+        oracle_problems.append(f"duplicate oracle rows {sorted(got)}")
+    if set(got) != expected:
+        oracle_problems.append(f"oracle covers {sorted(set(got))}, expected {sorted(expected)}")
+    for r in rows:
+        if r.get("missing") != 0 or r.get("extra") != 0:
+            oracle_problems.append(f"{r['stream_table']}: missing={r.get('missing')} extra={r.get('extra')}")
+    return rebuilt, not oracle_problems, problems + oracle_problems
+
+
 def _connect(shard: "db.Shard", user: str, password: str | None):
     conn = psycopg.connect(config.dsn(user, password, shard.host, shard.port), autocommit=True)
     conn.execute("SET statement_timeout = '120s'")
@@ -75,12 +108,11 @@ def rebuild_shard(shard: "db.Shard", user: str, password: str | None, timeout_s:
         for attempt in range(1, 16):
             rows = c.execute("SELECT stream_table, missing_in_st, extra_in_st FROM ax.oracle_mismatches()").fetchall()
             report["oracle"] = {"attempt": attempt, "rows": [{"stream_table": a, "missing": m, "extra": e} for a, m, e in rows]}
-            if all(m == 0 and e == 0 for _, m, e in rows):
+            if verify(report["stream_tables"], report["oracle"]["rows"])[1]:
                 break
             time.sleep(2)
-    rebuilt = all(i.get("rebuild_status") == "COMPLETED" and i.get("status_after") == "ACTIVE" for i in report["stream_tables"])
-    clean = report["oracle"] is not None and all(r["missing"] == 0 and r["extra"] == 0 for r in report["oracle"]["rows"])
-    report.update(ok=rebuilt and clean, rebuilt=rebuilt, oracle_clean=clean,
+    rebuilt, clean, problems = verify(report["stream_tables"], (report["oracle"] or {}).get("rows"))
+    report.update(ok=rebuilt and clean, rebuilt=rebuilt, oracle_clean=clean, problems=problems,
                   seconds=round(time.monotonic() - t0, 2))
     return report
 

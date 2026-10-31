@@ -1,0 +1,22 @@
+# NOTE: first run. Its 3 FAILs were TEST bugs, fixed before the rerun (live-bonus-20261031T132216Z.txt, 17/17):
+#  - Retry-After looked up case-sensitively (uvicorn sends 'retry-after'; curl confirmed 7/7 429s carry it)
+#  - tenant 2 fired 3 simultaneous requests against a 1-slot limit (correctly throttled itself); rerun sends them sequentially
+#  - B-2 pre-check ran while the live writer had changes in flight; rerun quiesces writes first
+PASS B-1 operator: summary carries freshness  {'http': 200, 'freshness': {'verified_at': '2026-10-31T13:21:31.184837+00:00', 'age_s': 0.67, 'healthy': True, 'stream_tables': 3, 'rule': "oldest stream table's last completed refresh"}}
+PASS B-1 tenant2: summary carries freshness  {'http': 200, 'freshness': {'verified_at': '2026-10-31T13:21:30.734572+00:00', 'age_s': 1.14, 'healthy': True, 'stream_tables': 3, 'rule': "oldest stream table's last completed refresh"}}
+PASS B-1 trends carries freshness  {'http': 200}
+PASS B-1 top-products carries freshness  {'http': 200}
+PASS B-1 breakdown carries freshness  {'http': 200}
+PASS B-3 flood on tenant 1 gets 429s and some 200s  {'ok_200': 2, 'rejected_429': 14}
+FAIL B-3 429 carries Retry-After: 1
+FAIL B-3 tenant 2 unaffected by tenant 1's flood (its own slot)  {'tenant2': [429, 429, 200]}
+PASS B-3 /api/limits counts the rejections  {'limits': {'tenant_id': 1, 'in_flight': 0, 'peak': 1, 'admitted': 3, 'rejected_429': 14}}
+PASS B-3 /api/limits is operator-only  {'http': 403}
+FAIL B-2 pre-check: oracle clean on both shards  {'before': {'a': [('st_day_category_status', 1, 1), ('st_day_product_status', 2, 2), ('st_hour_category_status', 1, 1)], 'b': [('st_day_category_status', 1, 1), ('st_day_product_status', 2, 2), ('st_hour_category_status', 1, 1)]}}
+PASS B-2 wrong owner password fails closed (exit 1, ok=false)  {'exit': 1}
+PASS B-2 rebuild CLI exit 0 and ok=true  {'exit': 0, 'seconds': 8.2, 'shards': [{'shard': 'a', 'ok': True, 'rebuilt': True, 'oracle_clean': True, 'seconds': 3.17, 'problems': []}, {'shard': 'b', 'ok': True, 'rebuilt': True, 'oracle_clean': True, 'seconds': 4.68, 'problems': []}]}
+PASS B-2 shard a: pg_trickle history shows a full rebuild of all 3 stream tables  {'history': 'st_day_category_status:REINITIALIZE:COMPLETED st_day_product_status:REINITIALIZE:COMPLETED st_hour_category_status:REINITIALIZE:COMPLETED'}
+PASS B-2 shard b: pg_trickle history shows a full rebuild of all 3 stream tables  {'history': 'st_day_category_status:REINITIALIZE:COMPLETED st_day_product_status:REINITIALIZE:COMPLETED st_hour_category_status:REINITIALIZE:COMPLETED'}
+PASS B-2 independent oracle after rebuild: 0/0 on both shards  {'after': {'a': [('st_day_category_status', 0, 0), ('st_day_product_status', 0, 0), ('st_hour_category_status', 0, 0)], 'b': [('st_day_category_status', 0, 0), ('st_day_product_status', 0, 0), ('st_hour_category_status', 0, 0)]}}
+PASS B-2 API serving after rebuild  {'http': 200}
+{"passed": 14, "failed": 3}

@@ -43,7 +43,7 @@ services:
       - ./sharding/seed_shard.sql:/ax/seed_shard.sql:ro
       - ./app/db/init.sh:/docker-entrypoint-initdb.d/10-aggregatex.sh:ro
       - shard_a_data:/var/lib/postgresql
-    ports: ["127.0.0.1:25571:5432"]
+    ports: ["127.0.0.1:${AX_SHARD_A_PORT:-25571}:5432"]
     networks: [net_a]
 
   shard_b:
@@ -61,7 +61,7 @@ services:
       - ./sharding/seed_shard.sql:/ax/seed_shard.sql:ro
       - ./app/db/init.sh:/docker-entrypoint-initdb.d/10-aggregatex.sh:ro
       - shard_b_data:/var/lib/postgresql
-    ports: ["127.0.0.1:25572:5432"]
+    ports: ["127.0.0.1:${AX_SHARD_B_PORT:-25572}:5432"]
     networks: [net_b]
 
   api:
@@ -74,11 +74,13 @@ services:
       AX_SHARD_DIRECTORY: /ax/directory.v1.json
       AX_DEMO_PASSWORD: ${AX_DEMO_PASSWORD:-demo1234}
       AX_ENABLE_DEMO_WRITES: "1"
+      AX_TENANT_MAX_CONCURRENT: ${AX_TENANT_MAX_CONCURRENT:-4}   # B-3
+      AX_TENANT_QUEUE_WAIT_S: ${AX_TENANT_QUEUE_WAIT_S:-0.25}
       # Login ON by default (tenant isolation demo). AX_AUTH_DISABLED=1 = open operator mode, local only.
       AX_AUTH_DISABLED: ${AX_AUTH_DISABLED:-0}
     volumes:
       - ./sharding/directory.v1.json:/ax/directory.v1.json:ro
-    ports: ["127.0.0.1:8091:8000"]
+    ports: ["127.0.0.1:${AX_API_PORT:-8091}:8000"]
     networks:
       edge: { gw_priority: 10 }   # published port + default route never depend on a shard network
       net_a: {}

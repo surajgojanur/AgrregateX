@@ -62,4 +62,14 @@ owning shard and returns **503** (no cross-shard fallback) when that shard is un
 | **B-2** rebuild from scratch | Operator CLI, **not** a web endpoint: pg_trickle only lets the stream-table owner reinitialize (it checks the session's outer user), and the API must not hold superuser credentials. It reinitializes all 3 stream tables per shard (a protected full recompute from source), waits for the completed rebuild, then requires `ax.oracle_mismatches()` 0/0. Exit 0 only if rebuilt **and** verified. | `docker compose -f compose.sharded.yaml exec -e AX_DB_SUPERUSER_PASSWORD=… api python -m axapi.rebuild --shard all` (single-DB stack: same, with `compose.yaml`) |
 | **B-3** per-tenant heavy-query limit | At most `AX_TENANT_MAX_CONCURRENT` (default 4) concurrent analytics queries per tenant. A request waits ≤ `AX_TENANT_QUEUE_WAIT_S` (0.25 s) for a slot, otherwise **429** + `Retry-After: 1`. Other tenants keep their own slots. Counters at operator `GET /api/limits`, also shown on the Engine page. Scope: per API process (one uvicorn worker in the demo). | `GET /api/limits` |
 
-Unit tests (no database): `cd hackathon/app && python -m unittest tests.test_bonus -v` → 7 tests (needs `fastapi httpx psycopg[binary,pool]`).
+Unit tests (no database): `cd hackathon/app && python -m unittest tests.test_bonus -v` → 15 tests (needs `fastapi httpx psycopg[binary,pool]`).
+
+**Live acceptance (disposable project only: B-2 reinitializes every stream table):**
+```bash
+cd hackathon
+export AX_API_PORT=18191 AX_SHARD_A_PORT=25671 AX_SHARD_B_PORT=25672 AX_TENANT_MAX_CONCURRENT=1 AX_TENANT_QUEUE_WAIT_S=0
+docker compose -p ax-b2test -f compose.sharded.yaml up -d --build --wait
+python3 -I app/tests/live_bonus_check.py ax-b2test 18191 25671 25672      # 17 assertions; exit 0 = all pass
+docker compose -p ax-b2test -f compose.sharded.yaml down -v               # removes ONLY the ax-b2test volumes
+```
+Result 2026-10-31 (M1): **17/17 PASS**, see `app/tests/results/live-bonus-20261031T132216Z.txt`.
