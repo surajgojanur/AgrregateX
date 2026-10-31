@@ -1,0 +1,44 @@
+{
+ "pairs": [
+  {
+   "pair": 1,
+   "B_vs_A_tps_pct": 8.9,
+   "B_vs_A_p95_pct": -4.6,
+   "A_vs_C_tps_pct": 21.1,
+   "A_vs_C_p95_pct": -27.6
+  }
+ ],
+ "summary": {
+  "B_vs_A_tps_pct": {
+   "median": 8.9,
+   "min": 8.9,
+   "max": 8.9
+  },
+  "B_vs_A_p95_pct": {
+   "median": -4.6,
+   "min": -4.6,
+   "max": -4.6
+  },
+  "A_vs_C_tps_pct": {
+   "median": 21.1,
+   "min": 21.1,
+   "max": 21.1
+  },
+  "A_vs_C_p95_pct": {
+   "median": -27.6,
+   "min": -27.6,
+   "max": -27.6
+  }
+ },
+ "seed": 1,
+ "median_tps": {
+  "A": 1509.0,
+  "B": 1644.0,
+  "C": 1245.7
+ },
+ "median_p95_ms": {
+  "A": 3.94,
+  "B": 3.76,
+  "C": 5.44
+ }
+}

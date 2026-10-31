@@ -1,0 +1,2 @@
+pair 1 arm C: tps=1683.0 p50=2.06 p95=3.73 p99=6.23 http=None backlog_max=0 age_max=None probes=[]
+pair 1 arm A: tps=822.8 p50=3.51 p95=9.44 p99=20.54 http=None backlog_max=92338 age_max=29.8 probes=[('insert', None), ('cancel', None)]
