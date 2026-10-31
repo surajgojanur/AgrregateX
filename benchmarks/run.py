@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """Full HTTP measurements. Every individual request and error retained, no percentile-only PASS."""
-import sys,json,time,statistics,concurrent.futures,uuid
+import sys,json,time,statistics,concurrent.futures,uuid,subprocess
 from pathlib import Path
 import httpx
 sys.path.insert(0,str(Path(__file__).resolve().parents[1]/'scripts'))
@@ -8,13 +8,20 @@ from db import ROOT,sql,query_json
 sys.path.insert(0,str(Path(__file__).parent))
 from functional import headers,direct
 scale=int(sys.argv[1]);nt=10 if scale==1000000 else 100
-out={'scale':scale,'dataset':'representative seed42 v1; OFFICIAL DATASET COMPATIBILITY: NOT VERIFIED','requests':[],'correctness':[],'freshness':[]}
+if scale not in [1000000,10000000]:raise SystemExit('scale must be 1000000 or 10000000')
+source_snapshot=query_json("SELECT count(*)::bigint orders,(SELECT count(*)::bigint FROM tenants) tenants FROM orders")[0]
+out={'scale':scale,'dataset':'representative seed42 v1; OFFICIAL DATASET COMPATIBILITY: NOT VERIFIED','source_snapshot':source_snapshot,'requests':[],'correctness':[],'freshness':[]}
 ranges=[('day','2026-10-01T00:00:00Z','2026-10-02T00:00:00Z'),('week','2026-10-01T00:00:00Z','2026-10-08T00:00:00Z'),('month','2026-10-01T00:00:00Z','2026-10-31T00:00:00Z'),('boundary','2026-10-01T05:13:17.123Z','2026-10-08T18:29:11.456Z')]
 families=[('summary','day'),('trends','day'),('trends','hour'),('top-products','day'),('breakdown','day')]
 def path(t,f,a,b,g):return f'/tenants/{t}/{f}?from={a}&to={b}&grain={g}'
 def hit(c,t,f,a,b,g,label,mode):
- start=time.perf_counter();r=c.get(path(t,f,a,b,g),headers=headers(t));ms=(time.perf_counter()-start)*1000
- return {'tenant':t,'family':f,'grain':g,'range':label,'mode':mode,'ms':ms,'http':r.status_code}
+ start=time.perf_counter()
+ try:
+  r=c.get(path(t,f,a,b,g),headers=headers(t));status=r.status_code;error=None
+ except Exception as exc:
+  status=None;error=type(exc).__name__
+ ms=(time.perf_counter()-start)*1000
+ return {'tenant':t,'family':f,'grain':g,'range':label,'mode':mode,'ms':ms,'http':status,'error':error}
 with httpx.Client(base_url='http://127.0.0.1:18081',timeout=30) as c:
  for t in [1,2,nt]:
   for label,a,b in ranges:
@@ -30,14 +37,24 @@ with httpx.Client(base_url='http://127.0.0.1:18081',timeout=30) as c:
   return res
  with concurrent.futures.ThreadPoolExecutor(4) as ex:
   for result in ex.map(concurrent_run,[1,2,3,nt]):out['requests']+=result
- # Compare all source tenants for aligned week; partial buckets for hot/small tenants;
- # capture data before writes so API/source state is stable.
- for t in range(1,nt+1):
-  test_ranges=[ranges[1]]+([ranges[3]] if t in [1,2,nt] else [])
-  for label,a,b in test_ranges:
-   for f,g in families:
-    r=c.get(path(t,f,a,b,g),headers=headers(t));actual=r.json().get('data');expected=direct(t,a,b,f,g)
-    out['correctness'].append({'tenant':t,'family':f,'grain':g,'range':label,'status':'PASS' if r.status_code==200 and actual==expected else 'FAIL',**({'actual':actual,'expected':expected} if actual!=expected else {})})
+ # Keep source state stable across each API result and its direct SQL oracle.
+ # SHARE is compatible with dashboard reads and blocks source writes for this
+ # short bounded correctness window; it is released before mutation tests.
+ lock=subprocess.Popen(['podman','exec','-i','agrregatex-postgres-1','psql','-X','-qAt','-v','ON_ERROR_STOP=1','-U','agrregatex_owner','-d','agrregatex'],stdin=subprocess.PIPE,stdout=subprocess.PIPE,stderr=subprocess.PIPE,text=True,bufsize=1)
+ lock.stdin.write("BEGIN; LOCK TABLE public.orders IN SHARE MODE; SELECT 'AGRREGATEX_LOCK_ACQUIRED';\n");lock.stdin.flush()
+ marker=lock.stdout.readline().strip()
+ if marker!='AGRREGATEX_LOCK_ACQUIRED':
+  lock.kill();raise RuntimeError('Could not acquire source stability lock for correctness oracle: '+lock.stderr.read())
+ try:
+  for t in range(1,nt+1):
+   test_ranges=[ranges[1]]+([ranges[3]] if t in [1,2,nt] else [])
+   for label,a,b in test_ranges:
+    for f,g in families:
+     r=c.get(path(t,f,a,b,g),headers=headers(t));actual=r.json().get('data') if r.status_code==200 else None;expected=direct(t,a,b,f,g)
+     out['correctness'].append({'tenant':t,'family':f,'grain':g,'range':label,'status':'PASS' if r.status_code==200 and actual==expected else 'FAIL',**({'actual':actual,'expected':expected,'http':r.status_code} if actual!=expected or r.status_code!=200 else {})})
+ finally:
+  lock.stdin.write('ROLLBACK;\n');lock.stdin.close();lock.wait(timeout=20)
+  if lock.returncode:raise RuntimeError('Source stability lock psql exited unexpectedly: '+lock.stderr.read())
  # Commit observed via source DB, not mutation HTTP response timing.
  for iteration in range(5):
   before=c.get(path(1,'summary','2027-01-01T00:00:00Z','2027-01-02T00:00:00Z','day'),headers=headers(1)).json()['data']
@@ -65,7 +82,7 @@ def metrics(v):
 out['latency']={}
 for f,g in families:
  for mode in ['sequential','concurrent4']:
-  values=[r['ms'] for r in out['requests'] if r['family']==f and r['grain']==g and r['mode']==mode];out['latency'][f+':'+g+':'+mode]=metrics(values)
+  values=[r['ms'] for r in out['requests'] if r['family']==f and r['grain']==g and r['mode']==mode and r['http']==200];out['latency'][f+':'+g+':'+mode]=metrics(values) if values else {'n':0,'p50':None,'p95':None,'p99':None,'max':None,'mean':None}
 out['errors']=sum(r['http']!=200 for r in out['requests']);out['query_target']='PASS' if not out['errors'] and max(r['ms'] for r in out['requests'])<200 else 'FAIL'
 out['correctness_target']='PASS' if all(x['status']=='PASS' for x in out['correctness']) and all(x['mismatches']==0 for x in out['rollup_mismatches']) else 'FAIL'
 (ROOT/'benchmarks/results'/f'benchmark-{scale}.json').write_text(json.dumps(out,indent=2));print(json.dumps({k:v for k,v in out.items() if k not in ['requests','correctness','freshness']},indent=2))
