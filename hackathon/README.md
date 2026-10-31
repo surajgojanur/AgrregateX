@@ -4,7 +4,7 @@
 
 AgrregateX is a PostgreSQL-backed analytics prototype for multi-tenant order data. It keeps useful daily and hourly rollups available to a tenant-aware API and dashboard, so repeated analytics requests need not recompute every aggregate from the full transactional dataset. It combines incremental stream tables, tenant routing, row-level security, freshness reporting, and an independent SQL correctness oracle.
 
-> **Honest status:** the product and core workflows run, and representative synthetic datasets have been tested. Official organizer-data compatibility and the PRD's 10M performance targets are not yet verified. Recorded heavy-write experiments show freshness and database-safety gaps. This project does not claim that every scorecard target has passed.
+> **Honest status (2026-11-01):** the application runs, and a Mac disposable 1M-order / 10-tenant *synthetic* HTTP run measured all 72 scenarios below 200 ms p95 (serial client). However **G4 correctness currently fails**: a persistent ghost `paid` product aggregate causes wrong sales, counts and Top-N results in the Fedora demo; a related defect was reproduced 5/5 in a disposable Mac test. G2 fails under heavier writes, G3 remains inconclusive, and official 10M/100 and G5 qualification remain untested. The existing Fedora demo is **not** a certified-correct live-cancellation demo.
 
 ## The problem
 
@@ -185,19 +185,20 @@ This example assumes `AX_DEMO_PASSWORD` is set in the local shell to the passwor
 
 ## Performance and correctness scorecard
 
-The PRD's targets apply to its skewed **1M orders / 10 tenants** and **10M / 100 tenants** data shapes. The current synthetic generator is representative data, not the organizer's dataset. The table shows measured evidence without converting small tests into official target passes.
+This is a **dated evidence summary (2026-11-01)**, not an official organizer certification. All measured load data below are **representative synthetic** orders, on specified single-host setups. Raw data and failures are intentionally preserved. The official benchmark shape is 1M orders / 10 tenants and 10M / 100 tenants; organizer generator/schema compatibility is still unverified.
 
-| Goal | PRD Good | PRD Great | Evidence and current status |
-|---|---:|---:|---|
-| G1 query speed | <1 s | <200 ms | Representative 10k–100k Mac measurements: HTTP p95 about 6–10 ms, max 47 ms, n=1 experiment. Fedora smoke on 1,002 rows returned quickly. **Not qualified at official scale; no pass claimed.** |
-| G2 freshness | <5 min | <30 s | Light-load representative insert visibility p50 about 1.2–1.3 s, max about 1.5–1.9 s. Under heavy writes, the incomplete G3 harness observed 12–14 s probes and later >30 s timeouts with a growing CDC backlog. **Freshness under sustained load is a known risk; official target not qualified.** |
-| G3 database safety | <25% slower | <10% slower | Recorded exploratory throughput: −28.4% in a single-DB test; −52.3% in a separate, dashboard-loaded two-shard test. Runs are small/confounded and not equivalent arms, but both indicate a material regression. **Misses Good/Great in those observations; official G3 remains unqualified.** |
-| G4 correctness | Most queries match | All queries match | Exact SQL and API oracle tooling exists. The 1M/10 **synthetic** load produced 0 missing/extra rows on each of the three stream tables. Earlier representative API oracle checks passed. **Promising evidence, not organizer-scale full acceptance.** |
-| G5 growth | 10M <5× slower than 1M | 10M <2× slower than 1M | No matched 1M-versus-10M query samples. **Not tested.** |
+| Goal | Good / Great PRD threshold | Current measured evidence | Verdict |
+|---|---|---|---|
+| G1 HTTP latency | <1 s / <200 ms | Disposable Mac **1M/10 synthetic**, serial client: **3,600 requests**, 72 scenarios × 50 responses; zero HTTP errors, worst scenario p95 **60.8 ms**. At **5 writes/s**, 1,440 requests across 72 scenarios, worst p95 **81.7 ms**, zero errors. | **Promising at 1M**, not qualified at 10M or with concurrent clients. |
+| G2 commit-to-visible | <5 min / <30 s | Mac 1M at 5 writes/s: **8 probes**, 0 timeouts, median **18.7 s**, maximum **24.0 s**. A separate **10k / 200 TPS** experiment: **18/20 probes timed out beyond 30 s**, and 107 FULL fallbacks were observed. | Meets the Great threshold in the *sampled low-rate* 1M run; **fails Great** in the measured heavier-write test. No general G2 PASS. |
+| G3 OLTP safety | <25% / <10% slowdown | Matched 10k five-pair A/B/C experiment at 200 offered TPS and 20 HTTP requests/s reports median B-vs-A throughput **+0.7%**, but host freezes invalidate a decisive p95 result; maintenance arm reports significant tail-latency impact. Earlier unbounded experiments had large regressions. | **INCOMPLETE / confounded**; no G3 PASS. |
+| G4 correctness | Most / all answers match source | Mac 1M before writer: API/source **225 checks, 0 mismatches**; initial three-table oracle 0/0. **After writes** product stream had **16 missing / 31 extra groups** (+33 paid orders); other streams 0/0. Mac disposable INSERT→UPDATE reproduction **5/5**; Fedora 1,002-row demo has **persistent 0 missing / 1 ghost paid group**, making summary, Top-N and status breakdown incorrect. | **FAIL**. The precise common runtime root cause is not proven; [#50](https://github.com/surajgojanur/AgrregateX/issues/50) is assigned for controlled tracing. |
+| G5 growth | 10M/1M p95 ratio <5× / <2× | No matched 1M/10M HTTP results; no 10M workload authorization or execution. | **NOT TESTED**. |
 
-The **1M synthetic** test is a loader/oracle result, not an official latency/throughput scorecard. The **10M synthetic** dataset is not run. The benchmark acceptance harness deliberately distinguishes live measured evidence from mock/unit fixtures; see [`benchmark/protocol.md`](benchmark/protocol.md), [`integration/scale/README.md`](integration/scale/README.md), [`docs/fedora-evidence/REQUIREMENTS.md`](docs/fedora-evidence/REQUIREMENTS.md), and [`docs/fedora-evidence/RESULTS.md`](docs/fedora-evidence/RESULTS.md).
+**Source evidence:** [1M synthetic report](integration/scale/results/REPORT-1m.md), [matched G3 experiment](integration/g3/results/10k-o200-r20-matched/REPORT.md), [Fedora G4 forensics](benchmark/results/issue31/20261101T2100Z-forensics/REPORT.md), [source-level hypothesis](benchmark/results/issue31/20261101T2110Z-root-cause/PROPOSAL.md), [prepared but unexecuted runtime protocol](benchmark/results/issue31/20261101T2137Z-controlled-prep/RUNTIME_REPRO_REPORT.md), and [Issue #31](https://github.com/surajgojanur/AgrregateX/issues/31).
 
-Correctness matters independently of speed: the source oracle recomputes the expected aggregates, while stream-table reconciliation checks both missing and extra rows. Fedora's latest read-only demo check compared a summary total with tenant-scoped source SQL; it did **not** rerun the full three-table oracle or every API answer on that database.
+**Correctness is a release/judge blocker.** The current source-level RLS staging hypothesis could explain Fedora's both-status ghost, but the retained Mac paid-only variant is different. No authorized Rust patch, FULL-mode mitigation, source-SQL fallback, or existing-data repair has been deployed. Do not interpret a healthy refresh timestamp as a correctness guarantee. Existing benchmark scripts with DML and writer stop/start operations are **disposable-test-only**, must be run with an explicitly approved owned target, and must never be pointed at the preserved demo.
+
 
 ## Testing
 
@@ -221,6 +222,7 @@ The smoke script is GET-only and restricts requests to loopback. Never run a liv
 
 ## Known limitations
 
+- **Critical G4 correctness defect remains unresolved:** Fedora's day/product/status rollup has a persistent ghost paid group; customer-visible summary, Top-N and status breakdown are wrong for the affected tenant/date. Do not present those results as verified or demonstrate live cancellation as correct. [Trace/repro owner issue #50](https://github.com/surajgojanur/AgrregateX/issues/50).
 - The Fedora Monitoring page remains degraded because `ax_monitor` cannot read `pgtrickle.pgt_dependencies`. The proposed migration 003 is a separate, unapplied review item; no grant is implied by these docs.
 - Scheduled freshness can fall behind under heavy writes. Small idle refresh ages do not prove commit-to-visible performance at load.
 - Earlier G3 experiments recorded database throughput regressions; the full comparable randomized experiment is incomplete.
@@ -234,14 +236,14 @@ The smoke script is GET-only and restricts requests to loopback. Never run a liv
 Use the [3–5 minute judge walkthrough](fedora_demo/JUDGE_WALKTHROUGH.md). Suggested sequence:
 
 1. Landing page and problem framing.
-2. Dashboard totals and sales metrics.
+2. Dashboard UI and the source-backed verification process; **disclose that some stored product rollups are known incorrect**. Do not represent the affected KPI/Top-N figures as source-verified.
 3. Switch tenants and show the tenant-scoped results.
 4. Show freshness and the three stream tables/effective refresh modes.
 5. Show Shards and state clearly whether this is the one-shard Fedora or separate two-shard environment.
 6. Show Monitoring, including its honest degraded state.
 7. Close with the oracle, scorecard evidence, and limitations.
 
-The demo database is read-only for this Fedora walkthrough. Do not press live insert/cancel controls or run rebuild commands against it.
+The demo database is read-only for this Fedora walkthrough. Do not press live insert/cancel controls or run rebuild commands against it. The screenshot evidence predates the detailed G4 investigation and must not be represented as a clean end-to-end correctness proof.
 
 ## Credits and licensing
 
