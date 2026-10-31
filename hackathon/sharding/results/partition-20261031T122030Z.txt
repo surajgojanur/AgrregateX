@@ -1,0 +1,32 @@
+# partition demo 2026-10-31T12:20:30Z  hold=20s  network=aggregatex-sharded_net_a
+## 0. before
+tenant 1 (A) summary: 200 33ms
+tenant 2 (B) summary: 200 13ms
+shard A rows: 5062
+## 1. partition: detach aggregatex-sharded-api-1 and aggregatex-sharded-writer-1 from aggregatex-sharded_net_a
+tenant 1 (A) summary #1: 503 3267ms
+  body: {"detail":"Shard a is unavailable. Data for tenants on this shard cannot be read or written right now; nothing was served from another shard.","shard":"a","retryable":true}
+tenant 1 (A) summary #2: 503 3019ms
+tenant 1 (A) summary #3: 503 3012ms
+tenant 3 (A) top-products: 503 3013ms
+tenant 2 (B) summary: 200 26ms
+tenant 5 (B) trends: 200 13ms
+tenant 1 (A) live-write insert: 503 3013ms
+  body: {"detail":"Shard a is unavailable. Data for tenants on this shard cannot be read or written right now; nothing was served from another shard.","shard":"a","retryable":true}
+tenant 2 (B) live-write insert: 200 1505ms
+  body: {"tenant_id":2,"shard":"b","committed":true,"order_id":200000062,"action":"insert","status":"paid","committed_at":"2026-10-31T12:20:47.002617+00:00","groups_checked":["paid"],"visible_after_ms":{"st_hour_category_status"
+/api/health: 200 3015ms
+  body: {"status":"degraded","version":"0.1.0","database":"degraded","pg_trickle_version":"0.108.3","shards":{"a":{"available":false,"probe_ms":3005.5,"error":"PoolTimeout"},"b":{"available":true,"probe_ms":2.3}},"directory_vers
+/api/shards: 200 3034ms
+  complete=False missing=['a'] total=None partial_total=5051
+shard A rows after router-side write attempt + 25 LOCAL inserts: 5087 (expected 5087: no phantom write from the router)
+tenant 1 (A) summary after 20s: 503 3018ms
+writer log during partition: writer stats: {'ok:b': 11, 'skipped:a': 9}
+## 2. restore: re-attach to aggregatex-sharded_net_a
+tenant 1 (A) summary after restore: 200 15ms  (recovered within 3s)
+partition duration: 47s
+## 3. catch-up + oracle (writer paused)
+shard A oracle: st_day_product_status=0/0 st_day_category_status=0/0 st_hour_category_status=0/0
+shard A refreshes since restore: NO_DATA:27
+tenant 1 orders in last 10 min: API=65 SQL=65 (includes the 25 local partition-time inserts)
+# done -> /Users/shridharbhat/Downloads/mitigata/AgrregateX-sharding/hackathon/sharding/results/partition-20261031T122030Z.txt

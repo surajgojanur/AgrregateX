@@ -2,8 +2,10 @@
 
 Freshness rule (handoff F6): pgt_status().staleness / data_timestamp do not advance on
 NO_DATA refreshes, so "verified as of" = end_time of the last COMPLETED refresh (any action).
-Visibility rule: a committed change is visible in a stream table once that table's frontier
-LSN for the source (pgt_stream_tables.frontier.sources.<oid>.lsn) >= the commit's WAL LSN.
+Visibility rule (data-based): a committed change is visible in a stream table once, in ONE
+snapshot, the stream table's row for every group the change touched equals the same aggregate
+computed from raw ax.orders. (An LSN rule is unreliable: pg_trickle's frontier records the LSN
+of the last consumed change, which is below the commit LSN and does not move while idle.)
 """
 import random
 import time
@@ -28,21 +30,23 @@ def _iso(v):
     return v.isoformat() if isinstance(v, datetime) else v
 
 
-def freshness() -> dict:
-    with db.monitor_pool.connection() as c:
+def freshness(tenant_id: int) -> dict:
+    shard = db.shard_for(tenant_id)
+    with db.monitor(shard) as c:
         rows = c.execute(FRESHNESS_SQL, {"s": ST_SCHEMA}).fetchall()
     tables = [{**r, "verified_at": _iso(r["verified_at"]),
                "age_s": round(float(r["age_s"]), 2) if r["age_s"] is not None else None} for r in rows]
     ages = [t["age_s"] for t in tables if t["age_s"] is not None]
     healthy = bool(tables) and all(t["status"] == "ACTIVE" for t in tables)
-    return {"verified_age_s": max(ages) if ages and len(ages) == len(tables) else None,
+    return {"shard": shard.name, "verified_age_s": max(ages) if ages and len(ages) == len(tables) else None,
             "healthy": healthy, "stream_tables": tables,
             "note": "verified_age_s = seconds since the OLDEST stream table last completed a refresh"}
 
 
-def snapshot() -> dict:
-    """Engine internals for the operator view (no tenant fact rows)."""
-    with db.monitor_pool.connection() as c:
+def snapshot(shard_name: str) -> dict:
+    """Engine internals of ONE shard for the operator view (no tenant fact rows)."""
+    shard = db.SHARDS[shard_name]
+    with db.monitor(shard) as c:
         version = c.execute("SELECT extversion FROM pg_extension WHERE extname = 'pg_trickle'").fetchone()
         sched = c.execute("SELECT count(*) AS n FROM pg_stat_activity WHERE backend_type = 'pg_trickle scheduler'"
                           " AND datname = current_database()").fetchone()
@@ -104,59 +108,130 @@ def snapshot() -> dict:
             row[k] = float(row[k]) if row[k] is not None else None
     for row in recent:
         row["ms"] = float(row["ms"]) if row["ms"] is not None else None
-    return {"pg_trickle_version": version["extversion"] if version else None,
+    return {"shard": shard.name, "pg_trickle_version": version["extversion"] if version else None,
             "scheduler_running": bool(sched and sched["n"]),
             "stream_tables": tables, "refresh_stats_5m": stats, "recent_refreshes": recent,
             "change_buffers": buffers, "settings": {g["name"]: g["setting"] for g in gucs},
             "health": health}
 
 
-def _frontier_lsns(c) -> dict:
-    rows = c.execute("""
-        SELECT st.pgt_name AS name,
-               (st.frontier -> 'sources' -> ('ax.orders'::regclass::oid)::text ->> 'lsn')::pg_lsn AS lsn
-          FROM pgtrickle.pgt_stream_tables st WHERE st.pgt_schema = %(s)s""", {"s": ST_SCHEMA}).fetchall()
-    return {r["name"]: r["lsn"] for r in rows}
+# For each stream table: does its row for the touched group equal the raw-orders aggregate?
+_GROUP_CHECK = """
+SELECT
+  (SELECT (COALESCE(sum(order_count), 0)::bigint, COALESCE(sum(sales_cents), 0)::numeric) FROM ax.st_day_product_status
+    WHERE tenant_id = %(t)s AND utc_day = %(d)s AND product_id = %(p)s AND status = %(s)s)
+  = (SELECT (count(*)::bigint, COALESCE(sum(line_cents), 0)::numeric) FROM ax.orders
+      WHERE tenant_id = %(t)s AND utc_day = %(d)s AND product_id = %(p)s AND status = %(s)s) AS st_day_product_status,
+  (SELECT (COALESCE(sum(order_count), 0)::bigint, COALESCE(sum(sales_cents), 0)::numeric) FROM ax.st_day_category_status
+    WHERE tenant_id = %(t)s AND utc_day = %(d)s AND category_id = %(c)s AND status = %(s)s)
+  = (SELECT (count(*)::bigint, COALESCE(sum(o.line_cents), 0)::numeric) FROM ax.orders o
+       JOIN ax.products p ON p.tenant_id = o.tenant_id AND p.product_id = o.product_id
+      WHERE o.tenant_id = %(t)s AND o.utc_day = %(d)s AND p.category_id = %(c)s AND o.status = %(s)s) AS st_day_category_status,
+  (SELECT (COALESCE(sum(order_count), 0)::bigint, COALESCE(sum(sales_cents), 0)::numeric) FROM ax.st_hour_category_status
+    WHERE tenant_id = %(t)s AND utc_hour = %(h)s AND category_id = %(c)s AND status = %(s)s)
+  = (SELECT (count(*)::bigint, COALESCE(sum(o.line_cents), 0)::numeric) FROM ax.orders o
+       JOIN ax.products p ON p.tenant_id = o.tenant_id AND p.product_id = o.product_id
+      WHERE o.tenant_id = %(t)s AND o.utc_hour = %(h)s AND p.category_id = %(c)s AND o.status = %(s)s) AS st_hour_category_status
+"""
+_ROW = "o.order_id, o.status, o.utc_day, o.utc_hour, o.product_id"  # writer role cannot read products
 
 
 def live_write(tenant_id: int, action: str, order_id: int | None, timeout_s: float = 30.0) -> dict:
-    """Commit one real source change for the tenant, then measure when each stream table covers it."""
-    with db.tenant_tx(db.writer_pool, tenant_id) as c:
+    """Commit one real source change for the tenant, then measure when each stream table reflects it."""
+    shard = db.shard_for(tenant_id)
+    with db.tenant_tx("writer", tenant_id) as c:
         if action == "insert":
-            row = c.execute("""
-                INSERT INTO ax.orders (tenant_id, order_id, customer_id, product_id, status, quantity,
-                                       unit_price_cents, created_at)
-                VALUES (%(t)s, nextval('ax.order_id_seq'), %(c)s, %(p)s, 'paid', %(q)s, %(u)s, now())
-                RETURNING order_id, status""",
+            row = c.execute(f"""
+                WITH o AS (
+                  INSERT INTO ax.orders (tenant_id, order_id, customer_id, product_id, status, quantity,
+                                         unit_price_cents, created_at)
+                  VALUES (%(t)s, nextval('ax.order_id_seq'), %(c)s, %(p)s, 'paid', %(q)s, %(u)s, now())
+                  RETURNING *)
+                SELECT {_ROW}, NULL::text AS old_status FROM o""",
                             {"t": tenant_id, "c": random.randint(1, 1000), "p": random.randint(1, 200),
                              "q": random.randint(1, 5), "u": random.randint(500, 50000)}).fetchone()
         else:  # cancel
-            row = c.execute("""
-                UPDATE ax.orders SET status = 'cancelled', updated_at = now()
-                 WHERE tenant_id = %(t)s AND order_id = %(o)s AND status <> 'cancelled'
-                RETURNING order_id, status""", {"t": tenant_id, "o": order_id}).fetchone()
-            if row is None:
+            old = c.execute("""SELECT status FROM ax.orders WHERE tenant_id = %(t)s AND order_id = %(o)s
+                                 AND status <> 'cancelled' FOR UPDATE""", {"t": tenant_id, "o": order_id}).fetchone()
+            if old is None:
                 return {"error": "order not found for this tenant, or already cancelled"}
-    # Transaction committed when the context exited. Any LSN read now is >= its commit record.
+            row = c.execute(f"""
+                WITH o AS (UPDATE ax.orders SET status = 'cancelled', updated_at = now()
+                            WHERE tenant_id = %(t)s AND order_id = %(o)s RETURNING *)
+                SELECT {_ROW}, %(old)s::text AS old_status FROM o""",
+                            {"t": tenant_id, "o": order_id, "old": old["status"]}).fetchone()
+    # Reaching this line means COMMIT succeeded (a failed or unacknowledged commit raised
+    # ShardUnavailable -> 503, never a success).
     t_commit = time.monotonic()
     committed_at = datetime.now(timezone.utc)
-    with db.monitor_pool.connection() as c:
-        target = c.execute("SELECT pg_current_wal_lsn() AS l").fetchone()["l"]
-        visible_ms: dict[str, float | None] = {}
+    groups = [row["status"]] + ([row["old_status"]] if row["old_status"] else [])
+    visible_ms: dict[str, float] = {}
+    visibility_error = None
+    try:  # the write is committed; an outage now must NOT turn it into a reported failure
+        with db.tenant_tx("api", tenant_id) as rc:   # category via the read role (least privilege)
+            cat = rc.execute("SELECT category_id FROM ax.products WHERE tenant_id = %s AND product_id = %s",
+                             (tenant_id, row["product_id"])).fetchone()
+        row = {**row, "category_id": cat["category_id"] if cat else None}
         while True:
-            for name, lsn in _frontier_lsns(c).items():
-                if name not in visible_ms and lsn is not None and _lsn_int(lsn) >= _lsn_int(target):
+            with db.tenant_tx("api", tenant_id) as rc:
+                ok = {}
+                for status in groups:
+                    r = rc.execute(_GROUP_CHECK, {"t": tenant_id, "d": row["utc_day"], "h": row["utc_hour"],
+                                                  "p": row["product_id"], "c": row["category_id"], "s": status}).fetchone()
+                    for k, v in r.items():
+                        ok[k] = ok.get(k, True) and bool(v)
+            for name, good in ok.items():
+                if good and name not in visible_ms:
                     visible_ms[name] = round((time.monotonic() - t_commit) * 1000, 1)
             if len(visible_ms) >= 3 or time.monotonic() - t_commit > timeout_s:
                 break
             time.sleep(0.025)
-    lags = [v for v in visible_ms.values() if v is not None]
-    return {"order_id": row["order_id"], "action": action, "status": row["status"],
-            "committed_at": committed_at.isoformat(), "commit_lsn": str(target),
-            "visible_after_ms": visible_ms, "timed_out": len(visible_ms) < 3,
-            "lag_ms": max(lags) if len(lags) >= 3 else None}
+    except db.ShardUnavailable as exc:
+        visibility_error = f"committed, but visibility could not be measured: {exc.reason}"
+    return {"shard": shard.name, "committed": True, "order_id": row["order_id"], "action": action,
+            "status": row["status"], "committed_at": committed_at.isoformat(),
+            "groups_checked": groups, "visible_after_ms": visible_ms, "timed_out": len(visible_ms) < 3,
+            "lag_ms": max(visible_ms.values()) if len(visible_ms) >= 3 else None,
+            "visibility_error": visibility_error}
 
 
-def _lsn_int(lsn) -> int:
-    hi, lo = str(lsn).split("/")
-    return (int(hi, 16) << 32) | int(lo, 16)
+def shard_status(shard: db.Shard) -> dict:
+    """Health, tenants, refresh state and CDC backlog of one shard. Never raises for an outage."""
+    out = {"shard": shard.name, "host": shard.host, "tenants": db.tenants_of(shard.name) if db.DIRECTORY else None,
+           **db.probe(shard)}
+    if not out["available"]:
+        return out
+    try:
+        with db.monitor(shard) as c:
+            out["stream_tables"] = [{**r, "verified_at": _iso(r["verified_at"]),
+                                     "age_s": round(float(r["age_s"]), 2) if r["age_s"] is not None else None}
+                                    for r in c.execute(FRESHNESS_SQL, {"s": ST_SCHEMA}).fetchall()]
+            out["pending_cdc_rows"] = c.execute("""
+                SELECT COALESCE(sum(s.n_live_tup), 0)::bigint AS n FROM pg_stat_all_tables s
+                 WHERE s.schemaname = 'pgtrickle_changes'""").fetchone()["n"]
+            counts = c.execute("SELECT tenant_id, orders, seed_orders FROM ax.tenant_order_counts() ORDER BY 1").fetchall()
+        out["orders_by_tenant"] = counts
+        out["orders"] = sum(r["orders"] for r in counts)
+        out["seed_orders"] = sum(r["seed_orders"] for r in counts)
+        stray = sorted({r["tenant_id"] for r in counts} - set(out["tenants"] or []))
+        out["directory_violations"] = stray if db.DIRECTORY else []
+        out["healthy"] = all(t["status"] == "ACTIVE" for t in out["stream_tables"]) and not out["directory_violations"]
+    except db.ShardUnavailable as exc:
+        out.update(available=False, error=exc.reason)
+    return out
+
+
+def shards_overview() -> dict:
+    shards = [shard_status(s) for s in db.SHARDS.values()]
+    missing = [s["shard"] for s in shards if not s["available"]]
+    complete = not missing
+    total = sum(s.get("orders", 0) for s in shards if s["available"])
+    return {
+        "directory_version": db.DIRECTORY_VERSION,
+        "complete": complete,
+        "missing_shards": missing,
+        # A global total is only reported when EVERY shard answered; otherwise it is explicitly partial.
+        "total_orders": total if complete else None,
+        "partial_total_orders": None if complete else total,
+        "shards": shards,
+    }

@@ -7,19 +7,30 @@ const sev = { OK: 'dot--ok', WARN: 'dot--warn', ERROR: 'dot--err', UNKNOWN: 'dot
 export default function Engine() {
   const [e, setE] = useState(null)
   const [err, setErr] = useState(null)
+  const [shard, setShard] = useState(null)
   useEffect(() => {
     let live = true
-    const tick = () => api.engine().then((d) => { if (live) { setE(d); setErr(null) } }).catch((x) => live && setErr(x.message))
+    const tick = () => api.engine(shard).then((d) => { if (live) { setE(d); setErr(null) } }).catch((x) => live && setErr(x.message))
     tick()
     const id = setInterval(tick, 3000)
     return () => { live = false; clearInterval(id) }
-  }, [])
+  }, [shard])
 
-  if (err) return <p className="alert" role="alert">{err}</p>
+  const picker = e?.shards?.length > 1 && (
+    <div className="ax-filters panel">
+      <div className="ax-field"><span className="label">Shard</span>
+        <div className="ax-seg">{e.shards.map((s) => (
+          <button key={s} className={`btn btn--sm ${(shard || e.shard) === s ? 'btn--primary' : 'btn--ghost'}`} onClick={() => { setE(null); setShard(s) }}>{s.toUpperCase()}</button>
+        ))}</div>
+      </div>
+    </div>
+  )
+  if (err) return <div className="ax-dash">{picker}<p className="alert" role="alert">{err}</p>{!e && <button className="btn" onClick={() => setShard(shard === 'a' ? 'b' : 'a')}>Try the other shard</button>}</div>
   if (!e) return <div className="skeleton" style={{ height: 300 }} />
   const problems = e.health.filter((h) => h.severity !== 'OK')
   return (
     <div className="ax-dash">
+      {picker}
       <div className="stats ax-kpis">
         <div className="stat panel"><span className="label">pg_trickle</span><span className="stat__value">{e.pg_trickle_version}</span><span className="stat__sub muted">upstream engine (trickle-labs)</span></div>
         <div className="stat panel"><span className="label">Scheduler</span><span className="stat__value">{e.scheduler_running ? 'running' : 'stopped'}</span><span className="stat__sub muted">background worker for this DB</span></div>

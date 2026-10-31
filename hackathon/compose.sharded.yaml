@@ -1,0 +1,108 @@
+# AgrregateX P3 sharded demo: two INDEPENDENT PostgreSQL + pg_trickle shards, tenant router API.
+#   cd hackathon && docker compose -f compose.sharded.yaml up -d --build   ->  http://127.0.0.1:8091
+# Isolated project, ports, networks and volumes: does not touch the single-DB compose.yaml stack.
+# Partition demo: sharding/partition_demo.sh (detaches the API/writer from net_a only).
+# Credentials are LOCAL DEMO DEFAULTS; override via environment for anything shared.
+name: aggregatex-sharded
+
+x-roles: &roles
+  AX_API_PASSWORD: ${AX_API_PASSWORD:-local-demo-api}
+  AX_WRITER_PASSWORD: ${AX_WRITER_PASSWORD:-local-demo-writer}
+  AX_MONITOR_PASSWORD: ${AX_MONITOR_PASSWORD:-local-demo-monitor}
+
+x-shard: &shard
+  image: ghcr.io/trickle-labs/pg_trickle:latest      # PG 18.6 + pg_trickle 0.108.3
+  # Small footprint: the host is memory constrained (see docs/handoffs/opus-sharding.md).
+  command: ["postgres", "-c", "shared_buffers=64MB", "-c", "max_connections=40", "-c", "work_mem=8MB",
+            "-c", "maintenance_work_mem=32MB", "-c", "effective_cache_size=256MB"]
+  mem_limit: 512m
+  healthcheck:
+    test: ["CMD-SHELL", "pg_isready -U postgres -d aggregatex && psql -U postgres -d aggregatex -tAc \"select 1 from pg_roles where rolname='ax_monitor'\" | grep -q 1"]
+    interval: 3s
+    retries: 60
+
+services:
+  shard_a:
+    <<: *shard
+    environment:
+      <<: *roles
+      POSTGRES_PASSWORD: ${AX_DB_SUPERUSER_PASSWORD:-local-demo-superuser}
+      POSTGRES_DB: aggregatex
+      AX_SHARD_TENANTS: "{1,3,4}"          # must match sharding/directory.v1.json
+      AX_SEED_ORDERS: ${AX_SEED_ORDERS:-10000}   # GLOBAL order count, not per shard
+      AX_SEED_TENANTS: 10
+      AX_SHARD_SEQ_START: 100000000
+    volumes:
+      - ./sql:/ax/sql:ro
+      - ./sharding/seed_shard.sql:/ax/seed_shard.sql:ro
+      - ./app/db/init.sh:/docker-entrypoint-initdb.d/10-aggregatex.sh:ro
+      - shard_a_data:/var/lib/postgresql
+    ports: ["127.0.0.1:25571:5432"]
+    networks: [net_a]
+
+  shard_b:
+    <<: *shard
+    environment:
+      <<: *roles
+      POSTGRES_PASSWORD: ${AX_DB_SUPERUSER_PASSWORD:-local-demo-superuser}
+      POSTGRES_DB: aggregatex
+      AX_SHARD_TENANTS: "{2,5,6,7,8,9,10}"
+      AX_SEED_ORDERS: ${AX_SEED_ORDERS:-10000}
+      AX_SEED_TENANTS: 10
+      AX_SHARD_SEQ_START: 200000000
+    volumes:
+      - ./sql:/ax/sql:ro
+      - ./sharding/seed_shard.sql:/ax/seed_shard.sql:ro
+      - ./app/db/init.sh:/docker-entrypoint-initdb.d/10-aggregatex.sh:ro
+      - shard_b_data:/var/lib/postgresql
+    ports: ["127.0.0.1:25572:5432"]
+    networks: [net_b]
+
+  api:
+    build: { context: ., dockerfile: app/Dockerfile }
+    image: aggregatex-sharded:local
+    environment: &apienv
+      <<: *roles
+      AX_DB_NAME: aggregatex
+      AX_SHARDS: "a=shard_a:5432,b=shard_b:5432"
+      AX_SHARD_DIRECTORY: /ax/directory.v1.json
+      AX_DEMO_PASSWORD: ${AX_DEMO_PASSWORD:-demo1234}
+      AX_ENABLE_DEMO_WRITES: "1"
+      AX_AUTH_DISABLED: ${AX_AUTH_DISABLED:-1}
+    volumes:
+      - ./sharding/directory.v1.json:/ax/directory.v1.json:ro
+    ports: ["127.0.0.1:8091:8000"]
+    networks:
+      edge: { gw_priority: 10 }   # published port + default route never depend on a shard network
+      net_a: {}
+      net_b: {}
+    mem_limit: 256m
+    depends_on:
+      shard_a: { condition: service_healthy }
+      shard_b: { condition: service_healthy }
+
+  writer:
+    image: aggregatex-sharded:local
+    pull_policy: never
+    command: ["python", "-m", "axapi.writer"]
+    environment:
+      <<: *apienv
+      AX_WRITER_RATE: ${AX_WRITER_RATE:-2}
+    volumes:
+      - ./sharding/directory.v1.json:/ax/directory.v1.json:ro
+    networks:
+      edge: { gw_priority: 10 }
+      net_a: {}
+      net_b: {}
+    mem_limit: 128m
+    depends_on:
+      api: { condition: service_started }
+
+networks:
+  edge: {}
+  net_a: {}
+  net_b: {}
+
+volumes:
+  shard_a_data:
+  shard_b_data:

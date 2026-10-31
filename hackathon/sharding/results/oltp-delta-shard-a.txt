@@ -1,0 +1,27 @@
+# OLTP delta on shard A, writer at 2/s in all arms, pgbench 4 clients x 20 s; dashboard load = 4 threads on tenants 1,3,4
+== rep 1 arm=no_dashboard_load
+number of failed transactions: 0 (0.000%)
+latency average = 3.478 ms
+tps = 1150.072852 (without initial connection time)
+== rep 1 arm=dashboard_load
+number of failed transactions: 0 (0.000%)
+latency average = 7.388 ms
+tps = 541.420142 (without initial connection time)
+dashboard requests: 3278 (156/s)
+== rep 2 arm=no_dashboard_load
+number of failed transactions: 0 (0.000%)
+latency average = 3.131 ms
+tps = 1277.482589 (without initial connection time)
+== rep 2 arm=dashboard_load
+number of failed transactions: 0 (0.000%)
+latency average = 6.500 ms
+tps = 615.380254 (without initial connection time)
+dashboard requests: 2840 (135/s)
+== docker stats (after)
+aggregatex-sharded-api-1 mem=51.31MiB / 256MiB cpu=0.31%
+aggregatex-sharded-writer-1 mem=28.55MiB / 128MiB cpu=0.24%
+aggregatex-sharded-shard_a-1 mem=155.5MiB / 512MiB cpu=0.33%
+aggregatex-sharded-shard_b-1 mem=121.8MiB / 512MiB cpu=17.20%
+== shard A oracle after load (writer still on; small transient diffs possible)
+st_day_product_status=ACTIVE st_day_category_status=ACTIVE st_hour_category_status=ACTIVE
+t+6s shardA mismatches=0 (pending cdc≈3) shardB mismatches=0

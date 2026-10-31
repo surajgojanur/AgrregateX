@@ -26,6 +26,15 @@ app = FastAPI(title="AgrregateX API", version=config.VERSION, lifespan=lifespan,
               docs_url="/api/docs", openapi_url="/api/openapi.json")
 
 
+@app.exception_handler(db.ShardUnavailable)
+async def shard_unavailable(_req: Request, exc: db.ShardUnavailable):
+    # Fail closed: no cross-shard fallback, no partial answer dressed up as a full one.
+    return JSONResponse({"detail": f"Shard {exc.shard} is unavailable. Data for tenants on this shard cannot be "
+                                   "read or written right now; nothing was served from another shard.",
+                         "shard": exc.shard, "retryable": True},
+                        status_code=503, headers={"Retry-After": "5"})
+
+
 @app.exception_handler(Exception)
 async def unhandled(_req: Request, exc: Exception):  # never leak SQL/stack traces to clients
     return JSONResponse({"detail": "Internal error."}, status_code=500)
@@ -57,7 +66,8 @@ def _meta(tenant_id: int, start: datetime, end: datetime, w: queries.Window, **e
     edges = [[start.isoformat(), w.edge1_end.isoformat()]] if start < w.edge1_end else []
     if w.edge2_start < end and has_full:
         edges.append([w.edge2_start.isoformat(), end.isoformat()])
-    return {"tenant_id": tenant_id, "from": start.isoformat(), "to": end.isoformat(),
+    return {"tenant_id": tenant_id, "shard": db.shard_for(tenant_id).name,
+            "from": start.isoformat(), "to": end.isoformat(),
             "source": {"stream_table_range": [w.full_lo.replace(tzinfo=UTC).isoformat(),
                                               w.full_hi.replace(tzinfo=UTC).isoformat()] if has_full else None,
                        "raw_edge_ranges": edges},
@@ -65,7 +75,7 @@ def _meta(tenant_id: int, start: datetime, end: datetime, w: queries.Window, **e
 
 
 def _run(fn, tenant_id, *args):
-    with db.tenant_tx(db.api_pool, tenant_id) as conn:
+    with db.tenant_tx("api", tenant_id) as conn:
         return fn(conn, tenant_id, *args)
 
 
@@ -103,26 +113,44 @@ def me(user: auth.User = Depends(auth.current_user)):
 # ── health / directory ─────────────────────────────────────────────────────
 @app.get("/api/health")
 def health():
-    try:
-        with db.monitor_pool.connection(timeout=2) as c:
-            v = c.execute("SELECT extversion FROM pg_extension WHERE extname = 'pg_trickle'").fetchone()
-        return {"status": "ok", "version": config.VERSION, "database": "ok",
-                "pg_trickle_version": v["extversion"] if v else None}
-    except Exception:  # noqa: BLE001
-        return JSONResponse({"status": "degraded", "version": config.VERSION, "database": "unreachable"},
-                            status_code=503)
+    shards = {name: db.probe(sh) for name, sh in db.SHARDS.items()}
+    up = [n for n, p in shards.items() if p["available"]]
+    version = None
+    for name in up:
+        try:
+            with db.monitor(db.SHARDS[name]) as c:
+                v = c.execute("SELECT extversion FROM pg_extension WHERE extname = 'pg_trickle'").fetchone()
+            version = v["extversion"] if v else None
+            break
+        except db.ShardUnavailable:
+            continue
+    status = "ok" if len(up) == len(shards) else ("degraded" if up else "down")
+    body = {"status": status, "version": config.VERSION, "database": "ok" if status == "ok" else status,
+            "pg_trickle_version": version, "shards": shards, "directory_version": db.DIRECTORY_VERSION}
+    return JSONResponse(body, status_code=200 if up else 503)
 
 
 @app.get("/api/tenants")
 def tenants(user: auth.User = Depends(auth.current_user)):
-    with db.monitor_pool.connection() as c:
-        rows = c.execute("SELECT tenant_id, name FROM ax.tenants WHERE tenant_id < 999 ORDER BY tenant_id").fetchall()
-    return {"tenants": [r for r in rows if user.can_read_tenant(r["tenant_id"])]}
+    if db.DIRECTORY:  # served from the directory, so it still answers while a shard is down
+        rows = [{"tenant_id": t, "name": f"tenant-{t}", "shard": s} for t, s in sorted(db.DIRECTORY.items())]
+    else:
+        shard = next(iter(db.SHARDS.values()))
+        with db.monitor(shard) as c:
+            rows = [{**r, "shard": shard.name} for r in
+                    c.execute("SELECT tenant_id, name FROM ax.tenants WHERE tenant_id < 999 ORDER BY tenant_id").fetchall()]
+    return {"directory_version": db.DIRECTORY_VERSION,
+            "tenants": [r for r in rows if user.can_read_tenant(r["tenant_id"])]}
 
 
 # ── tenant analytics ───────────────────────────────────────────────────────
 def tenant_path(tenant_id: int, user: auth.User = Depends(auth.current_user)) -> int:
-    return auth.authorize_tenant(user, tenant_id)
+    auth.authorize_tenant(user, tenant_id)          # authorisation BEFORE routing
+    try:
+        db.shard_for(tenant_id)
+    except db.UnknownTenant as exc:
+        raise HTTPException(404, "Unknown tenant.") from exc
+    return tenant_id
 
 
 @app.get("/api/tenants/{tenant_id}/summary")
@@ -160,7 +188,7 @@ async def breakdown(tenant_id: int = Depends(tenant_path), win=Depends(window),
 
 @app.get("/api/tenants/{tenant_id}/freshness")
 async def freshness(tenant_id: int = Depends(tenant_path)):
-    return {"tenant_id": tenant_id, **await run_in_threadpool(engine.freshness)}
+    return {"tenant_id": tenant_id, **await run_in_threadpool(engine.freshness, tenant_id)}
 
 
 class LiveWrite(BaseModel):
@@ -182,8 +210,16 @@ async def live_write(body: LiveWrite, tenant_id: int = Depends(tenant_path)):
 
 # ── operator ───────────────────────────────────────────────────────────────
 @app.get("/api/engine")
-async def engine_snapshot(_admin: auth.User = Depends(auth.require_admin)):
-    return await run_in_threadpool(engine.snapshot)
+async def engine_snapshot(shard: str | None = None, _admin: auth.User = Depends(auth.require_admin)):
+    name = shard or next(iter(db.SHARDS))
+    if name not in db.SHARDS:
+        raise HTTPException(404, "Unknown shard.")
+    return {"shards": list(db.SHARDS), **await run_in_threadpool(engine.snapshot, name)}
+
+
+@app.get("/api/shards")
+async def shards(_admin: auth.User = Depends(auth.require_admin)):
+    return await run_in_threadpool(engine.shards_overview)
 
 
 @app.api_route("/api/{rest:path}", methods=["GET", "POST", "PUT", "PATCH", "DELETE"])

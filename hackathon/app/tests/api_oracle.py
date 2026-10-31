@@ -2,6 +2,8 @@
 
 Run with writes paused (docker compose stop writer) after refreshes settle.
 usage: python3 -I api_oracle.py [n_windows]   (env: AX_BASE, AX_PG_DSN, AX_DEMO_PASSWORD)
+Sharded: AX_TENANT_DSNS='{"1": "<dsn shard A>", "2": "<dsn shard B>"}' checks each tenant against
+its OWNING shard's raw orders (the tenant list is the JSON keys).
 """
 import http.cookiejar
 import json
@@ -31,12 +33,17 @@ def get(path):
 req = urllib.request.Request(BASE + "/api/auth/login", data=json.dumps({"email": "admin@demo.local", "password": PW}).encode(),
                              headers={"content-type": "application/json"})
 http_.open(req).read()
-pg = psycopg2.connect(DSN)
-pg.autocommit = True
-cur = pg.cursor()
+TENANT_DSNS = {int(k): v for k, v in json.loads(os.environ.get("AX_TENANT_DSNS", "{}")).items()}
+_conns: dict[str, object] = {}
+current_dsn = DSN
 
 
 def q(sql, args):
+    if current_dsn not in _conns:
+        c = psycopg2.connect(current_dsn)
+        c.autocommit = True
+        _conns[current_dsn] = c
+    cur = _conns[current_dsn].cursor()
     cur.execute(sql, args)
     return cur.fetchall()
 
@@ -62,7 +69,8 @@ def iso(d):
 
 fails = 0
 checks = 0
-for tenant in (1, 2, 7):
+for tenant in (sorted(TENANT_DSNS) or (1, 2, 7)):
+    current_dsn = TENANT_DSNS.get(tenant, DSN)
     for a, b in windows(int(sys.argv[1]) if len(sys.argv) > 1 else 12):
         rng = f"from={iso(a)}&to={iso(b)}"
         base = f"/api/tenants/{tenant}"

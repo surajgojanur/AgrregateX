@@ -13,10 +13,12 @@ import './pages/dashboard.css'
 
 const Dashboard = lazy(() => import('./pages/Dashboard'))
 const Engine = lazy(() => import('./pages/Engine'))
+const Shards = lazy(() => import('./pages/Shards'))
 
 const TITLES = {
   dashboard: ['Tenant analytics', 'Dashboard'],
   engine: ['pg_trickle internals', 'Engine'],
+  shards: ['Tenant router', 'Shards'],
 }
 
 function PageFallback() {
@@ -43,7 +45,7 @@ function Shell({ user }) {
         <Topbar title={title} eyebrow={eyebrow} onMenu={() => setNavOpen(true)} />
         <main id="main" className="content" key={page}>
           <Suspense fallback={<PageFallback />}>
-            {page === 'engine' ? <Engine /> : <Dashboard params={route.params} />}
+            {page === 'engine' ? <Engine /> : page === 'shards' ? <Shards /> : <Dashboard params={route.params} />}
           </Suspense>
         </main>
         <footer className="app__foot">

@@ -48,3 +48,9 @@ Every response states which ranges came from which source (`source`).
 - Single shared-DB topology.
 - **Write rate is limited by upstream finding F3/PROPOSAL P1.** Raising `AX_WRITER_RATE` far above about 50/s makes refresh fall behind.
 - Not the PRD benchmark harness (G-1..G-5); that stays with Codex.
+
+## Sharded mode (issue #19)
+Set `AX_SHARDS="a=host:port,b=host:port"` and `AX_SHARD_DIRECTORY=<directory.json>`. The API then routes each tenant to its
+owning shard and returns **503** (no cross-shard fallback) when that shard is unreachable. The demo stack is
+`compose.sharded.yaml` (port 8091). Design, failure semantics, runbook and measured results:
+`../docs/handoffs/opus-sharding.md`.
