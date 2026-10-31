@@ -1,0 +1,28 @@
+      stream_table       | missing_in_st | extra_in_st 
+-------------------------+---------------+-------------
+ st_day_product_status   |             0 |           0
+ st_day_category_status  |             0 |           0
+ st_hour_category_status |             0 |           0
+(3 rows)
+
+        pgt_name         |    action    | was_full_fallback | refresh_reason 
+-------------------------+--------------+-------------------+----------------
+ st_hour_category_status | REINITIALIZE | f                 | SCHEMA_CHANGED
+ st_day_category_status  | REINITIALIZE | f                 | SCHEMA_CHANGED
+ st_day_product_status   | REINITIALIZE | f                 | SCHEMA_CHANGED
+(3 rows)
+
+      stream_table       |    action    | fallback | reason | refreshes | p50_ms | max_ms | failed 
+-------------------------+--------------+----------+--------+-----------+--------+--------+--------
+ st_day_category_status  | DIFFERENTIAL | f        |        |         2 |  255.5 |  503.5 |      0
+ st_day_product_status   | DIFFERENTIAL | f        |        |         1 |  766.4 |  766.4 |      0
+ st_hour_category_status | DIFFERENTIAL | f        |        |         2 |  391.2 |  775.1 |      0
+(3 rows)
+
+      stream_table       | missing_in_st | extra_in_st 
+-------------------------+---------------+-------------
+ st_day_product_status   |             0 |           0
+ st_day_category_status  |             0 |           0
+ st_hour_category_status |             0 |           0
+(3 rows)
+
