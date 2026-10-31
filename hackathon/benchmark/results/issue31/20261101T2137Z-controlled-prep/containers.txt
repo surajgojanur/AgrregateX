@@ -1,0 +1,12 @@
+ragguard-db docker.io/pgvector/pgvector:pg16 Exited (0) 2 weeks ago 127.0.0.1:5433->5432/tcp
+nervous_pike docker.io/reacherhq/backend:latest Exited (137) 4 weeks ago 0.0.0.0:8080->8080/tcp
+mongo docker.io/library/mongo:7 Created 0.0.0.0:27017->27017/tcp
+pgtrickle-ecommerce-generator-1 docker.io/library/pgtrickle-ecommerce-generator:latest Exited (137) 9 hours ago
+pgtrickle-ecommerce-dashboard-1 docker.io/library/pgtrickle-ecommerce-dashboard:latest Exited (137) 9 hours ago 127.0.0.1:18080->8080/tcp
+pgtrickle-ecommerce-postgres-1 ghcr.io/trickle-labs/pg_trickle:latest Exited (0) 9 hours ago (healthy) 127.0.0.1:15432->5432/tcp
+agrregatex-postgres-1 ghcr.io/trickle-labs/pg_trickle:latest Up 14 hours (healthy) 127.0.0.1:25432->5432/tcp
+agrregatex-api-1 docker.io/library/agrregatex-api:latest Up 14 hours 127.0.0.1:18081->8000/tcp
+round1-db ghcr.io/trickle-labs/pg_trickle:latest Up 11 hours 127.0.0.1:25560->5432/tcp
+round1-api localhost/aggregatex-round1-api:latest Up 11 hours 127.0.0.1:8090->8000/tcp
+agentrouter-codex-project-1160579 localhost/agentrouter-codex-test:0.66.0 Stopping
+Emulate Docker CLI using podman. Create /etc/containers/nodocker to quiet msg.

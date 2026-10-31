@@ -1,0 +1,30 @@
+# PREPARED ONLY. Target approval + a fresh passing preflight required before up.
+name: ax-issue31-g4-repro
+services:
+  db:
+    container_name: ax-issue31-g4-repro-db
+    image: ghcr.io/trickle-labs/pg_trickle@sha256:94344bb98995b19c826f939739672481abaab8c25710e3910b48bdb7cf5b3b8d
+    platform: linux/amd64
+    cpus: 1.0
+    mem_limit: 1g
+    shm_size: 128m
+    restart: "no"
+    command: [postgres, -c, pg_trickle.enabled=off, -c, shared_buffers=128MB, -c, work_mem=4MB, -c, maintenance_work_mem=32MB, -c, max_connections=12, -c, log_min_messages=debug1]
+    environment:
+      POSTGRES_DB: ax_g4_repro
+      POSTGRES_PASSWORD: ${AX_G4_SUPERUSER_PASSWORD:?Set a private throwaway password locally; never publish rendered environment}
+    ports: ["127.0.0.1:25634:5432"]
+    volumes:
+      - data:/var/lib/postgresql
+      - ../../../../sql:/ax/sql:ro
+      - .:/protocol:ro
+    labels:
+      ax.issue: "31"
+      ax.purpose: g4-repro
+      ax.disposable: "true"
+volumes:
+  data:
+    name: ax-issue31-g4-repro_data
+    labels:
+      ax.issue: "31"
+      ax.disposable: "true"

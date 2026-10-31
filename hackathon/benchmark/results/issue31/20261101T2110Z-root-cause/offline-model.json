@@ -1,0 +1,388 @@
+{
+  "scope": "Pure Python signed-event model of release SQL predicate; no database or compiled Rust execution. Fixed 1-unit/14094 values; group-label movement tests do not validate arbitrary aggregate expressions.",
+  "cases": [
+    {
+      "case": "insert then cancel",
+      "events": [
+        [
+          1,
+          "I",
+          "paid"
+        ],
+        [
+          1,
+          "D",
+          "paid"
+        ],
+        [
+          1,
+          "I",
+          "cancelled"
+        ]
+      ],
+      "expected": {
+        "cancelled": [
+          1,
+          1,
+          14094
+        ]
+      },
+      "current_endpoint_reducer": {
+        "paid": [
+          1,
+          1,
+          14094
+        ],
+        "cancelled": [
+          1,
+          1,
+          14094
+        ]
+      },
+      "proposed_endpoint_reducer": {
+        "cancelled": [
+          1,
+          1,
+          14094
+        ]
+      },
+      "current_matches": false
+    },
+    {
+      "case": "update existing paid",
+      "events": [
+        [
+          1,
+          "D",
+          "paid"
+        ],
+        [
+          1,
+          "I",
+          "cancelled"
+        ]
+      ],
+      "expected": {
+        "cancelled": [
+          1,
+          1,
+          14094
+        ]
+      },
+      "current_endpoint_reducer": {
+        "cancelled": [
+          1,
+          1,
+          14094
+        ]
+      },
+      "proposed_endpoint_reducer": {
+        "cancelled": [
+          1,
+          1,
+          14094
+        ]
+      },
+      "current_matches": true
+    },
+    {
+      "case": "two updates existing",
+      "events": [
+        [
+          1,
+          "D",
+          "paid"
+        ],
+        [
+          1,
+          "I",
+          "shipped"
+        ],
+        [
+          1,
+          "D",
+          "shipped"
+        ],
+        [
+          1,
+          "I",
+          "cancelled"
+        ]
+      ],
+      "expected": {
+        "cancelled": [
+          1,
+          1,
+          14094
+        ]
+      },
+      "current_endpoint_reducer": {
+        "cancelled": [
+          1,
+          1,
+          14094
+        ]
+      },
+      "proposed_endpoint_reducer": {
+        "cancelled": [
+          1,
+          1,
+          14094
+        ]
+      },
+      "current_matches": true
+    },
+    {
+      "case": "insert ship cancel",
+      "events": [
+        [
+          1,
+          "I",
+          "paid"
+        ],
+        [
+          1,
+          "D",
+          "paid"
+        ],
+        [
+          1,
+          "I",
+          "shipped"
+        ],
+        [
+          1,
+          "D",
+          "shipped"
+        ],
+        [
+          1,
+          "I",
+          "cancelled"
+        ]
+      ],
+      "expected": {
+        "cancelled": [
+          1,
+          1,
+          14094
+        ]
+      },
+      "current_endpoint_reducer": {
+        "paid": [
+          1,
+          1,
+          14094
+        ],
+        "cancelled": [
+          1,
+          1,
+          14094
+        ]
+      },
+      "proposed_endpoint_reducer": {
+        "cancelled": [
+          1,
+          1,
+          14094
+        ]
+      },
+      "current_matches": false
+    },
+    {
+      "case": "move product key",
+      "events": [
+        [
+          1,
+          "D",
+          "p116/paid"
+        ],
+        [
+          1,
+          "I",
+          "p117/paid"
+        ]
+      ],
+      "expected": {
+        "p117/paid": [
+          1,
+          1,
+          14094
+        ]
+      },
+      "current_endpoint_reducer": {
+        "p117/paid": [
+          1,
+          1,
+          14094
+        ]
+      },
+      "proposed_endpoint_reducer": {
+        "p117/paid": [
+          1,
+          1,
+          14094
+        ]
+      },
+      "current_matches": true
+    },
+    {
+      "case": "delete existing",
+      "events": [
+        [
+          1,
+          "D",
+          "paid"
+        ]
+      ],
+      "expected": {},
+      "current_endpoint_reducer": {},
+      "proposed_endpoint_reducer": {},
+      "current_matches": true
+    },
+    {
+      "case": "insert delete same window",
+      "events": [
+        [
+          1,
+          "I",
+          "paid"
+        ],
+        [
+          1,
+          "D",
+          "paid"
+        ]
+      ],
+      "expected": {},
+      "current_endpoint_reducer": {},
+      "proposed_endpoint_reducer": {},
+      "current_matches": true
+    },
+    {
+      "case": "update delete empty",
+      "events": [
+        [
+          1,
+          "D",
+          "paid"
+        ],
+        [
+          1,
+          "I",
+          "cancelled"
+        ],
+        [
+          1,
+          "D",
+          "cancelled"
+        ]
+      ],
+      "expected": {},
+      "current_endpoint_reducer": {
+        "cancelled": [
+          -1,
+          -1,
+          -14094
+        ]
+      },
+      "proposed_endpoint_reducer": {},
+      "current_matches": false
+    },
+    {
+      "case": "two changed orders same group",
+      "events": [
+        [
+          1,
+          "D",
+          "paid"
+        ],
+        [
+          1,
+          "I",
+          "cancelled"
+        ],
+        [
+          2,
+          "D",
+          "paid"
+        ],
+        [
+          2,
+          "I",
+          "cancelled"
+        ]
+      ],
+      "expected": {
+        "cancelled": [
+          2,
+          2,
+          28188
+        ]
+      },
+      "current_endpoint_reducer": {
+        "cancelled": [
+          2,
+          2,
+          28188
+        ]
+      },
+      "proposed_endpoint_reducer": {
+        "cancelled": [
+          2,
+          2,
+          28188
+        ]
+      },
+      "current_matches": true
+    },
+    {
+      "case": "insert quantity represented by key variant",
+      "events": [
+        [
+          1,
+          "I",
+          "paid/q1"
+        ],
+        [
+          1,
+          "D",
+          "paid/q1"
+        ],
+        [
+          1,
+          "I",
+          "paid/q2"
+        ]
+      ],
+      "expected": {
+        "paid/q2": [
+          1,
+          1,
+          14094
+        ]
+      },
+      "current_endpoint_reducer": {
+        "paid/q1": [
+          1,
+          1,
+          14094
+        ],
+        "paid/q2": [
+          1,
+          1,
+          14094
+        ]
+      },
+      "proposed_endpoint_reducer": {
+        "paid/q2": [
+          1,
+          1,
+          14094
+        ]
+      },
+      "current_matches": false
+    }
+  ],
+  "proposed_matches_all": true
+}

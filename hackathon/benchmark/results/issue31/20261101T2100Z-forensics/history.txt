@@ -1,0 +1,39 @@
+{"utc" : "2026-10-31T21:00:43.904721", "snapshot" : "1149376:1149376:"}
+[{"pgt_name":"st_day_category_status","action":"DIFFERENTIAL","status":"COMPLETED","was_full_fallback":false,"refresh_reason":null,"n":2,"first_start":"2026-10-31T10:39:57.606287+00:00","last_end":"2026-10-31T11:11:57.518801+00:00"},
+ {"pgt_name":"st_day_category_status","action":"FULL","status":"COMPLETED","was_full_fallback":false,"refresh_reason":null,"n":1,"first_start":"2026-10-31T10:38:14.802157+00:00","last_end":"2026-10-31T10:38:14.802378+00:00"},
+ {"pgt_name":"st_day_category_status","action":"NO_DATA","status":"COMPLETED","was_full_fallback":false,"refresh_reason":null,"n":21150,"first_start":"2026-10-31T10:38:16.800136+00:00","last_end":"2026-10-31T21:00:43.413231+00:00"},
+ {"pgt_name":"st_day_category_status","action":"REINITIALIZE","status":"COMPLETED","was_full_fallback":false,"refresh_reason":"SCHEMA_CHANGED","n":1,"first_start":"2026-10-31T10:38:15.312366+00:00","last_end":"2026-10-31T10:38:15.358363+00:00"},
+ {"pgt_name":"st_day_product_status","action":"DIFFERENTIAL","status":"COMPLETED","was_full_fallback":false,"refresh_reason":null,"n":4,"first_start":"2026-10-31T10:39:57.391993+00:00","last_end":"2026-10-31T11:11:58.082451+00:00"},
+ {"pgt_name":"st_day_product_status","action":"FULL","status":"COMPLETED","was_full_fallback":false,"refresh_reason":null,"n":1,"first_start":"2026-10-31T10:38:14.747106+00:00","last_end":"2026-10-31T10:38:14.747423+00:00"},
+ {"pgt_name":"st_day_product_status","action":"NO_DATA","status":"COMPLETED","was_full_fallback":false,"refresh_reason":null,"n":21218,"first_start":"2026-10-31T10:38:18.208069+00:00","last_end":"2026-10-31T21:00:43.624435+00:00"},
+ {"pgt_name":"st_day_product_status","action":"REINITIALIZE","status":"COMPLETED","was_full_fallback":false,"refresh_reason":"SCHEMA_CHANGED","n":1,"first_start":"2026-10-31T10:38:17.007507+00:00","last_end":"2026-10-31T10:38:17.052008+00:00"},
+ {"pgt_name":"st_hour_category_status","action":"DIFFERENTIAL","status":"COMPLETED","was_full_fallback":false,"refresh_reason":null,"n":3,"first_start":"2026-10-31T10:39:58.214771+00:00","last_end":"2026-10-31T11:11:57.289219+00:00"},
+ {"pgt_name":"st_hour_category_status","action":"FULL","status":"COMPLETED","was_full_fallback":false,"refresh_reason":null,"n":1,"first_start":"2026-10-31T10:38:14.848777+00:00","last_end":"2026-10-31T10:38:14.848977+00:00"},
+ {"pgt_name":"st_hour_category_status","action":"NO_DATA","status":"COMPLETED","was_full_fallback":false,"refresh_reason":null,"n":19956,"first_start":"2026-10-31T10:38:18.465962+00:00","last_end":"2026-10-31T21:00:43.654292+00:00"},
+ {"pgt_name":"st_hour_category_status","action":"REINITIALIZE","status":"COMPLETED","was_full_fallback":false,"refresh_reason":"SCHEMA_CHANGED","n":1,"first_start":"2026-10-31T10:38:17.107569+00:00","last_end":"2026-10-31T10:38:17.141866+00:00"}]
+[{"refresh_id":2908,"start_time":"2026-10-31T11:11:58.076224+00:00","end_time":"2026-10-31T11:11:58.082451+00:00","action":"DIFFERENTIAL","status":"COMPLETED","rows_inserted":0,"rows_updated":0,"rows_deleted":0,"delta_row_count":0,"was_full_fallback":false,"refresh_reason":null,"merge_strategy_used":"DIFFERENTIAL","initiated_by":"SCHEDULER"},
+ {"refresh_id":2904,"start_time":"2026-10-31T11:11:51.441832+00:00","end_time":"2026-10-31T11:11:51.463646+00:00","action":"DIFFERENTIAL","status":"COMPLETED","rows_inserted":1,"rows_updated":0,"rows_deleted":0,"delta_row_count":1,"was_full_fallback":false,"refresh_reason":null,"merge_strategy_used":"delete_insert","initiated_by":"SCHEDULER"},
+ {"refresh_id":73,"start_time":"2026-10-31T10:39:58.937014+00:00","end_time":"2026-10-31T10:39:58.943621+00:00","action":"DIFFERENTIAL","status":"COMPLETED","rows_inserted":0,"rows_updated":0,"rows_deleted":0,"delta_row_count":0,"was_full_fallback":false,"refresh_reason":null,"merge_strategy_used":"DIFFERENTIAL","initiated_by":"SCHEDULER"},
+ {"refresh_id":70,"start_time":"2026-10-31T10:39:57.391993+00:00","end_time":"2026-10-31T10:39:57.431408+00:00","action":"DIFFERENTIAL","status":"COMPLETED","rows_inserted":2,"rows_updated":0,"rows_deleted":0,"delta_row_count":2,"was_full_fallback":false,"refresh_reason":null,"merge_strategy_used":"delete_insert","initiated_by":"SCHEDULER"},
+ {"refresh_id":6,"start_time":"2026-10-31T10:38:17.007507+00:00","end_time":"2026-10-31T10:38:17.052008+00:00","action":"REINITIALIZE","status":"COMPLETED","rows_inserted":997,"rows_updated":0,"rows_deleted":0,"delta_row_count":997,"was_full_fallback":false,"refresh_reason":"SCHEMA_CHANGED","merge_strategy_used":"FULL","initiated_by":"SCHEDULER"},
+ {"refresh_id":1,"start_time":"2026-10-31T10:38:14.747106+00:00","end_time":"2026-10-31T10:38:14.747423+00:00","action":"FULL","status":"COMPLETED","rows_inserted":0,"rows_updated":0,"rows_deleted":0,"delta_row_count":0,"was_full_fallback":false,"refresh_reason":null,"merge_strategy_used":"FULL","initiated_by":"INITIAL"}]
+[{"refresh_id":62338,"start_time":"2026-10-31T21:00:43.623205+00:00","end_time":"2026-10-31T21:00:43.624435+00:00","action":"NO_DATA","status":"COMPLETED"},
+ {"refresh_id":62336,"start_time":"2026-10-31T21:00:42.354897+00:00","end_time":"2026-10-31T21:00:42.356154+00:00","action":"NO_DATA","status":"COMPLETED"},
+ {"refresh_id":62332,"start_time":"2026-10-31T21:00:40.517158+00:00","end_time":"2026-10-31T21:00:40.518417+00:00","action":"NO_DATA","status":"COMPLETED"},
+ {"refresh_id":62329,"start_time":"2026-10-31T21:00:39.02999+00:00","end_time":"2026-10-31T21:00:39.031267+00:00","action":"NO_DATA","status":"COMPLETED"},
+ {"refresh_id":62327,"start_time":"2026-10-31T21:00:37.762837+00:00","end_time":"2026-10-31T21:00:37.764087+00:00","action":"NO_DATA","status":"COMPLETED"}]
+[{"source":"ax.orders","cdc_mode":"TRIGGER","pgt_id":1},
+ {"source":"ax.products","cdc_mode":"TRIGGER","pgt_id":2},
+ {"source":"ax.orders","cdc_mode":"TRIGGER","pgt_id":2},
+ {"source":"ax.products","cdc_mode":"TRIGGER","pgt_id":3},
+ {"source":"ax.orders","cdc_mode":"TRIGGER","pgt_id":3}]
+[{"source":"ax.products","last_consumed_lsn":null,"receipt_high_water_lsn":null,"acknowledged_high_water_lsn":null,"tracked_by_pgt_ids":[2,3]},
+ {"source":"ax.orders","last_consumed_lsn":null,"receipt_high_water_lsn":null,"acknowledged_high_water_lsn":null,"tracked_by_pgt_ids":[1,2,3]}]
+{"orders_buffer_rows" : 1, "oldest_commit" : null, "newest_commit" : null}
+{"products_buffer_rows" : 1}
+[{"backend_type":"client backend","state":"idle","wait_event_type":"Client","wait_event":"ClientRead","n":7},
+ {"backend_type":"pg_trickle scheduler","state":null,"wait_event_type":"Extension","wait_event":"Extension","n":1}]
+[{"name":"pg_trickle.enabled","setting":"on"},
+ {"name":"pg_trickle.max_concurrent_refreshes","setting":"4"},
+ {"name":"pg_trickle.scheduler_interval_ms","setting":"500"}]
+Emulate Docker CLI using podman. Create /etc/containers/nodocker to quiet msg.

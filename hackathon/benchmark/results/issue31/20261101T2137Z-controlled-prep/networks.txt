@@ -1,0 +1,6 @@
+aggregatex-round1-net
+agrregatex_default
+pgtrickle-ecommerce_default
+podman
+ragguard_default
+Emulate Docker CLI using podman. Create /etc/containers/nodocker to quiet msg.

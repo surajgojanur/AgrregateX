@@ -1,0 +1,2 @@
+["ghcr.io/trickle-labs/pg_trickle@sha256:92f271e27f8d3b9b5aaf568df10ee377937f48d79825e73adaf469768b0208a5","ghcr.io/trickle-labs/pg_trickle@sha256:94344bb98995b19c826f939739672481abaab8c25710e3910b48bdb7cf5b3b8d"]
+Emulate Docker CLI using podman. Create /etc/containers/nodocker to quiet msg.

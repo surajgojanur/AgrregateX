@@ -1,0 +1,18 @@
+{
+  "utc": "2026-10-31T21:39:07.708767+00:00",
+  "project": "ax-issue31-g4-repro",
+  "database": "ax_g4_repro",
+  "db_port": 25634,
+  "optional_api_port": 18134,
+  "container": "ax-issue31-g4-repro-db",
+  "volume": "ax-issue31-g4-repro_data",
+  "network": "ax-issue31-g4-repro_default",
+  "available_ram_bytes": 1573191680,
+  "required_ram_bytes": 4294967296,
+  "disk_required_bytes": 5368709120,
+  "swap_used_bytes": 6007336960,
+  "approval_present": false,
+  "preflight_pass": false,
+  "execution": "NOT STARTED",
+  "reason": "Available RAM below 4GiB; active swap I/O; target-specific approval absent. No matching project/port/volume/network names observed. Competing benchmark absence not fully established from names alone."
+}

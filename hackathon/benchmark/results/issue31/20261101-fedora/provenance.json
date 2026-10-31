@@ -1,0 +1,15 @@
+{
+  "main_sha": "c19b89a24370d29412fc42c250a86b0ea68f791f",
+  "demo_source_sha": "2cc3a757cee37efc75586780df56fbefd2737e94",
+  "host": "Fedora 44 Intel i3-1115G4 4 logical CPUs 7.5 GiB RAM",
+  "target": "http://127.0.0.1:8094",
+  "database": "round1-db:25560/aggregatex",
+  "volume": "aggregatex_round1_data (preserved)",
+  "dataset": "1000 historical seeded orders plus 2 pre-existing orders",
+  "auth": "operator bypass; not signed-cookie enforcement proof",
+  "concurrency": 1,
+  "requests": 16,
+  "warmup": 1,
+  "sql_timeout_seconds": 2,
+  "disposable_stack_created": false
+}

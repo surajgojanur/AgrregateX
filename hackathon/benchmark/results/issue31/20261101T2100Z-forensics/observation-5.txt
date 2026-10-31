@@ -1,0 +1,17 @@
+{"observation_utc" : "2026-10-31T21:02:21.884315", "snapshot" : "1152786:1152786:", "database" : "aggregatex", "role" : "postgres", "server_version" : "18.6 (Debian 18.6-1.pgdg12+2)", "extension" : "0.108.3", "timezone" : "Etc/UTC", "read_only" : "on", "isolation" : "repeatable read", "orders" : 1002}
+[{"stream_table":"st_day_product_status","missing_in_st":0,"extra_in_st":1},
+ {"stream_table":"st_day_category_status","missing_in_st":0,"extra_in_st":0},
+ {"stream_table":"st_hour_category_status","missing_in_st":0,"extra_in_st":0}]
+[{"pgt_id":2,"pgt_name":"st_day_category_status","status":"ACTIVE","refresh_mode":"DIFFERENTIAL","effective_refresh_mode":"NO_DATA","last_refresh_at":"2026-10-31T21:02:21.169939+00:00","data_timestamp":"2026-10-31T11:11:57.483354+00:00","frontier":{"sources": {"17431": {"lsn": "0/4C508F0", "snapshot_ts": "1793445117Z"}, "17462": {"lsn": "0/4BEB240", "snapshot_ts": "1793445117Z"}}, "data_timestamp": "1793445117Z"},"tentative_frontier":null,"consecutive_errors":0,"needs_reinit":false,"last_error_at":null,"last_error_code":null},
+ {"pgt_id":1,"pgt_name":"st_day_product_status","status":"ACTIVE","refresh_mode":"DIFFERENTIAL","effective_refresh_mode":"NO_DATA","last_refresh_at":"2026-10-31T21:02:21.382861+00:00","data_timestamp":"2026-10-31T11:11:51.434755+00:00","frontier":{"sources": {"17462": {"lsn": "0/4BEB240", "snapshot_ts": "1793445118Z"}}, "data_timestamp": "1793445118Z"},"tentative_frontier":null,"consecutive_errors":0,"needs_reinit":false,"last_error_at":null,"last_error_code":null},
+ {"pgt_id":3,"pgt_name":"st_hour_category_status","status":"ACTIVE","refresh_mode":"DIFFERENTIAL","effective_refresh_mode":"NO_DATA","last_refresh_at":"2026-10-31T21:02:20.448637+00:00","data_timestamp":"2026-10-31T11:11:51.645729+00:00","frontier":{"sources": {"17431": {"lsn": "0/4C4DB50", "snapshot_ts": "1793445117Z"}, "17462": {"lsn": "0/4BEB240", "snapshot_ts": "1793445117Z"}}, "data_timestamp": "1793445117Z"},"tentative_frontier":null,"consecutive_errors":0,"needs_reinit":false,"last_error_at":null,"last_error_code":null}]
+[{"pgt_name":"st_day_category_status","latest_completed":"2026-10-31T21:02:21.180491+00:00","latest_data_refresh":"2026-10-31T11:11:57.518801+00:00","failed":0,"incomplete":0,"fallbacks":0},
+ {"pgt_name":"st_day_product_status","latest_completed":"2026-10-31T21:02:21.392161+00:00","latest_data_refresh":"2026-10-31T11:11:58.082451+00:00","failed":0,"incomplete":0,"fallbacks":0},
+ {"pgt_name":"st_hour_category_status","latest_completed":"2026-10-31T21:02:20.458549+00:00","latest_data_refresh":"2026-10-31T11:11:57.289219+00:00","failed":0,"incomplete":0,"fallbacks":0}]
+{"table" : "orders", "rows" : 1002, "content_md5" : "97743717803b942d08ab6725e3d31001"}
+{"table" : "st_day_product_status", "rows" : 1000, "content_md5" : "500442cbe8841a0c161489b338089446"}
+{"table" : "st_day_category_status", "rows" : 970, "content_md5" : "1add12b650c6395bbbdd3187b6d7ebe0"}
+{"table" : "st_hour_category_status", "rows" : 1001, "content_md5" : "5c822b91a02e36c81c52c0f8a20e23e7"}
+[{"tenant_id":2,"utc_day":"2026-10-31T00:00:00","product_id":116,"status":"cancelled","order_count":1,"units":1,"sales_cents":14094},
+ {"tenant_id":2,"utc_day":"2026-10-31T00:00:00","product_id":116,"status":"paid","order_count":1,"units":1,"sales_cents":14094}]
+Emulate Docker CLI using podman. Create /etc/containers/nodocker to quiet msg.

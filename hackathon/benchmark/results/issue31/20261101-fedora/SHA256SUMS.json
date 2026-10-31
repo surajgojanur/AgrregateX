@@ -1,0 +1,21 @@
+{
+  "offline-additional.txt": "054511e7fea2a2f5e8c959edd6246ca5bff3a1532c432e81dbfded6135545db9",
+  "provenance.json": "e88b3b1da2a8ee1a6e47a385470efeb1e1102538d302cab77c30b9af346ae86f",
+  "image.txt": "85be8bb62a3173ef398f95b029447a7dc903a51cd4f364aadadf41715ec60b10",
+  "containers.txt": "ac6cc3da2b51b45be25bfb28052613776127a5683432a928ade4cde9829803a4",
+  "host.txt": "0c253fa57a93ea624e00f90c50ed08ecd4341c4c97f6d1fc367874327c1fc747",
+  "G1_G5_SCORECARD.md": "cc155010a9d14ab4719c95e6d05de804c9077145d5a54a12fc22be46ec6d134d",
+  "scorecard.json": "6f2e7c96b8dd042fcde65cb5f810002a356a69594776053fcb25103427f4020d",
+  "drift.txt": "fbbab46b2160458076e32e44a510bf3f1d5a52feb1c4bf9eb7f02b53780d7b91",
+  "drift.sql": "ee7055a4f3779f7cb41cf637cb865005004b60ad682054b1568636132b035dc0",
+  "lint.txt": "4d44faf9b1891f2cb42b3572101ce09523a54159cf561ece38024abab9ed9ca6",
+  "fmt.txt": "4d44faf9b1891f2cb42b3572101ce09523a54159cf561ece38024abab9ed9ca6",
+  "tests.txt": "1eb395364ab21362d559dfe51bc015b4110e648a44ee0753041212c6e4cafcac",
+  "database.txt": "cea969d9934a24ceec4c02d92214f4d598ad6aacf6a666fe8ef80488250a42c3",
+  "sql-corrected/comparison.json": "340657f97906a64a3c3ec709f4bc1b1a4f2ed31638f0df5dccc1f7fb27690d83",
+  "sql-corrected/executed.sql": "a1ad44064045c3b3e25a423232ec13e618c4ecc6f96d48872611b252135c0cf5",
+  "sql/comparison.json": "fd2b7f7db2271415fabc94b1476f0814be9174dcdfb9e8da5819ef988f8576c4",
+  "sql/executed.sql": "6648a3be8ce76ad184e873564185f93b6cdbb38013bacb2e9a38bdc6c038f5d5",
+  "http/HTTP.md": "cbbed11000927250f1a90531de2b17bd85143bf70c3be005de0f08236b40f2e1",
+  "http/http.json": "b887de3018cf00f6bd47e6cd68b67c32ec676898794e15e7e3dfbbc65df14616"
+}

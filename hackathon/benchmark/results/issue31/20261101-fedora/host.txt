@@ -1,0 +1,33 @@
+Sat Oct 31 20:51:48 UTC 2026
+Fedora release 44 (Forty Four)
+Architecture:                            x86_64
+CPU op-mode(s):                          32-bit, 64-bit
+Address sizes:                           39 bits physical, 48 bits virtual
+Byte Order:                              Little Endian
+CPU(s):                                  4
+On-line CPU(s) list:                     0-3
+Vendor ID:                               GenuineIntel
+Model name:                              11th Gen Intel(R) Core(TM) i3-1115G4 @ 3.00GHz
+CPU family:                              6
+Model:                                   140
+Thread(s) per core:                      2
+Core(s) per socket:                      2
+Socket(s):                               1
+Stepping:                                1
+CPU(s) scaling MHz:                      96%
+CPU max MHz:                             4100.0000
+CPU min MHz:                             400.0000
+BogoMIPS:                                5990.40
+               total        used        free      shared  buff/cache   available
+Mem:           7.5Gi       6.1Gi       361Mi       550Mi       1.9Gi       1.4Gi
+Swap:          7.5Gi       5.9Gi       1.6Gi
+Filesystem      Size  Used Avail Use% Mounted on
+/dev/nvme0n1p4  346G  118G  228G  35% /home
+procs -----------memory---------- ---swap-- -----io---- -system-- -------cpu-------
+ r  b   swpd   free   buff  cache   si   so    bi    bo   in   cs us sy id wa st gu
+ 0  0 6187628 369848   556 1994856 639  919  3533  4501 5593   15 12  4 83  1  0  0
+ 1  0 6187596 369640   556 1995416  24    0    24   776 3468 4365 10  3 87  0  0  0
+ 0  0 6187556 385076   556 1996436  28    0    60   712 10362 3973 19 3 77  1  0  0
+LISTEN 0      4096            127.0.0.1:25560      0.0.0.0:*
+LISTEN 0      2048            127.0.0.1:8093       0.0.0.0:*
+LISTEN 0      2048            127.0.0.1:8094       0.0.0.0:*

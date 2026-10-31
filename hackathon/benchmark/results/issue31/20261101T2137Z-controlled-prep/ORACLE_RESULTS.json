@@ -1,0 +1,24 @@
+{
+  "execution": "NOT RUN",
+  "reason": "Resource gate failed and explicit target approval absent",
+  "cases": {
+    "A": {
+      "status": "NOT TESTED",
+      "missing_in_st": null,
+      "extra_in_st": null
+    },
+    "B": {
+      "status": "NOT TESTED",
+      "missing_in_st": null,
+      "extra_in_st": null
+    }
+  },
+  "expected_streams": [
+    "st_day_product_status",
+    "st_day_category_status",
+    "st_hour_category_status"
+  ],
+  "observations": [],
+  "official_pass": false,
+  "runtime_staging_defect_confirmed": false
+}
