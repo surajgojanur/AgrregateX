@@ -1,0 +1,10 @@
+CREATE TABLE
+INSERT 0 1
+SET
+    check_name     | severity |                              detail                               
+-------------------+----------+-------------------------------------------------------------------
+ scheduler_running | OK       | 1 worker(s) running
+ error_tables      | OK       | All stream tables are ACTIVE or INITIALIZING
+ monitor_contract  | OK       | Required privileges and applicable health-check coverage verified
+(3 rows)
+

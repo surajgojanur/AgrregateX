@@ -1,0 +1,266 @@
+BEGIN
+SET
+SET
+SET
+SET
+DO
+ database_name |  login   | server_version_num | extversion | extension_owner | database_owner 
+---------------+----------+--------------------+------------+-----------------+----------------
+ aggregatex    | postgres | 180006             | 0.108.3    | postgres        | postgres
+(1 row)
+
+  rolname   | rolcanlogin | rolsuper | rolbypassrls | rolcreatedb | rolcreaterole | rolreplication | rolinherit 
+------------+-------------+----------+--------------+-------------+---------------+----------------+------------
+ ax_api     | t           | f        | f            | f           | f             | f              | t
+ ax_monitor | t           | f        | f            | f           | f             | f              | t
+ ax_writer  | t           | f        | f            | f           | f             | f              | t
+ postgres   | t           | t        | t            | t           | t             | t              | t
+(4 rows)
+
+   member   | granted_role | admin_option | inherit_option | set_option 
+------------+--------------+--------------+----------------+------------
+ ax_monitor | pg_monitor   | f            | t              | t
+(1 row)
+
+  nspname  |            relname             |  owner   | relkind | relrowsecurity | relforcerowsecurity | monitor_table_select | monitor_any_column_select | api_any_column_select | writer_any_column_select 
+-----------+--------------------------------+----------+---------+----------------+---------------------+----------------------+---------------------------+-----------------------+--------------------------
+ ax        | orders                         | postgres | r       | t              | t                   | f                    | f                         | t                     | t
+ ax        | products                       | postgres | r       | t              | t                   | f                    | f                         | t                     | f
+ ax        | st_day_category_status         | postgres | r       | t              | t                   | f                    | f                         | t                     | f
+ ax        | st_day_product_status          | postgres | r       | t              | t                   | f                    | f                         | t                     | f
+ ax        | st_hour_category_status        | postgres | r       | t              | t                   | f                    | f                         | t                     | f
+ pgtrickle | pgt_change_tracking            | postgres | r       | f              | f                   | f                    | f                         | f                     | f
+ pgtrickle | pgt_dependencies               | postgres | r       | f              | f                   | f                    | f                         | f                     | f
+ pgtrickle | pgt_freshness_controller_state | postgres | r       | f              | f                   | f                    | f                         | f                     | f
+ pgtrickle | pgt_outbox_config              | postgres | r       | f              | f                   | f                    | f                         | f                     | f
+ pgtrickle | pgt_publication_bindings       | postgres | r       | f              | f                   | f                    | f                         | f                     | f
+ pgtrickle | pgt_refresh_history            | postgres | r       | f              | f                   | t                    | t                         | f                     | f
+ pgtrickle | pgt_scheduler_jobs             | postgres | r       | f              | f                   | f                    | f                         | f                     | f
+ pgtrickle | pgt_stream_tables              | postgres | r       | f              | f                   | t                    | t                         | f                     | f
+ pgtrickle | pgt_window_states              | postgres | r       | f              | f                   | f                    | f                         | f                     | f
+ pgtrickle | stream_tables_info             | postgres | v       | f              | f                   | t                    | t                         | f                     | f
+(15 rows)
+
+            relname             |           attname           | monitor_select | isolated_owner_select 
+--------------------------------+-----------------------------+----------------+-----------------------
+ pgt_change_tracking            | source_relid                | f              | 
+ pgt_change_tracking            | slot_name                   | f              | 
+ pgt_change_tracking            | last_consumed_lsn           | f              | 
+ pgt_change_tracking            | receipt_high_water_lsn      | f              | 
+ pgt_change_tracking            | acknowledged_high_water_lsn | f              | 
+ pgt_change_tracking            | tracked_by_pgt_ids          | f              | 
+ pgt_change_tracking            | source_stable_name          | f              | 
+ pgt_change_tracking            | source_placement            | f              | 
+ pgt_change_tracking            | frontier_per_node           | f              | 
+ pgt_dependencies               | pgt_id                      | f              | 
+ pgt_dependencies               | source_relid                | f              | 
+ pgt_dependencies               | source_type                 | f              | 
+ pgt_dependencies               | columns_used                | f              | 
+ pgt_dependencies               | column_snapshot             | f              | 
+ pgt_dependencies               | schema_fingerprint          | f              | 
+ pgt_dependencies               | cdc_mode                    | f              | 
+ pgt_dependencies               | slot_name                   | f              | 
+ pgt_dependencies               | decoder_confirmed_lsn       | f              | 
+ pgt_dependencies               | transition_started_at       | f              | 
+ pgt_dependencies               | cutover_target              | f              | 
+ pgt_dependencies               | cutover_lsn                 | f              | 
+ pgt_dependencies               | source_stable_name          | f              | 
+ pgt_dependencies               | source_placement            | f              | 
+ pgt_freshness_controller_state | pgt_id                      | f              | 
+ pgt_freshness_controller_state | controller_version          | f              | 
+ pgt_freshness_controller_state | plan_identity               | f              | 
+ pgt_freshness_controller_state | target_ms                   | f              | 
+ pgt_freshness_controller_state | sample_count                | f              | 
+ pgt_freshness_controller_state | last_settled_refresh_id     | f              | 
+ pgt_freshness_controller_state | last_sample_ms              | f              | 
+ pgt_freshness_controller_state | p50_freshness_ms            | f              | 
+ pgt_freshness_controller_state | p95_freshness_ms            | f              | 
+ pgt_freshness_controller_state | p99_freshness_ms            | f              | 
+ pgt_freshness_controller_state | sla_status                  | f              | 
+ pgt_freshness_controller_state | evidence_state              | f              | 
+ pgt_freshness_controller_state | breach_streak               | f              | 
+ pgt_freshness_controller_state | recovery_streak             | f              | 
+ pgt_freshness_controller_state | breach_started_at           | f              | 
+ pgt_freshness_controller_state | infeasibility_streak        | f              | 
+ pgt_freshness_controller_state | feasibility_recovery_streak | f              | 
+ pgt_freshness_controller_state | infeasible_since            | f              | 
+ pgt_freshness_controller_state | infeasibility_reason        | f              | 
+ pgt_freshness_controller_state | minimum_cost_ms             | f              | 
+ pgt_freshness_controller_state | last_applied_interval_ms    | f              | 
+ pgt_freshness_controller_state | last_applied_mode           | f              | 
+ pgt_freshness_controller_state | last_applied_batch_size     | f              | 
+ pgt_freshness_controller_state | last_input_snapshot         | f              | 
+ pgt_freshness_controller_state | next_due_at                 | f              | 
+ pgt_freshness_controller_state | last_decision_at            | f              | 
+ pgt_freshness_controller_state | updated_at                  | f              | 
+ pgt_outbox_config              | stream_table_oid            | f              | 
+ pgt_outbox_config              | stream_table_name           | f              | 
+ pgt_outbox_config              | tide_outbox_name            | f              | 
+ pgt_outbox_config              | pg_tide_extension_oid       | f              | 
+ pgt_outbox_config              | pg_tide_version             | f              | 
+ pgt_outbox_config              | tide_outbox_created_at      | f              | 
+ pgt_outbox_config              | embedding_vector_column     | f              | 
+ pgt_outbox_config              | created_at                  | f              | 
+ pgt_publication_bindings       | pgt_id                      | f              | 
+ pgt_publication_bindings       | stream_relid                | f              | 
+ pgt_publication_bindings       | publication_oid             | f              | 
+ pgt_publication_bindings       | publication_name            | f              | 
+ pgt_publication_bindings       | publication_owner_oid       | f              | 
+ pgt_publication_bindings       | expected_relation_oids      | f              | 
+ pgt_scheduler_jobs             | job_id                      | f              | 
+ pgt_scheduler_jobs             | dag_version                 | f              | 
+ pgt_scheduler_jobs             | unit_key                    | f              | 
+ pgt_scheduler_jobs             | unit_kind                   | f              | 
+ pgt_scheduler_jobs             | member_pgt_ids              | f              | 
+ pgt_scheduler_jobs             | root_pgt_id                 | f              | 
+ pgt_scheduler_jobs             | status                      | f              | 
+ pgt_scheduler_jobs             | scheduler_pid               | f              | 
+ pgt_scheduler_jobs             | worker_pid                  | f              | 
+ pgt_scheduler_jobs             | attempt_no                  | f              | 
+ pgt_scheduler_jobs             | enqueued_at                 | f              | 
+ pgt_scheduler_jobs             | started_at                  | f              | 
+ pgt_scheduler_jobs             | finished_at                 | f              | 
+ pgt_scheduler_jobs             | outcome_detail              | f              | 
+ pgt_scheduler_jobs             | retryable                   | f              | 
+ pgt_scheduler_jobs             | dispatch_tick_id            | f              | 
+ pgt_scheduler_jobs             | tick_watermark_lsn          | f              | 
+ pgt_scheduler_jobs             | outcome_code                | f              | 
+ pgt_scheduler_jobs             | outcome_sqlstate            | f              | 
+ pgt_scheduler_jobs             | worker_slot_generation      | f              | 
+ pgt_window_states              | pgt_id                      | f              | 
+ pgt_window_states              | node_ordinal                | f              | 
+ pgt_window_states              | spec_ordinal                | f              | 
+ pgt_window_states              | partition_relid             | f              | 
+ pgt_window_states              | row_relid                   | f              | 
+ pgt_window_states              | peer_relid                  | f              | 
+ pgt_window_states              | schema_version              | f              | 
+ pgt_window_states              | strategy_version            | f              | 
+ pgt_window_states              | query_hash                  | f              | 
+ pgt_window_states              | state_generation            | f              | 
+ pgt_window_states              | status                      | f              | 
+ pgt_window_states              | estimated_bytes             | f              | 
+ pgt_window_states              | last_validated_at           | f              | 
+ pgt_window_states              | updated_at                  | f              | 
+(98 rows)
+
+      nspname      | monitor_usage | monitor_create | api_usage | writer_usage 
+-------------------+---------------+----------------+-----------+--------------
+ ax                | t             | f              | t         | t
+ pgtrickle         | t             | f              | t         | f
+ pgtrickle_changes | f             | f              | f         | f
+(3 rows)
+
+        proname         | lanname |  owner   | prosecdef | provolatile |           proconfig            |         body_fingerprint         | library_reference | monitor_execute 
+------------------------+---------+----------+-----------+-------------+--------------------------------+----------------------------------+-------------------+-----------------
+ change_buffer_sizes    | c       | postgres | f         | v           |                                | 3c82d79d46b73b3c5bec146bbe26c245 | pg_trickle        | t
+ health_check           | c       | postgres | f         | v           |                                | 190907cc2ece6eab3ff797eb87a94c14 | pg_trickle        | t
+ parse_duration_seconds | c       | postgres | f         | i           |                                | dfaeabb91e6f5c356fcb99a7e0e33bb3 | pg_trickle        | t
+ slot_health            | c       | postgres | f         | v           |                                | e33970d5af7d25c1dcdaa2955100807e | pg_trickle        | t
+ tenant_order_counts    | sql     | postgres | t         | s           | {"search_path=pg_catalog, ax"} | b9dfb012def5c9c774c287384d50e6cb |                   | t
+(5 rows)
+
+      stale_view_fingerprint      
+----------------------------------
+ a0db0c17e25f761c7d978515ce0cce6c
+(1 row)
+
+ private_executable_definer_functions 
+--------------------------------------
+                                    8
+(1 row)
+
+ pgt_schema |        pgt_name         | status | schedule | refresh_mode | effective_refresh_mode | refresh_tier |        last_refresh_at        |        data_timestamp         | consecutive_errors | last_error_code | last_error_at | has_last_error | last_error_fingerprint | stale | refresh_age_seconds |    last_successful_refresh    | last_successful_action 
+------------+-------------------------+--------+----------+--------------+------------------------+--------------+-------------------------------+-------------------------------+--------------------+-----------------+---------------+----------------+------------------------+-------+---------------------+-------------------------------+------------------------
+ ax         | st_day_category_status  | ACTIVE | 1s       | DIFFERENTIAL | NO_DATA                | hot          | 2026-10-31 19:12:07.457583+00 | 2026-10-31 19:11:33.297206+00 |                  0 |                 |               | f              |                        | t     |            1.112588 | 2026-10-31 19:12:07.46754+00  | NO_DATA
+ ax         | st_day_product_status   | ACTIVE | 1s       | DIFFERENTIAL | NO_DATA                | hot          | 2026-10-31 19:12:07.247342+00 | 2026-10-31 19:11:33.509562+00 |                  0 |                 |               | f              |                        | t     |            1.322856 | 2026-10-31 19:12:07.254635+00 | NO_DATA
+ ax         | st_hour_category_status | ACTIVE | 1s       | DIFFERENTIAL | NO_DATA                | hot          | 2026-10-31 19:12:08.014283+00 | 2026-10-31 19:11:33.670634+00 |                  0 |                 |               | f              |                        | f     |            0.555928 | 2026-10-31 19:12:08.030002+00 | NO_DATA
+(3 rows)
+
+        pgt_name         |          start_time           |           end_time            | action  |  status   | error_code | error_sqlstate | was_full_fallback | has_error | error_fingerprint 
+-------------------------+-------------------------------+-------------------------------+---------+-----------+------------+----------------+-------------------+-----------+-------------------
+ st_day_category_status  | 2026-10-31 19:12:07.466359+00 | 2026-10-31 19:12:07.46754+00  | NO_DATA | COMPLETED |            |                | f                 | f         | 
+ st_day_category_status  | 2026-10-31 19:12:05.776795+00 | 2026-10-31 19:12:05.77811+00  | NO_DATA | COMPLETED |            |                | f                 | f         | 
+ st_day_category_status  | 2026-10-31 19:12:04.309784+00 | 2026-10-31 19:12:04.311525+00 | NO_DATA | COMPLETED |            |                | f                 | f         | 
+ st_day_category_status  | 2026-10-31 19:12:02.838138+00 | 2026-10-31 19:12:02.840016+00 | NO_DATA | COMPLETED |            |                | f                 | f         | 
+ st_day_category_status  | 2026-10-31 19:12:01.553158+00 | 2026-10-31 19:12:01.554293+00 | NO_DATA | COMPLETED |            |                | f                 | f         | 
+ st_day_product_status   | 2026-10-31 19:12:07.253611+00 | 2026-10-31 19:12:07.254635+00 | NO_DATA | COMPLETED |            |                | f                 | f         | 
+ st_day_product_status   | 2026-10-31 19:12:05.994887+00 | 2026-10-31 19:12:05.996268+00 | NO_DATA | COMPLETED |            |                | f                 | f         | 
+ st_day_product_status   | 2026-10-31 19:12:04.516103+00 | 2026-10-31 19:12:04.51731+00  | NO_DATA | COMPLETED |            |                | f                 | f         | 
+ st_day_product_status   | 2026-10-31 19:12:03.040525+00 | 2026-10-31 19:12:03.041681+00 | NO_DATA | COMPLETED |            |                | f                 | f         | 
+ st_day_product_status   | 2026-10-31 19:12:01.345154+00 | 2026-10-31 19:12:01.346177+00 | NO_DATA | COMPLETED |            |                | f                 | f         | 
+ st_hour_category_status | 2026-10-31 19:12:08.028151+00 | 2026-10-31 19:12:08.030002+00 | NO_DATA | COMPLETED |            |                | f                 | f         | 
+ st_hour_category_status | 2026-10-31 19:12:06.543902+00 | 2026-10-31 19:12:06.54642+00  | NO_DATA | COMPLETED |            |                | f                 | f         | 
+ st_hour_category_status | 2026-10-31 19:12:05.048693+00 | 2026-10-31 19:12:05.04995+00  | NO_DATA | COMPLETED |            |                | f                 | f         | 
+ st_hour_category_status | 2026-10-31 19:12:03.573609+00 | 2026-10-31 19:12:03.574807+00 | NO_DATA | COMPLETED |            |                | f                 | f         | 
+ st_hour_category_status | 2026-10-31 19:12:02.084534+00 | 2026-10-31 19:12:02.085602+00 | NO_DATA | COMPLETED |            |                | f                 | f         | 
+(15 rows)
+
+     backend_type     | count 
+----------------------+-------
+ pg_trickle launcher  |     1
+ pg_trickle scheduler |     1
+(2 rows)
+
+               name               |      setting      
+----------------------------------+-------------------
+ pg_trickle.change_buffer_schema  | pgtrickle_changes
+ pg_trickle.disk_headroom_mb      | 1024
+ pg_trickle.enabled               | on
+ pg_trickle.load_shed_threshold   | 0.8
+ pg_trickle.min_schedule_seconds  | 1
+ pg_trickle.parallel_refresh_mode | on
+ pg_trickle.scheduler_interval_ms | 500
+ pg_trickle.tiered_scheduling     | on
+(8 rows)
+
+  status   | count 
+-----------+-------
+ SUCCEEDED |    72
+(1 row)
+
+ buffers | estimated_pending_rows | accounted_bytes 
+---------+------------------------+-----------------
+       5 |                      5 |          163840
+(1 row)
+
+       check_name       | severity 
+------------------------+----------
+ adaptive_workers       | OK
+ attachment_owner_check | OK
+ buffer_growth          | OK
+ consecutive_errors     | OK
+ disk_forecast          | OK
+ dvm_fallbacks          | OK
+ error_tables           | OK
+ freshness_breach       | OK
+ freshness_evidence     | OK
+ freshness_infeasible   | OK
+ freshness_override     | OK
+ immediate_ivm_triggers | OK
+ job_queue              | OK
+ memory_budget          | OK
+ needs_reinit           | OK
+ publication_bindings   | OK
+ ring_overflow_trend    | OK
+ scheduler_load         | OK
+ scheduler_running      | OK
+ slot_lag               | OK
+ stale_tables           | WARN
+ worker_pool            | OK
+(22 rows)
+
+ tenant_id | orders | seed_orders 
+-----------+--------+-------------
+         1 |   4017 |        4017
+         2 |   2014 |        2014
+         3 |    502 |         502
+         4 |    463 |         463
+         5 |    518 |         518
+         6 |    489 |         489
+         7 |    496 |         496
+         8 |    480 |         480
+         9 |    510 |         510
+        10 |    511 |         511
+(10 rows)
+
+ROLLBACK

@@ -1,0 +1,1 @@
+{"condition": "load_100tps", "samples": 270, "monitor_contract": {"OK": 270}, "severity_mismatches_by_check": {}, "stale_tables_non_ok_pct": {"facade": 88.9, "native": 88.9}, "facade_latency_ms": {"p50": 9.4, "p95": 70.5, "max": 265.0}}
