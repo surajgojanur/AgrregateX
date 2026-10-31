@@ -1,0 +1,118 @@
+/* Drag-to-reveal comparison — shared by the workspace and the landing page. */
+.compare {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  aspect-ratio: 4 / 5;
+  border-radius: var(--r-sm);
+  overflow: hidden;
+  cursor: ew-resize;
+  touch-action: none;
+  user-select: none;
+  background: #f2f0ea;
+  box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.06), 0 24px 60px rgba(0, 0, 0, 0.55);
+}
+
+.compare__img {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.compare__before {
+  position: absolute;
+  inset: 0;
+}
+
+.compare__tag {
+  position: absolute;
+  top: 10px;
+  padding: 3px 7px;
+  border-radius: var(--r-xs);
+  background: rgba(8, 11, 18, 0.85);
+  color: var(--text);
+  font-size: 10.5px;
+  pointer-events: none;
+}
+
+.compare__tag--l { left: 10px; }
+.compare__tag--r { right: 10px; }
+
+.compare__handle {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  margin-left: -1px;
+  background: var(--cyan);
+  box-shadow: 0 0 10px color-mix(in srgb, var(--cyan) 55%, transparent);
+  outline: none;
+  transition: box-shadow 160ms ease;
+}
+
+/* Wider invisible hit area so the divider is easy to grab on touch screens. */
+.compare__handle::before {
+  content: '';
+  position: absolute;
+  inset: 0 -14px;
+}
+
+.compare__grip {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 38px;
+  height: 38px;
+  margin: -19px 0 0 -19px;
+  border-radius: 50%;
+  background: var(--bg);
+  border: 2px solid var(--cyan);
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.45);
+  transition: transform 160ms var(--ease, ease), box-shadow 160ms ease;
+}
+
+.compare__grip::before,
+.compare__grip::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  width: 0;
+  height: 0;
+  margin-top: -5px;
+  border: 5px solid transparent;
+}
+
+.compare__grip::before { left: 4px; border-right-color: var(--cyan); }
+.compare__grip::after { right: 4px; border-left-color: var(--cyan); }
+
+.compare:hover .compare__grip,
+.compare__handle:focus-visible .compare__grip,
+.compare.is-dragging .compare__grip {
+  transform: scale(1.08);
+  box-shadow: 0 0 0 4px color-mix(in srgb, var(--cyan) 22%, transparent), 0 0 18px color-mix(in srgb, var(--cyan) 45%, transparent);
+}
+
+.compare__handle:focus-visible {
+  box-shadow: 0 0 0 2px var(--bg), 0 0 0 4px var(--cyan);
+}
+
+.compare__pos {
+  position: absolute;
+  bottom: 10px;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 2px 6px;
+  border-radius: var(--r-xs);
+  background: rgba(8, 11, 18, 0.85);
+  border: 1px solid color-mix(in srgb, var(--cyan) 45%, transparent);
+  color: var(--cyan);
+  font-size: 10.5px;
+  white-space: nowrap;
+  pointer-events: none;
+}
+
+@media (max-width: 600px) {
+  .compare__tag { font-size: 9.5px; max-width: 44%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+}
