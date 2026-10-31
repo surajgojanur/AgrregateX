@@ -1,0 +1,79 @@
+5 cases: INSERT paid, then 0.3 s later UPDATE -> cancelled (separate commits), fresh day 2026-11-20 tenant 9 products 191..195
+ ?column? | n 
+----------+---
+(0 rows)
+
+ pg_sleep 
+----------
+ 
+(1 row)
+
+waiting 25 s for refreshes
+ pg_sleep 
+----------
+ 
+(1 row)
+
+ side | product_id |  status   | order_count 
+------+------------+-----------+-------------
+ SRC  |        191 | cancelled |           1
+ ST   |        191 | paid      |           1
+ SRC  |        192 | cancelled |           1
+ ST   |        192 | paid      |           1
+ SRC  |        193 | cancelled |           1
+ ST   |        193 | paid      |           1
+ SRC  |        194 | cancelled |           1
+ ST   |        194 | paid      |           1
+ SRC  |        195 | cancelled |           1
+ ST   |        195 | paid      |           1
+(10 rows)
+
+  start_time  |        pgt_name         |    action    | delta_row_count | merge_strategy_used 
+--------------+-------------------------+--------------+-----------------+---------------------
+ 20:55:05.702 | st_day_product_status   | DIFFERENTIAL |               0 | DIFFERENTIAL
+ 20:55:05.909 | st_day_category_status  | DIFFERENTIAL |               0 | DIFFERENTIAL
+ 20:55:06.47  | st_hour_category_status | DIFFERENTIAL |               5 | delete_insert
+ 20:55:08.563 | st_day_product_status   | DIFFERENTIAL |               5 | delete_insert
+ 20:55:10.36  | st_day_category_status  | DIFFERENTIAL |               5 | delete_insert
+ 20:55:12.66  | st_day_product_status   | DIFFERENTIAL |               0 | DIFFERENTIAL
+ 20:55:12.869 | st_hour_category_status | DIFFERENTIAL |               0 | DIFFERENTIAL
+ 20:55:12.89  | st_day_category_status  | DIFFERENTIAL |               0 | DIFFERENTIAL
+ 20:55:13.936 | st_day_product_status   | DIFFERENTIAL |               0 | DIFFERENTIAL
+ 20:55:14.149 | st_day_category_status  | DIFFERENTIAL |               0 | DIFFERENTIAL
+ 20:55:14.174 | st_hour_category_status | DIFFERENTIAL |               0 | DIFFERENTIAL
+ 20:55:15.242 | st_day_product_status   | DIFFERENTIAL |               0 | DIFFERENTIAL
+ 20:55:15.443 | st_day_category_status  | DIFFERENTIAL |               0 | DIFFERENTIAL
+ 20:55:15.473 | st_hour_category_status | DIFFERENTIAL |               0 | DIFFERENTIAL
+ 20:55:16.534 | st_day_product_status   | DIFFERENTIAL |               0 | DIFFERENTIAL
+ 20:55:16.755 | st_day_category_status  | DIFFERENTIAL |               0 | DIFFERENTIAL
+ 20:55:16.829 | st_hour_category_status | DIFFERENTIAL |               0 | DIFFERENTIAL
+ 20:55:17.877 | st_day_product_status   | DIFFERENTIAL |               0 | DIFFERENTIAL
+ 20:55:18.092 | st_day_category_status  | DIFFERENTIAL |               0 | DIFFERENTIAL
+ 20:55:18.161 | st_hour_category_status | DIFFERENTIAL |               0 | DIFFERENTIAL
+ 20:55:19.225 | st_day_product_status   | DIFFERENTIAL |               0 | DIFFERENTIAL
+ 20:55:19.447 | st_day_category_status  | DIFFERENTIAL |               0 | DIFFERENTIAL
+ 20:55:19.522 | st_hour_category_status | DIFFERENTIAL |               0 | DIFFERENTIAL
+ 20:55:20.574 | st_day_product_status   | DIFFERENTIAL |               0 | DIFFERENTIAL
+ 20:55:20.791 | st_day_category_status  | DIFFERENTIAL |               0 | DIFFERENTIAL
+ 20:55:20.815 | st_hour_category_status | DIFFERENTIAL |               0 | DIFFERENTIAL
+ 20:55:21.868 | st_day_product_status   | DIFFERENTIAL |               0 | DIFFERENTIAL
+ 20:55:22.074 | st_day_category_status  | DIFFERENTIAL |               0 | DIFFERENTIAL
+ 20:55:22.64  | st_hour_category_status | DIFFERENTIAL |               0 | DIFFERENTIAL
+ 20:55:23.357 | st_day_product_status   | DIFFERENTIAL |               0 | DIFFERENTIAL
+ 20:55:23.574 | st_day_category_status  | DIFFERENTIAL |               0 | DIFFERENTIAL
+ 20:55:24.165 | st_hour_category_status | DIFFERENTIAL |               0 | DIFFERENTIAL
+ 20:55:24.895 | st_day_category_status  | DIFFERENTIAL |               0 | DIFFERENTIAL
+ 20:55:25.104 | st_day_product_status   | DIFFERENTIAL |               0 | DIFFERENTIAL
+ 20:55:25.642 | st_hour_category_status | DIFFERENTIAL |               0 | DIFFERENTIAL
+ 20:55:26.372 | st_day_product_status   | DIFFERENTIAL |               0 | DIFFERENTIAL
+ 20:55:26.581 | st_day_category_status  | DIFFERENTIAL |               0 | DIFFERENTIAL
+ 20:55:27.127 | st_hour_category_status | DIFFERENTIAL |               0 | DIFFERENTIAL
+ 20:55:27.859 | st_day_category_status  | DIFFERENTIAL |               0 | DIFFERENTIAL
+ 20:55:28.056 | st_day_product_status   | DIFFERENTIAL |               0 | DIFFERENTIAL
+ 20:55:28.595 | st_hour_category_status | DIFFERENTIAL |               0 | DIFFERENTIAL
+ 20:55:29.338 | st_day_category_status  | DIFFERENTIAL |               0 | DIFFERENTIAL
+ 20:55:29.545 | st_day_product_status   | DIFFERENTIAL |               0 | DIFFERENTIAL
+ 20:55:30.082 | st_hour_category_status | DIFFERENTIAL |               0 | DIFFERENTIAL
+ 20:55:30.825 | st_day_category_status  | DIFFERENTIAL |               0 | DIFFERENTIAL
+(45 rows)
+

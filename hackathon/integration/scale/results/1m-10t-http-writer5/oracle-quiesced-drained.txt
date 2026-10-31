@@ -1,0 +1,3 @@
+st_day_product_status 16/31
+st_day_category_status 0/0
+st_hour_category_status 0/0

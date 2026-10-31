@@ -1,0 +1,16 @@
+    k    | status | groups | first_day  |  last_day  
+---------+--------+--------+------------+------------
+ extra   | paid   |     31 | 2026-10-31 | 2026-10-31
+ missing | paid   |     16 | 2026-10-31 | 2026-10-31
+(2 rows)
+
+ status | st_minus_src 
+--------+--------------
+ paid   |           33
+(1 row)
+
+ writer_updated_seed_orders 
+----------------------------
+                        164
+(1 row)
+
