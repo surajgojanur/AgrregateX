@@ -1,5 +1,10 @@
 # Issue #34 — pg_trickle health-check permission (least-privilege repair)
 
+> Historical migration-002 plan: 002 has since been applied, but did not repair
+> the complete health check. Follow the [dependency audit](MONITOR_HEALTH_DEPENDENCIES.md)
+> for current evidence and the blocked migration-003 proposal. Do not reapply 002
+> or infer deployment authorization from this historical runbook.
+
 **Status:** Migration PR only. **NOT APPLIED to the existing Fedora database.** Running any SQL that changes `aggregatex` needs explicit human approval after comparing the diagnostics to this plan. The existing `round1-db` and localhost `8093` dashboard must remain running and unmodified until approval.
 
 ## Root cause supported by the code and recorded Fedora observation

@@ -1,5 +1,16 @@
 # Existing Fedora helper migration
 
+## Pending complete monitoring repair (003)
+
+Migration 002 was applied but health still fails on further catalogs. See
+[the dependency audit](../../docs/MONITOR_HEALTH_DEPENDENCIES.md) before reviewing
+003. All six 003 files contain independent unconditional approval holds. None is
+authorized for the existing database. The backend facade consumer must not be
+deployed before the reviewed facade is installed. Do not run the first-boot role
+script as an upgrade. Snapshot/verifier SQL is read-only in intent but also held
+in this review-only proposal; verifier requires an actual monitor login after
+installation. All include files must accompany the migration.
+
 001_tenant_order_counts.sql installs ONLY the aggregate helper copied from 25_app_roles.sql. Run with psql -X -v ON_ERROR_STOP=1 as postgres in the independently verified aggregatex database. Check the server/port/container identity first; the database-name guard alone is not a server identity check. Existing functions with different body, owner, language, return type, security options or ACLs are rejected. Identical installs are no-ops. Lock timeout 2s; statement timeout 10s; transactional. No source mutations, schema policy changes, new roles or raw-order grants.
 
 Before state: verified API PID689077 uses round1-db via localhost25560/aggregatex. postgres owns FORCE-RLS orders and is the trusted superuser definer; ax_monitor has schema USAGE and no orders SELECT. Helper absent. Source columns tenant_id integer/order_id bigint match. A bounded read-only before/after report includes order checksum, per-tenant counts and all ax policies, retained outside Git in /tmp/ax-shards-{before,after}.txt; reports match exactly.

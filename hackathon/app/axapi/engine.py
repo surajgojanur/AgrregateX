@@ -13,7 +13,7 @@ import threading
 import time
 from datetime import datetime, timezone
 
-from . import db
+from . import db, monitor_health
 
 ST_SCHEMA = "ax"
 
@@ -135,10 +135,7 @@ def snapshot(shard_name: str) -> dict:
                             'pg_trickle.scheduler_interval_ms', 'pg_trickle.differential_max_change_ratio',
                             'pg_trickle.max_dynamic_refresh_workers', 'wal_level')
              ORDER BY name""").fetchall()
-        try:
-            health = c.execute("SELECT check_name, severity, detail FROM pgtrickle.health_check()").fetchall()
-        except Exception as exc:  # noqa: BLE001 - surfaced to the operator, not hidden
-            health = [{"check_name": "health_check", "severity": "UNKNOWN", "detail": str(exc).splitlines()[0]}]
+        health = monitor_health.read_health(c)
     for row in tables:
         row["last_refresh_at"] = _iso(row["last_refresh_at"])
     for row in recent:

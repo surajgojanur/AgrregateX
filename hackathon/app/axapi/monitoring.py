@@ -77,7 +77,7 @@ def collect_shards():
                 fresh = c.execute(engine.FRESHNESS_SQL, {"s": engine.ST_SCHEMA}).fetchall()
             fresh = [{**r, "verified_at": engine._iso(r["verified_at"]),
                       "age_s": float(r["age_s"]) if r["age_s"] is not None else None} for r in fresh]
-            degraded = (not snap["scheduler_running"] or not fresh or
+            degraded = (not snap["scheduler_running"] or not fresh or not snap["health"] or
                         any(t["status"] != "ACTIVE" or t["consecutive_errors"] or
                             t["age_s"] is None or t["age_s"] >= 30 for t in fresh) or
                         any(r["failed"] for r in snap["refresh_stats_5m"]) or
