@@ -28,7 +28,7 @@ Artifacts are written under `benchmarks/results/`. Raw outputs are ignored by Gi
 | FR-7 | Health, live API calls and OpenAPI title/document availability. |
 | G-1 | Full local HTTP request latency, reporting p50/p95/p99/max and failures by query family. A bounded pass is labeled 1M only. |
 | G-2 | Source transaction commit timestamp to observed correct API result for 30 insert/update/cancel observations; report worst elapsed time. |
-| G-3 | Three paired baseline/dashboard-load arms, 720 ordinary reads/writes per arm. Compare mean and p95 for read statement, write statement and full transaction; any metric at or above 10% fails. |
+| G-3 | Eight randomized matched baseline/dashboard-load pairs, 120 mixed ordinary transactions per arm (960 per arm total). Compare statement, COMMIT round-trip and full-transaction p50/p95/p99/max and paired variation; retain actual achieved OLTP/dashboard throughput, failures, CPU, memory, block I/O, WAL, locks and database counters. Score the full mixed workload against the 10% criterion; report operation types and pair-level tails separately. |
 | G-4 | Compare API values with direct PostgreSQL source queries while a `SHARE` lock blocks source writes; compare complete maintained rollup tables against grouped source rows. |
 | G-5 | `growth.py` accepts only matched 1M/10-tenant and 10M/100-tenant artifacts, filters failed requests and compares matched query, tenant role, range and concurrency cases. Without both verified scale artifacts it reports NOT TESTED. |
 

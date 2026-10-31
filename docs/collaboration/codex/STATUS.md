@@ -1,15 +1,15 @@
-# Codex status — Phase 01B
+# Codex status — Phase 01B review fixes
 
 **Status:** DONE — WAITING FOR REVIEW
 **Branch:** `test/prd-benchmark-suite`
-**Scope:** `benchmarks/**`, `docs/BENCHMARK_PLAN.md`, `docs/BENCHMARK_TEST_REPORT.md`, this status/handoff directory.
+**Ownership:** `benchmarks/**`, benchmark-specific docs, and `docs/collaboration/codex/**`.
+**PR:** [#2](https://github.com/surajgojanur/AgrregateX/pull/2)
 **Coordination:** [Issue #1](https://github.com/surajgojanur/AgrregateX/issues/1)
-**Pull request:** [#2](https://github.com/surajgojanur/AgrregateX/pull/2), open and awaiting review.
 
-Implemented a bounded acceptance orchestrator, explicit 10M growth evidence gate, request-error capture, and stable-source correctness oracle. Ran the full bounded suite on 1,000,000 representative orders / 10 tenants. Functional checks: 150/150; HTTP: 720/720, maximum 63.16 ms; API/source comparisons: 65/65; rollup mismatches: zero; freshness: 30/30, worst 0.423 sec; 100 API identities passed. Baseline source and rollup counts were unchanged.
+Changes address explicit fail-closed requirement coverage, exact request/correctness matrices, strict 1M/10M growth comparability, current-run/failure artifacts, and paired G-3 measurement with phase and resource telemetry. The bounded run used the preserved 1M / 10-tenant representative dataset only. No loader, backend, shared schema, Compose or original pg_trickle demo changes were made.
 
-G-3 **failed** in the recorded safety run: full-transaction mean slowdown 42.71% and p95 slowdown 16.75%. An earlier independent run also failed the p95 criterion; report both as evidence of variance, not a speedup. G-5 is **NOT TESTED** because no 10M run was permitted. Official generator compatibility remains NOT VERIFIED.
+Latest bounded results: 163/163 functional assertions passed; 720/720 HTTP requests passed (maximum 78.787 ms); 65 source-oracle comparisons and both full rollup reconciliations had zero mismatches; 30 freshness observations passed (worst 0.216 seconds); 100 API identities and 9,900 cross-identity rejection pairs passed. Source/rollup baseline remained unchanged.
 
-No loader, shared schema/API, Compose, generator or database-volume changes were made. No container restarts were performed.
+G-3 is **FAIL**: 8 randomized pairs, 960 operations per arm, no HTTP errors, achieved target rates, and telemetry captured. Mixed transaction mean slowdown was +5.84%; pooled p95 slowdown was +50.59%, and median paired p95 slowdown was +25.13%. G-5 is **NOT TESTED**: no 10M dataset was run. Official dataset compatibility remains **NOT VERIFIED**.
 
-See [BENCHMARK_TEST_REPORT.md](../../BENCHMARK_TEST_REPORT.md) for detailed measurements and limitations.
+See [BENCHMARK_TEST_REPORT.md](../../BENCHMARK_TEST_REPORT.md) for full measurements and limitations.
