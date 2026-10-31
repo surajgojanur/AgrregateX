@@ -42,6 +42,8 @@ ap.add_argument("--seconds", type=int, default=35)
 ap.add_argument("--warmup", type=int, default=5)
 ap.add_argument("--clients", type=int, default=4)
 ap.add_argument("--http-rate", type=float, default=20.0, help="fixed offered dashboard requests/s in arm B")
+ap.add_argument("--oltp-rate", type=float, default=0.0,
+                help="fixed offered OLTP transactions/s (pgbench -R); 0 = unthrottled (saturating)")
 ap.add_argument("--seed", type=int, default=int(time.time()))
 ap.add_argument("--out", required=True)
 ap.add_argument("--orders", type=int, default=10000, help="seed size (for ax_nost) - must match the shard")
@@ -208,6 +210,7 @@ def run_arm(pair, arm, op):
     t_start = time.time()
     pb = subprocess.run(["pgbench", "-h", "127.0.0.1", "-p", str(args.port), "-U", "postgres", "-n",
                          "-c", str(args.clients), "-j", "2", "-T", str(args.seconds), "-f", WORKLOAD,
+                         *(["-R", str(args.oltp_rate)] if args.oltp_rate > 0 else []),
                          "-l", "--log-prefix", prefix, db], capture_output=True, text=True, env=ENV, cwd=tmp)
     t_end = time.time()
     if ht:
@@ -238,6 +241,7 @@ def run_arm(pair, arm, op):
         "pair": pair, "arm": arm, "db": db, "start": t_start, "seconds_measured": round(meas_s, 1),
         "pgbench_exit": pb.returncode, "pgbench_failed_line": next((l for l in pb.stdout.splitlines() if "failed" in l), ""),
         "tps": round(len(lat) / meas_s, 1) if meas_s > 0 else None,
+        "oltp_offered_tps": args.oltp_rate or None,
         "lat_ms": {"p50": pct(lat, .5), "p95": pct(lat, .95), "p99": pct(lat, .99), "mean": round(statistics.mean(lat), 3) if lat else None},
         "http": None if arm != "B" else {
             "offered_rps": args.http_rate, "achieved_rps": round(len(http) / args.seconds, 1),
