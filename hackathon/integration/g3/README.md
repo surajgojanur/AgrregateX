@@ -14,7 +14,7 @@ This harness measures it with matched, randomised arms on **one** disposable sha
 
 **Method**
 - **Ordering:** each pair runs A, B and C in a random order (seed recorded in `meta.json`).
-- **Per arm:** one `pgbench` run of `--clients` clients for `--seconds`. Per-transaction logs give p50/p95/p99; the first `--warmup` seconds are discarded.
+- **Per arm:** one `pgbench` run of `--clients` clients for `--seconds`. `--oltp-rate N` fixes the offered OLTP rate (`pgbench -R`); with a fixed rate, the G3 signal is **latency** (p50/p95/p99, measured from the scheduled start, so queueing counts) rather than throughput. Per-transaction logs give p50/p95/p99; the first `--warmup` seconds are discarded.
 - **Reset:** between arms, pgbench's inserted rows (`order_id >= 300,000,000`) are deleted and vacuumed. For `aggregatex` the harness then waits until the CDC backlog has drained and refreshes are current.
 - **Sampled every 2 s:** lock waits, CDC backlog and refresh age. Per arm also: the refresh-history actions, fallbacks and failures in the window, container CPU/RAM at mid-arm, and **commit→visible probes** (insert + cancel via `/live-write`, tenant 3) in arms A and B.
 - **HTTP:** offered vs achieved rate, status counts and errors, latency p50/p95/p99 (successful requests only).
