@@ -83,6 +83,7 @@ export const api = {
   liveWrite: (t, body) => request(`${T(t)}/live-write`, { method: 'POST', body }),
   engine: (shard, signal) => request(`/engine${shard ? `?shard=${encodeURIComponent(shard)}` : ''}`, { signal }),
   shards: (signal) => request('/shards', { signal }),
+  limits: (signal) => request('/limits', { signal }),
 
   // ── legacy Revelio endpoints (no longer served) ──
   me: () => request('/auth/me'),

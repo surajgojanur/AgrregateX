@@ -54,3 +54,12 @@ Set `AX_SHARDS="a=host:port,b=host:port"` and `AX_SHARD_DIRECTORY=<directory.jso
 owning shard and returns **503** (no cross-shard fallback) when that shard is unreachable. The demo stack is
 `compose.sharded.yaml` (port 8091). Design, failure semantics, runbook and measured results:
 `../docs/handoffs/opus-sharding.md`.
+
+## Bonus features (B-1, B-2, B-3)
+| | What | How to use / verify |
+|---|---|---|
+| **B-1** freshness in every response | Every analytics response (`summary`, `trends`, `top-products`, `breakdown`) carries `freshness: {verified_at, age_s, healthy}`. `verified_at` is the **oldest** stream table's last completed refresh (any action, including no-change ticks), so every number is at least that fresh. Cached ≤ 1 s per shard. The dashboard shows "Updated N s ago" (amber beyond 30 s). | `curl …/api/tenants/2/summary` → `.freshness` |
+| **B-2** rebuild from scratch | Operator CLI, **not** a web endpoint: pg_trickle only lets the stream-table owner reinitialize (it checks the session's outer user), and the API must not hold superuser credentials. It reinitializes all 3 stream tables per shard (a protected full recompute from source), waits for the completed rebuild, then requires `ax.oracle_mismatches()` 0/0. Exit 0 only if rebuilt **and** verified. | `docker compose -f compose.sharded.yaml exec -e AX_DB_SUPERUSER_PASSWORD=… api python -m axapi.rebuild --shard all` (single-DB stack: same, with `compose.yaml`) |
+| **B-3** per-tenant heavy-query limit | At most `AX_TENANT_MAX_CONCURRENT` (default 4) concurrent analytics queries per tenant. A request waits ≤ `AX_TENANT_QUEUE_WAIT_S` (0.25 s) for a slot, otherwise **429** + `Retry-After: 1`. Other tenants keep their own slots. Counters at operator `GET /api/limits`, also shown on the Engine page. Scope: per API process (one uvicorn worker in the demo). | `GET /api/limits` |
+
+Unit tests (no database): `cd hackathon/app && python -m unittest tests.test_bonus -v` → 7 tests (needs `fastapi httpx psycopg[binary,pool]`).
