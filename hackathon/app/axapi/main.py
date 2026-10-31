@@ -40,6 +40,10 @@ async def unhandled(_req: Request, exc: Exception):  # never leak SQL/stack trac
     return JSONResponse({"detail": "Internal error."}, status_code=500)
 
 
+from .monitoring import install as install_monitoring
+install_monitoring(app)
+
+
 # ── window parsing ──────────────────────────────────────────────────────────
 def _parse(value: str | None, default: datetime) -> datetime:
     if not value:

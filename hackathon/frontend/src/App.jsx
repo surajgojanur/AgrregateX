@@ -13,11 +13,13 @@ import './pages/dashboard.css'
 
 const Dashboard = lazy(() => import('./pages/Dashboard'))
 const Engine = lazy(() => import('./pages/Engine'))
+const Monitoring = lazy(() => import('./pages/Monitoring'))
 const Shards = lazy(() => import('./pages/Shards'))
 
 const TITLES = {
   dashboard: ['Tenant analytics', 'Dashboard'],
   engine: ['pg_trickle internals', 'Engine'],
+  monitoring: ['Live observability', 'Monitoring'],
   shards: ['Tenant router', 'Shards'],
 }
 
@@ -45,7 +47,7 @@ function Shell({ user }) {
         <Topbar title={title} eyebrow={eyebrow} onMenu={() => setNavOpen(true)} />
         <main id="main" className="content" key={page}>
           <Suspense fallback={<PageFallback />}>
-            {page === 'engine' ? <Engine /> : page === 'shards' ? <Shards /> : <Dashboard params={route.params} />}
+            {page === 'monitoring' ? <Monitoring /> : page === 'engine' ? <Engine /> : page === 'shards' ? <Shards /> : <Dashboard params={route.params} />}
           </Suspense>
         </main>
         <footer className="app__foot">
