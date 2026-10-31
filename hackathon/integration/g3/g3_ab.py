@@ -304,7 +304,13 @@ def main():
     for p in range(1, args.pairs + 1):
         order = ["A", "B", "C"]
         rng.shuffle(order)
-        meta.setdefault("fixture_per_pair", {})[p] = sync_fixture()
+        # Pause the demo writer for the 1-2 s copy so both fingerprints come from one state
+        # (the first matched run aborted at pair 3 on a 1-row race: 5,392 vs 5,391).
+        subprocess.run(["docker", "stop", f"{args.project}-writer-1"], capture_output=True)
+        try:
+            meta.setdefault("fixture_per_pair", {})[p] = sync_fixture()
+        finally:
+            subprocess.run(["docker", "start", f"{args.project}-writer-1"], capture_output=True)
         json.dump(meta, open(os.path.join(args.out, "meta.json"), "w"), indent=1)
         for arm in order:
             results.append(run_arm(p, arm, op))

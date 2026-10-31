@@ -1,0 +1,16 @@
+pair 1 arm B: tps=192.5 p50=2.66 p95=6.61 p99=10.72 http=(20.0, 0, 7.65) backlog_max=20888 age_max=66.1 probes=[('insert', None), ('cancel', 26356.7)]
+pair 1 arm A: tps=198.2 p50=2.85 p95=6.91 p99=11.46 http=None backlog_max=16588 age_max=59.9 probes=[('insert', None), ('cancel', None)]
+pair 1 arm C: tps=192.2 p50=2.9 p95=11.14 p99=123.78 http=None backlog_max=0 age_max=None probes=[]
+pair 2 arm A: tps=196.5 p50=2.94 p95=7.67 p99=36.4 http=None backlog_max=15963 age_max=60.5 probes=[('insert', None), ('cancel', None)]
+pair 2 arm C: tps=192.1 p50=2.84 p95=7.11 p99=20.16 http=None backlog_max=0 age_max=None probes=[]
+pair 2 arm B: tps=197.2 p50=2.75 p95=7.07 p99=14.63 http=(20.0, 0, 10.25) backlog_max=21053 age_max=67.7 probes=[('insert', None), ('cancel', None)]
+Traceback (most recent call last):
+  File "/Users/shridharbhat/Downloads/mitigata/AgrregateX-final/hackathon/integration/g3/g3_ab.py", line 345, in <module>
+    main()
+    ~~~~^^
+  File "/Users/shridharbhat/Downloads/mitigata/AgrregateX-final/hackathon/integration/g3/g3_ab.py", line 307, in main
+    meta.setdefault("fixture_per_pair", {})[p] = sync_fixture()
+                                                 ~~~~~~~~~~~~^^
+  File "/Users/shridharbhat/Downloads/mitigata/AgrregateX-final/hackathon/integration/g3/g3_ab.py", line 110, in sync_fixture
+    raise RuntimeError(f"fixture mismatch after sync: aggregatex={a} ax_nost={c}")
+RuntimeError: fixture mismatch after sync: aggregatex=5392:36a44f822fffad202c3c357d8db58629 ax_nost=5391:dcf3e559f28b3933dda4182c3a3b326f
