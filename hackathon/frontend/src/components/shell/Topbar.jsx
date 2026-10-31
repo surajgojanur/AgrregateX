@@ -2,7 +2,6 @@ import { useEffect, useRef, useState } from 'react'
 import { relativeTime } from '../../lib/format'
 import { useApp } from '../../state/AppContext'
 import { LogoMark } from '../brand/Logo'
-import CaseClock from '../ui/CaseClock'
 import Icon from '../ui/Icon'
 import ThemeToggle from '../ui/ThemeToggle'
 
@@ -89,8 +88,6 @@ const Topbar = ({ title, eyebrow, onMenu }) => {
           <span className={`dot ${health ? 'dot--ok' : 'dot--err'}`} />
           <span className="mono">{health ? 'LIVE' : 'OFFLINE'}</span>
         </div>
-
-        <CaseClock />
 
         <ThemeToggle className="btn btn--ghost btn--icon theme-toggle" />
 

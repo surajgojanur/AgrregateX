@@ -6,39 +6,23 @@ import { initializeTheme } from './lib/theme'
 /* eslint-disable react-refresh/only-export-components -- entry file, not a component module */
 
 // Entry points, one Vite build:
-//   /                   → marketing landing page
-//   /login, /register   → local account pages
-//   /app                → the Revelio workspace (requires a login; uses #/hash routes internally)
+//   /                   -> landing page (the problem and how AggregateX answers it)
+//   /login              -> demo sign-in (skipped by the API when login is disabled)
+//   /app                -> tenant analytics dashboard (#/dashboard, #/shards, #/engine)
 const App = lazy(() => import('./App.jsx'))
 const LandingPage = lazy(() => import('./landing/LandingPage.jsx'))
 const AuthPage = lazy(() => import('./auth/AuthPage.jsx'))
 
-// One-time carry-over of browser storage saved before the project was renamed.
-try {
-  for (const k of ['draft', 'prefs']) {
-    const old = window.localStorage.getItem(`verisketch.${k}`)
-    if (old != null && window.localStorage.getItem(`revelio.${k}`) == null) window.localStorage.setItem(`revelio.${k}`, old)
-  }
-} catch {
-  /* storage unavailable */
-}
-
 initializeTheme()
 
-const { pathname, hash, search } = window.location
-
-// Old bookmarks such as /#/library belonged to the workspace: keep them working.
-if ((pathname === '/' || pathname === '') && hash.startsWith('#/')) {
-  window.location.replace(`/app${search}${hash}`)
-}
-
+const { pathname } = window.location
 const isApp = pathname === '/app' || pathname.startsWith('/app/')
-const authMode = { '/login': 'login', '/register': 'register' }[pathname.replace(/\/$/, '')]
-document.title = isApp ? 'AgrregateX — Tenant Analytics' : 'AgrregateX — Multi-tenant analytics on pg_trickle'
+const isAuth = ['/login', '/register'].includes(pathname.replace(/\/$/, ''))
+document.title = isApp ? 'AggregateX — Tenant Analytics' : isAuth ? 'Sign in — AggregateX' : 'AggregateX — Multi-tenant analytics'
 
 let page = <LandingPage />
 if (isApp) page = <App />
-else if (authMode) page = <AuthPage mode={authMode} />
+else if (isAuth) page = <AuthPage />
 
 createRoot(document.getElementById('root')).render(
   <StrictMode>
