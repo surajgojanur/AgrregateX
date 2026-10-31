@@ -3,7 +3,6 @@ import { api } from './api/client'
 import Sidebar from './components/shell/Sidebar'
 import Toasts from './components/shell/Toasts'
 import Topbar from './components/shell/Topbar'
-import { loginUrl } from './lib/auth'
 import { NAV } from './lib/nav'
 import { useRoute } from './lib/router'
 import { AppProvider } from './state/AppContext'
@@ -13,11 +12,13 @@ import './pages/dashboard.css'
 
 const Dashboard = lazy(() => import('./pages/Dashboard'))
 const Engine = lazy(() => import('./pages/Engine'))
+const Monitoring = lazy(() => import('./pages/Monitoring'))
 const Shards = lazy(() => import('./pages/Shards'))
 
 const TITLES = {
   dashboard: ['Tenant analytics', 'Dashboard'],
   engine: ['pg_trickle internals', 'Engine'],
+  monitoring: ['Live observability', 'Live Monitoring'],
   shards: ['Tenant router', 'Shards'],
 }
 
@@ -45,7 +46,7 @@ function Shell({ user }) {
         <Topbar title={title} eyebrow={eyebrow} onMenu={() => setNavOpen(true)} />
         <main id="main" className="content" key={page}>
           <Suspense fallback={<PageFallback />}>
-            {page === 'engine' ? <Engine /> : page === 'shards' ? <Shards /> : <Dashboard params={route.params} />}
+            {page === 'monitoring' ? <Monitoring /> : page === 'engine' ? <Engine /> : page === 'shards' ? <Shards /> : <Dashboard params={route.params} />}
           </Suspense>
         </main>
         <footer className="app__foot">
@@ -65,16 +66,15 @@ export default function App() {
     api.me()
       .then((r) => setAuth({ checked: true, user: r.user }))
       .catch((err) => {
-        if (err.status === 401) window.location.replace(loginUrl())
-        else setAuth({ checked: true, user: null, error: err.message })
+        setAuth({ checked: true, user: null, error: err.status === 401 ? 'Restricted access. This deployment requires an authorized session. For a local demonstration, use the explicit localhost demo launcher.' : err.message })
       })
   }, [])
 
-  if (!auth.checked) return null
+  if (!auth.checked) return <p role="status">Connecting to AgrregateX…</p>
   if (!auth.user) {
     return (
       <div className="engine-offline panel" role="alert">
-        <h2>API unavailable</h2>
+        <h2>Workspace unavailable</h2>
         <p>{auth.error}</p>
         <button className="btn" onClick={() => window.location.reload()}>Retry</button>
       </div>

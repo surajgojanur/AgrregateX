@@ -67,7 +67,7 @@ export default function LandingPage() {
         </nav>
         <div className="ax-land__nav-right">
           <ThemeToggle className="btn btn--ghost btn--icon" />
-          <a className="btn btn--primary btn--sm" href="/app">Open dashboard</a>
+          <a className="btn btn--primary btn--sm" href="/app#/dashboard">OPEN DASHBOARD</a>
         </div>
       </header>
 
@@ -82,8 +82,8 @@ export default function LandingPage() {
               summary rows instead of scanning millions of orders.
             </p>
             <div className="ax-land__cta">
-              <a className="btn btn--primary" href="/app">Open the dashboard</a>
-              <a className="btn btn--ghost" href="#architecture">How it works</a>
+              <a className="btn btn--primary" href="/app#/dashboard">OPEN DASHBOARD</a>
+              <a className="btn btn--ghost" href="/app#/monitoring">LIVE MONITORING</a>
             </div>
           </div>
           <ul className="ax-land__questions" aria-label="Questions store owners ask">

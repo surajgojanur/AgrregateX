@@ -24,44 +24,8 @@ function useDismiss(open, setOpen, ref) {
   }, [open, setOpen, ref])
 }
 
-const initials = (name) => name.split(' ').filter(Boolean).slice(0, 2).map((w) => w[0].toUpperCase()).join('')
-
-function AccountMenu({ user, onLogout }) {
-  const [open, setOpen] = useState(false)
-  const [busy, setBusy] = useState(false)
-  const ref = useRef(null)
-  useDismiss(open, setOpen, ref)
-
-  return (
-    <div className="account" ref={ref}>
-      <button type="button" className="btn btn--ghost account__btn" onClick={() => setOpen((v) => !v)}
-        aria-expanded={open} aria-haspopup="true" aria-label={`Account: ${user.name}`}>
-        <span className="account__avatar mono" aria-hidden="true">{initials(user.name) || '?'}</span>
-      </button>
-      {open && (
-        <div className="account__panel panel" role="dialog" aria-label="Account">
-          <div className="account__who">
-            <span className="account__avatar account__avatar--lg mono" aria-hidden="true">{initials(user.name) || '?'}</span>
-            <div>
-              <strong>{user.name}</strong>
-              <span className="mono faint">{user.email}</span>
-            </div>
-          </div>
-          <p className="account__note faint">Demo session (HttpOnly cookie). Data access is enforced again in the database by row-level security.</p>
-          <div className="account__foot">
-            <button type="button" className="btn btn--ghost btn--sm" disabled={busy}
-              onClick={() => { setBusy(true); onLogout() }}>
-              {busy ? <span className="spinner" /> : <Icon name="logout" />} Log out
-            </button>
-          </div>
-        </div>
-      )}
-    </div>
-  )
-}
-
 const Topbar = ({ title, eyebrow, onMenu }) => {
-  const { notifications, clearNotifications, health, user, logout } = useApp()
+  const { notifications, clearNotifications, health, user } = useApp()
   const [open, setOpen] = useState(false)
   const ref = useRef(null)
   useDismiss(open, setOpen, ref)
@@ -79,7 +43,7 @@ const Topbar = ({ title, eyebrow, onMenu }) => {
       </div>
 
       <div className="topbar__right">
-        <div className="case-chip is-active" title="Signed-in scope">
+        <div className="case-chip is-active" title="Data scope">
           <span className="label">Scope</span>
           <span className="mono case-chip__id">{user?.role === 'admin' ? 'ALL TENANTS (OPERATOR)' : `TENANT ${user?.tenant_id}`}</span>
         </div>
@@ -133,7 +97,7 @@ const Topbar = ({ title, eyebrow, onMenu }) => {
           )}
         </div>
 
-        {user && <AccountMenu user={user} onLogout={logout} />}
+
       </div>
     </header>
   )

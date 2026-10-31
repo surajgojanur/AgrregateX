@@ -240,6 +240,10 @@ async def shards(_admin: auth.User = Depends(auth.require_admin)):
     return await run_in_threadpool(engine.shards_overview)
 
 
+from .monitoring import install as install_monitoring
+install_monitoring(app)
+
+
 @app.api_route("/api/{rest:path}", methods=["GET", "POST", "PUT", "PATCH", "DELETE"])
 def api_not_found(rest: str):
     raise HTTPException(404, "Not found.")
@@ -249,16 +253,12 @@ def api_not_found(rest: str):
 if config.STATIC_DIR and Path(config.STATIC_DIR, "index.html").is_file():
     _index = Path(config.STATIC_DIR, "index.html")
 
-    if config.AUTH_DISABLED:  # no login: land directly on the dashboard
-        @app.get("/", include_in_schema=False)
-        @app.get("/login", include_in_schema=False)
-        @app.get("/register", include_in_schema=False)
-        def to_dashboard():
-            return RedirectResponse("/app#/dashboard", status_code=307)
-
-    @app.get("/app", include_in_schema=False)
     @app.get("/login", include_in_schema=False)
     @app.get("/register", include_in_schema=False)
+    def legacy_auth_redirect():
+        return RedirectResponse("/", status_code=307)
+
+    @app.get("/app", include_in_schema=False)
     def spa_entry():
         return FileResponse(_index)
 

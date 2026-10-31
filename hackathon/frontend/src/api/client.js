@@ -1,6 +1,6 @@
 // Thin client for the AggregateX API (hackathon/app). The session is an HttpOnly cookie
 // that page scripts cannot read; tenant scoping is enforced by the API and by database RLS.
-import { loginUrl } from '../lib/auth.js'
+
 
 const BASE = (import.meta.env?.VITE_API_BASE || '/api').replace(/\/$/, '')
 
@@ -30,10 +30,6 @@ async function request(path, { method = 'GET', body, signal } = {}) {
     throw new ApiError(0, 'The AggregateX API is not reachable.')
   }
   if (!res.ok) {
-    // Session expired: send the dashboard back to the login page.
-    if (res.status === 401 && !path.startsWith('/auth/') && window.location.pathname.startsWith('/app')) {
-      window.location.assign(loginUrl())
-    }
     let data = {}
     try {
       data = await res.json()
@@ -57,6 +53,7 @@ export const query = (params = {}) => {
 const T = (id) => `/tenants/${encodeURIComponent(id)}`
 
 export const api = {
+  monitoring: (signal) => request('/monitoring', { signal }),
   me: () => request('/auth/me'),
   login: (email, password) => request('/auth/login', { method: 'POST', body: { email, password } }),
   logout: () => request('/auth/logout', { method: 'POST' }),
