@@ -1,0 +1,50 @@
+{"orders_rls" : true, "orders_force_rls" : true}
+CREATE OR REPLACE FUNCTION pgtrickle_changes.pg_trickle_cdc_upd_fn_daaaeeb1fdc57e97()
+ RETURNS trigger
+ LANGUAGE plpgsql
+ SECURITY DEFINER
+ SET search_path TO 'pgtrickle_changes', 'pgtrickle', 'pg_catalog', 'pg_temp'
+AS $function$
+         DECLARE
+             statement_lsn PG_LSN := pg_current_wal_insert_lsn();
+             trace_context TEXT := NULLIF(current_setting('pg_trickle.trace_id', true), '');
+         BEGIN
+             -- A07: discard mode is lossy; hold mode keeps capture active.
+             IF (current_setting('pg_trickle.cdc_paused', true) = 'on'
+                 AND current_setting('pg_trickle.cdc_capture_mode', true)
+                     IS DISTINCT FROM 'hold') THEN
+                 RETURN NULL;
+             END IF;
+             -- Pair stable keys and PK-changing UPDATEs once, then emit D before I.
+             WITH pair_rows AS MATERIALIZED (
+                 SELECT n AS __pgt_new_row, o AS __pgt_old_row,
+                        (n."tenant_id" IS NOT NULL) AS __pgt_new_present,
+                        (o."tenant_id" IS NOT NULL) AS __pgt_old_present,
+                        (CASE WHEN o."tenant_id" IS NOT NULL THEN pgtrickle.encode_row_id_v3('SCAN_KEY', ROW(o."tenant_id", o."order_id")) ELSE pgtrickle.encode_row_id_v3('SCAN_KEY', ROW(n."tenant_id", n."order_id")) END) AS __pgt_row_id,
+                        (CASE WHEN n."tenant_id" IS NOT NULL AND o."tenant_id" IS NOT NULL THEN ((CASE WHEN n."tenant_id" IS DISTINCT FROM o."tenant_id" THEN B'1' ELSE B'0' END)::varbit ||
+		        (CASE WHEN n."order_id" IS DISTINCT FROM o."order_id" THEN B'1' ELSE B'0' END)::varbit ||
+		        (CASE WHEN n."customer_id" IS DISTINCT FROM o."customer_id" THEN B'1' ELSE B'0' END)::varbit ||
+		        (CASE WHEN n."product_id" IS DISTINCT FROM o."product_id" THEN B'1' ELSE B'0' END)::varbit ||
+		        (CASE WHEN n."status" IS DISTINCT FROM o."status" THEN B'1' ELSE B'0' END)::varbit ||
+		        (CASE WHEN n."quantity" IS DISTINCT FROM o."quantity" THEN B'1' ELSE B'0' END)::varbit ||
+		        (CASE WHEN n."unit_price_cents" IS DISTINCT FROM o."unit_price_cents" THEN B'1' ELSE B'0' END)::varbit ||
+		        (CASE WHEN n."created_at" IS DISTINCT FROM o."created_at" THEN B'1' ELSE B'0' END)::varbit ||
+		        (CASE WHEN n."updated_at" IS DISTINCT FROM o."updated_at" THEN B'1' ELSE B'0' END)::varbit ||
+		        (CASE WHEN n."utc_day" IS DISTINCT FROM o."utc_day" THEN B'1' ELSE B'0' END)::varbit ||
+		        (CASE WHEN n."utc_hour" IS DISTINCT FROM o."utc_hour" THEN B'1' ELSE B'0' END)::varbit ||
+		        (CASE WHEN n."line_cents" IS DISTINCT FROM o."line_cents" THEN B'1' ELSE B'0' END)::varbit) END) AS changed_cols
+                 FROM __pgt_new n FULL JOIN __pgt_old o ON n."tenant_id" = o."tenant_id" AND n."order_id" = o."order_id"
+             )
+             INSERT INTO pgtrickle_changes.changes_daaaeeb1fdc57e97
+                 (lsn, action, __pgt_row_id, changed_cols, "tenant_id", "order_id", "customer_id", "product_id", "status", "quantity", "unit_price_cents", "created_at", "updated_at", "utc_day", "utc_hour", "line_cents", __pgt_trace_context)
+             SELECT statement_lsn, 'D', p.__pgt_row_id, p.changed_cols, (p.__pgt_old_row)."tenant_id", (p.__pgt_old_row)."order_id", (p.__pgt_old_row)."customer_id", (p.__pgt_old_row)."product_id", (p.__pgt_old_row)."status", (p.__pgt_old_row)."quantity", (p.__pgt_old_row)."unit_price_cents", (p.__pgt_old_row)."created_at", (p.__pgt_old_row)."updated_at", (p.__pgt_old_row)."utc_day", (p.__pgt_old_row)."utc_hour", (p.__pgt_old_row)."line_cents", trace_context
+             FROM pair_rows p
+             WHERE p.__pgt_old_present
+             UNION ALL
+             SELECT statement_lsn, 'I', p.__pgt_row_id, p.changed_cols, (p.__pgt_new_row)."tenant_id", (p.__pgt_new_row)."order_id", (p.__pgt_new_row)."customer_id", (p.__pgt_new_row)."product_id", (p.__pgt_new_row)."status", (p.__pgt_new_row)."quantity", (p.__pgt_new_row)."unit_price_cents", (p.__pgt_new_row)."created_at", (p.__pgt_new_row)."updated_at", (p.__pgt_new_row)."utc_day", (p.__pgt_new_row)."utc_hour", (p.__pgt_new_row)."line_cents", trace_context
+             FROM pair_rows p
+             WHERE p.__pgt_new_present;
+             PERFORM pg_notify('pgtrickle_wake', '');
+             RETURN NULL;
+         END;
+         $function$

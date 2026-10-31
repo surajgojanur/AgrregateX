@@ -1,0 +1,67 @@
+{
+  "release_tag": "v0.108.3",
+  "release_commit": "ce709f06327b4801f79fc48934bc96107b450907",
+  "main_sha": "c19b89a24370d29412fc42c250a86b0ea68f791f",
+  "runtime_so_sha256": "7d22f093dc0841d06f0738f32ba93f06213279e6a66994dfe1bdda8cfa84b1bf",
+  "runtime_version_label": "0.108.3",
+  "oci_revision_label": "absent",
+  "binary_fragments": {
+    "rn_asc > 1 AND rn_desc > 1": [
+      "u WHERE action IN ('I', 'D')) __pgt_ranked WHERE (first_act = 'I' AND last_act = 'D') OR (rn_asc > 1 AND rn_desc > 1))",
+      "c'::pg_lsn) __pgt_ranked WHERE (first_act = 'I' AND last_act = 'D') OR (rn_asc > 1 AND rn_desc > 1))",
+      "c'::pg_lsn) __pgt_ranked WHERE (first_act = 'I' AND last_act = 'D') OR (rn_asc > 1 AND rn_desc > 1))"
+    ],
+    "first_act = 'I' AND last_act = 'D'": [
+      "u WHERE action IN ('I', 'D')) __pgt_ranked WHERE (first_act = 'I' AND last_act = 'D') OR (rn_asc > 1 AND rn_desc > 1))",
+      "c'::pg_lsn) __pgt_ranked WHERE (first_act = 'I' AND last_act = 'D') OR (rn_asc > 1 AND rn_desc > 1))",
+      "c'::pg_lsn) __pgt_ranked WHERE (first_act = 'I' AND last_act = 'D') OR (rn_asc > 1 AND rn_desc > 1))"
+    ],
+    "SUM(CASE WHEN c.action": [
+      "\"SUM(CASE WHEN c.action = 'D' THEN ",
+      "#SUM(CASE WHEN c.action = 'D' THEN (",
+      "!SUM(CASE WHEN c.action = 'I' AND "
+    ],
+    "source_visibility_key": [
+      "_RNvNtCs5OAiuAqYkb9_10pg_trickle7refresh21source_visibility_key"
+    ]
+  },
+  "files": [
+    {
+      "path": "src/refresh/delta_stage.rs",
+      "release_sha256": "2e8f74250d673214e05ff9535f4ad56109824254634193e6800eb5f50e808c65",
+      "main_sha256": "2e8f74250d673214e05ff9535f4ad56109824254634193e6800eb5f50e808c65",
+      "identical": true
+    },
+    {
+      "path": "src/cdc/mod.rs",
+      "release_sha256": "3c78d443c8e4249300ba93bd64c701b266ed95baeb16f8bfc7609204bc49c20b",
+      "main_sha256": "a53e8dc17aad5f8104546f2dd833e8cbcd9e927a0bd78f56d293b0dbd69d87d4",
+      "identical": false
+    },
+    {
+      "path": "src/dvm/operators/scan.rs",
+      "release_sha256": "a7a39e124dfede57f20a5e0aeb696161e45b7b1a537b2120b743e9aeae34fea0",
+      "main_sha256": "be17863be75b9a7f87b713c4e7418c9ddfe230dd55791400db9da6d51dfcc543",
+      "identical": false
+    },
+    {
+      "path": "src/dvm/operators/aggregate.rs",
+      "release_sha256": "663956e68529b3b4c5375e72d098b383867faff50888c3bcfe98a59d510aa2d9",
+      "main_sha256": "a88914eb6f51a037f9eeb8693659019752bec4a3a49423b8652dff401a4c72c8",
+      "identical": false
+    },
+    {
+      "path": "src/refresh/merge/mod.rs",
+      "release_sha256": "d486a330bff5e12147e4b13dd294d15b7edfc3c6a925e196c1c2ea89d37f9914",
+      "main_sha256": "1e2ed3fae5f6341c8b86b3fd14e6e4e41eb99bdf5cef12f60778b8db3635807f",
+      "identical": false
+    },
+    {
+      "path": "src/refresh/codegen.rs",
+      "release_sha256": "905332fb6a3ee8035c10fe84ad556daf8fbdcc9a2b915a7359ac8d4199b80c29",
+      "main_sha256": "97402754987c03426db6c31d13ecb772f7ca4302f70a1c23d55d08f37e46f508",
+      "identical": false
+    }
+  ],
+  "limitation": "Release source available; exact whole-binary build commit unproven. Relevant defective reducer text is embedded in binary; source delta_stage identical release/main."
+}
