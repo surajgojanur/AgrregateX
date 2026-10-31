@@ -27,6 +27,9 @@ CREATE POLICY tenant_write ON ax.orders FOR ALL TO ax_writer
 GRANT pg_monitor TO ax_monitor;
 GRANT USAGE ON SCHEMA pgtrickle, ax TO ax_monitor;
 GRANT SELECT ON pgtrickle.pgt_stream_tables, pgtrickle.pgt_refresh_history TO ax_monitor;
+-- pgtrickle.health_check() reads this catalog-only view. This does NOT grant
+-- raw tenant fact rows; the view is built from pgtrickle.pgt_stream_tables.
+GRANT SELECT ON pgtrickle.stream_tables_info TO ax_monitor;
 GRANT SELECT ON ax.tenants TO ax_monitor;
 
 -- Aggregate-only order counts for the operator /api/shards view: ax_monitor never reads order

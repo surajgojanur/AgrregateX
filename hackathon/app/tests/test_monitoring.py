@@ -59,5 +59,36 @@ class MonitoringTests(unittest.TestCase):
         self.assertEqual([s["state"] for s in out["shards"]], ["unavailable", "degraded"])
 
 
+    def test_unknown_health_check_keeps_shard_degraded(self):
+        # Database permission failures must NOT be rendered as a healthy shard.
+        from axapi import db, engine
+        from types import SimpleNamespace
+        healthy_refresh = [{"name": "st_day_product_status", "status": "ACTIVE",
+                            "consecutive_errors": 0, "age_s": 0.5, "verified_at": None}]
+        snap = {"scheduler_running": True, "refresh_stats_5m": [],
+                "health": [{"check_name": "health_check", "severity": "UNKNOWN",
+                            "detail": "permission denied for view stream_tables_info"}]}
+        with patch.dict(db.SHARDS, {"default": SimpleNamespace()}, clear=True):
+            with patch.object(engine, "snapshot", return_value=snap), patch.object(db, "monitor") as connection:
+                connection.return_value.__enter__.return_value.execute.return_value.fetchall.return_value = healthy_refresh
+                out = monitoring.collect_shards()
+        self.assertEqual(out["shards"][0]["state"], "degraded")
+        self.assertEqual(out["shards"][0]["engine"]["health"][0]["severity"], "UNKNOWN")
+
+    def test_ok_health_check_can_report_healthy_shard(self):
+        from axapi import db, engine
+        from types import SimpleNamespace
+        healthy_refresh = [{"name": "st_day_product_status", "status": "ACTIVE",
+                            "consecutive_errors": 0, "age_s": 0.5, "verified_at": None}]
+        snap = {"scheduler_running": True, "refresh_stats_5m": [],
+                "health": [{"check_name": "health_check", "severity": "OK",
+                            "detail": "No stale stream tables"}]}
+        with patch.dict(db.SHARDS, {"default": SimpleNamespace()}, clear=True):
+            with patch.object(engine, "snapshot", return_value=snap), patch.object(db, "monitor") as connection:
+                connection.return_value.__enter__.return_value.execute.return_value.fetchall.return_value = healthy_refresh
+                out = monitoring.collect_shards()
+        self.assertEqual(out["shards"][0]["state"], "healthy")
+
+
 if __name__ == "__main__":
     unittest.main()
