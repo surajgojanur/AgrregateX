@@ -10,7 +10,7 @@ from fastapi.responses import FileResponse, JSONResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 
-from . import auth, config, db, engine, queries
+from . import auth, config, db, engine, limits, queries
 
 UTC = timezone.utc
 
@@ -33,6 +33,15 @@ async def shard_unavailable(_req: Request, exc: db.ShardUnavailable):
                                    "read or written right now; nothing was served from another shard.",
                          "shard": exc.shard, "retryable": True},
                         status_code=503, headers={"Retry-After": "5"})
+
+
+@app.exception_handler(limits.TenantBusy)
+async def tenant_busy(_req: Request, exc: limits.TenantBusy):
+    # B-3: one tenant cannot monopolise the database; other tenants keep their own slots.
+    return JSONResponse({"detail": f"Too many concurrent analytics queries for tenant {exc.tenant_id} "
+                                   f"(limit {exc.limit}). Retry shortly.",
+                         "tenant_id": exc.tenant_id, "limit": exc.limit, "retryable": True},
+                        status_code=429, headers={"Retry-After": "1"})
 
 
 @app.exception_handler(Exception)
@@ -75,8 +84,11 @@ def _meta(tenant_id: int, start: datetime, end: datetime, w: queries.Window, **e
 
 
 def _run(fn, tenant_id, *args):
-    with db.tenant_tx("api", tenant_id) as conn:
-        return fn(conn, tenant_id, *args)
+    """Heavy analytics query under the tenant's B-3 slot, then its B-1 freshness (same shard)."""
+    with limits.LIMITER.slot(tenant_id):
+        with db.tenant_tx("api", tenant_id) as conn:
+            data = fn(conn, tenant_id, *args)
+    return data, engine.freshness_brief(db.shard_for(tenant_id))
 
 
 # ── auth ───────────────────────────────────────────────────────────────────
@@ -156,8 +168,8 @@ def tenant_path(tenant_id: int, user: auth.User = Depends(auth.current_user)) ->
 @app.get("/api/tenants/{tenant_id}/summary")
 async def summary(tenant_id: int = Depends(tenant_path), win=Depends(window)):
     w = queries.split(*win, "day")
-    data = await run_in_threadpool(_run, queries.summary, tenant_id, w)
-    return _meta(tenant_id, *win, w, summary=data)
+    data, fresh = await run_in_threadpool(_run, queries.summary, tenant_id, w)
+    return _meta(tenant_id, *win, w, freshness=fresh, summary=data)
 
 
 @app.get("/api/tenants/{tenant_id}/trends")
@@ -166,24 +178,24 @@ async def trends(tenant_id: int = Depends(tenant_path), win=Depends(window),
     if grain == "hour" and win[1] - win[0] > timedelta(days=config.MAX_HOURLY_RANGE_DAYS):
         raise HTTPException(422, f"Hourly trends are limited to {config.MAX_HOURLY_RANGE_DAYS} days.")
     w = queries.split(*win, grain)
-    data = await run_in_threadpool(_run, queries.trends, tenant_id, w, grain)
-    return _meta(tenant_id, *win, w, grain=grain, points=data)
+    data, fresh = await run_in_threadpool(_run, queries.trends, tenant_id, w, grain)
+    return _meta(tenant_id, *win, w, freshness=fresh, grain=grain, points=data)
 
 
 @app.get("/api/tenants/{tenant_id}/top-products")
 async def top_products(tenant_id: int = Depends(tenant_path), win=Depends(window),
                        limit: int = Query(10, ge=1, le=50)):
     w = queries.split(*win, "day")
-    data = await run_in_threadpool(_run, queries.top_products, tenant_id, w, limit)
-    return _meta(tenant_id, *win, w, limit=limit, products=data)
+    data, fresh = await run_in_threadpool(_run, queries.top_products, tenant_id, w, limit)
+    return _meta(tenant_id, *win, w, freshness=fresh, limit=limit, products=data)
 
 
 @app.get("/api/tenants/{tenant_id}/breakdown")
 async def breakdown(tenant_id: int = Depends(tenant_path), win=Depends(window),
                     by: Literal["status", "category"] = "status"):
     w = queries.split(*win, "day")
-    data = await run_in_threadpool(_run, queries.breakdown, tenant_id, w, by)
-    return _meta(tenant_id, *win, w, by=by, rows=data)
+    data, fresh = await run_in_threadpool(_run, queries.breakdown, tenant_id, w, by)
+    return _meta(tenant_id, *win, w, freshness=fresh, by=by, rows=data)
 
 
 @app.get("/api/tenants/{tenant_id}/freshness")
@@ -215,6 +227,12 @@ async def engine_snapshot(shard: str | None = None, _admin: auth.User = Depends(
     if name not in db.SHARDS:
         raise HTTPException(404, "Unknown shard.")
     return {"shards": list(db.SHARDS), **await run_in_threadpool(engine.snapshot, name)}
+
+
+@app.get("/api/limits")
+def tenant_limits(_admin: auth.User = Depends(auth.require_admin)):
+    """B-3 counters: per-tenant in-flight, peak, admitted and 429-rejected analytics queries."""
+    return limits.LIMITER.snapshot()
 
 
 @app.get("/api/shards")

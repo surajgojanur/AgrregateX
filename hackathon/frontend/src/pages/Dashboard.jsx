@@ -32,6 +32,26 @@ function Pending({ h, down }) {
     : <div className="skeleton" style={{ height: h }} />
 }
 
+// B-1: "Updated N s ago" from the response's freshness block (oldest stream table's last
+// completed refresh). Ticks every second; amber beyond 30 s (the PRD's great-freshness line).
+function FreshBadge({ fresh }) {
+  const [now, setNow] = useState(() => Date.now())
+  useEffect(() => {
+    const id = setInterval(() => setNow(Date.now()), 1000)
+    return () => clearInterval(id)
+  }, [])
+  if (!fresh) return null
+  if (!fresh.verified_at) return <span className="ax-fresh ax-fresh--warn" role="status">Freshness unknown</span>
+  const age = Math.max(0, Math.round((now - Date.parse(fresh.verified_at)) / 1000))
+  const text = age < 60 ? `${age} s` : `${Math.floor(age / 60)} min ${age % 60} s`
+  return (
+    <span className={`ax-fresh ${age > 30 || !fresh.healthy ? 'ax-fresh--warn' : ''}`} role="status"
+      title={`Every number shown is at least as fresh as ${new Date(fresh.verified_at).toLocaleTimeString()} (${fresh.rule})`}>
+      <span className={`dot ${age > 30 || !fresh.healthy ? 'dot--warn' : 'dot--ok dot--pulse'}`} /> Updated {text} ago
+    </span>
+  )
+}
+
 function Kpi({ label, value, sub }) {
   return (
     <div className="stat panel">
@@ -288,6 +308,7 @@ export default function Dashboard() {
           <span>Auto-refresh 5 s</span>
         </label>
         <span className="mono faint ax-range">{range.from.slice(0, 16)}Z → {range.to.slice(0, 16)}Z</span>
+        <FreshBadge fresh={state.s?.data.freshness} />
       </div>
 
       {shardOf && <p className="mono faint ax-shardline">Tenant {tenant} lives on shard {shardOf.toUpperCase()} (directory v{dirVersion})</p>}

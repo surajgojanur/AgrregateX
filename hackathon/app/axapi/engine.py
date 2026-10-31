@@ -8,6 +8,7 @@ computed from raw ax.orders. (An LSN rule is unreliable: pg_trickle's frontier r
 of the last consumed change, which is below the commit LSN and does not move while idle.)
 """
 import random
+import threading
 import time
 from datetime import datetime, timezone
 
@@ -41,6 +42,44 @@ def freshness(tenant_id: int) -> dict:
     return {"shard": shard.name, "verified_age_s": max(ages) if ages and len(ages) == len(tables) else None,
             "healthy": healthy, "stream_tables": tables,
             "note": "verified_age_s = seconds since the OLDEST stream table last completed a refresh"}
+
+
+_BRIEF_TTL_S = 1.0
+_brief_cache: dict[str, tuple[float, dict]] = {}
+_brief_locks: dict[str, threading.Lock] = {}
+_brief_locks_guard = threading.Lock()
+
+
+def _brief_lock(shard_name: str) -> threading.Lock:
+    with _brief_locks_guard:
+        return _brief_locks.setdefault(shard_name, threading.Lock())
+
+
+def freshness_brief(shard: "db.Shard") -> dict:
+    """B-1: compact freshness for analytics responses. verified_at = the OLDEST stream table's last
+    completed refresh (any action, including NO_DATA), so every number in the response is at least
+    that fresh. Single-flight per shard with a 1 s cache: concurrent misses wait for one query, so it
+    costs at most one catalog query per second per shard (PR #24 review)."""
+    hit = _brief_cache.get(shard.name)
+    if hit and time.monotonic() - hit[0] < _BRIEF_TTL_S:
+        return hit[1]
+    with _brief_lock(shard.name):
+        hit = _brief_cache.get(shard.name)          # another request may have refreshed it meanwhile
+        if hit and time.monotonic() - hit[0] < _BRIEF_TTL_S:
+            return hit[1]
+        with db.monitor(shard) as c:
+            rows = c.execute(FRESHNESS_SQL, {"s": ST_SCHEMA}).fetchall()
+        times = [r["verified_at"] for r in rows if r["verified_at"] is not None]
+        complete = bool(rows) and len(times) == len(rows)
+        brief = {
+            "verified_at": _iso(min(times)) if complete else None,
+            "age_s": round(max(float(r["age_s"]) for r in rows), 2) if complete else None,
+            "healthy": complete and all(r["status"] == "ACTIVE" for r in rows),
+            "stream_tables": len(rows),
+            "rule": "oldest stream table's last completed refresh",
+        }
+        _brief_cache[shard.name] = (time.monotonic(), brief)
+        return brief
 
 
 def snapshot(shard_name: str) -> dict:

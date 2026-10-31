@@ -1,0 +1,18 @@
+PASS B-1 operator: summary carries freshness  {'http': 200, 'freshness': {'verified_at': '2026-10-31T13:22:15.370872+00:00', 'age_s': 1.3, 'healthy': True, 'stream_tables': 3, 'rule': "oldest stream table's last completed refresh"}}
+PASS B-1 tenant2: summary carries freshness  {'http': 200, 'freshness': {'verified_at': '2026-10-31T13:22:15.903612+00:00', 'age_s': 0.77, 'healthy': True, 'stream_tables': 3, 'rule': "oldest stream table's last completed refresh"}}
+PASS B-1 trends carries freshness  {'http': 200}
+PASS B-1 top-products carries freshness  {'http': 200}
+PASS B-1 breakdown carries freshness  {'http': 200}
+PASS B-3 flood on tenant 1 gets 429s and some 200s  {'ok_200': 3, 'rejected_429': 13}
+PASS B-3 429 carries Retry-After: 1
+PASS B-3 tenant 2 unaffected by tenant 1's flood (its own slot)  {'tenant2': [200, 200, 200]}
+PASS B-3 /api/limits counts the rejections  {'limits': {'tenant_id': 1, 'in_flight': 0, 'peak': 1, 'admitted': 9, 'rejected_429': 34}}
+PASS B-3 /api/limits is operator-only  {'http': 403}
+PASS B-2 pre-check (writes quiesced): oracle clean on both shards  {'before': {'a': [('st_day_category_status', 0, 0), ('st_day_product_status', 0, 0), ('st_hour_category_status', 0, 0)], 'b': [('st_day_category_status', 0, 0), ('st_day_product_status', 0, 0), ('st_hour_category_status', 0, 0)]}}
+PASS B-2 wrong owner password fails closed (exit 1, ok=false)  {'exit': 1}
+PASS B-2 rebuild CLI exit 0 and ok=true  {'exit': 0, 'seconds': 8.6, 'shards': [{'shard': 'a', 'ok': True, 'rebuilt': True, 'oracle_clean': True, 'seconds': 5.15, 'problems': []}, {'shard': 'b', 'ok': True, 'rebuilt': True, 'oracle_clean': True, 'seconds': 3.16, 'problems': []}]}
+PASS B-2 shard a: pg_trickle history shows a full rebuild of all 3 stream tables  {'history': 'st_day_category_status:REINITIALIZE:COMPLETED st_day_product_status:REINITIALIZE:COMPLETED st_hour_category_status:REINITIALIZE:COMPLETED'}
+PASS B-2 shard b: pg_trickle history shows a full rebuild of all 3 stream tables  {'history': 'st_day_category_status:REINITIALIZE:COMPLETED st_day_product_status:REINITIALIZE:COMPLETED st_hour_category_status:REINITIALIZE:COMPLETED'}
+PASS B-2 independent oracle after rebuild: 0/0 on both shards  {'after': {'a': [('st_day_category_status', 0, 0), ('st_day_product_status', 0, 0), ('st_hour_category_status', 0, 0)], 'b': [('st_day_category_status', 0, 0), ('st_day_product_status', 0, 0), ('st_hour_category_status', 0, 0)]}}
+PASS B-2 API serving after rebuild  {'http': 200}
+{"passed": 17, "failed": 0}

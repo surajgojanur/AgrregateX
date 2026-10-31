@@ -8,6 +8,14 @@ export default function Engine() {
   const [e, setE] = useState(null)
   const [err, setErr] = useState(null)
   const [shard, setShard] = useState(null)
+  const [limits, setLimits] = useState(null)
+  useEffect(() => {
+    let live = true
+    const tick = () => api.limits().then((d) => live && setLimits(d)).catch(() => live && setLimits(null))
+    tick()
+    const id = setInterval(tick, 3000)
+    return () => { live = false; clearInterval(id) }
+  }, [])
   useEffect(() => {
     let live = true
     const tick = () => api.engine(shard).then((d) => { if (live) { setE(d); setErr(null) } }).catch((x) => live && setErr(x.message))
@@ -99,6 +107,22 @@ export default function Engine() {
           </tbody>
         </table>
       </section>
+
+      {limits && (
+        <section className="panel ax-panel">
+          <div className="panel__head"><span className="panel__title">Per-tenant query limits (B-3)</span>
+            <span className="label">max {limits.max_concurrent_per_tenant} concurrent / tenant · wait {limits.queue_wait_s} s · {limits.scope}</span></div>
+          {limits.tenants.length === 0 ? <p className="muted">No analytics queries yet.</p> : (
+            <table className="ax-table">
+              <thead><tr><th>Tenant</th><th className="num">In flight</th><th className="num">Peak</th><th className="num">Admitted</th><th className="num">Rejected (429)</th></tr></thead>
+              <tbody>{limits.tenants.map((t) => (
+                <tr key={t.tenant_id}><td className="mono">{t.tenant_id}</td><td className="num mono">{t.in_flight}</td><td className="num mono">{t.peak}</td>
+                  <td className="num mono">{t.admitted}</td><td className={`num mono ${t.rejected_429 ? 'text-amber' : ''}`}>{t.rejected_429}</td></tr>
+              ))}</tbody>
+            </table>
+          )}
+        </section>
+      )}
 
       <section className="panel ax-panel">
         <div className="panel__head"><span className="panel__title">Settings (live SHOW)</span></div>

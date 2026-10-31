@@ -3,7 +3,7 @@
 > **Owner:** OPUS. Only OPUS edits this file; Codex and humans communicate through Issue #12.
 > **Purpose:** survive context compaction, restarts and new sessions. **Reload at every session start,
 > then re-sync from GitHub** (GitHub is the source of truth; this file can be stale).
-> **Last updated:** 2026-10-31 ~13:10 UTC by OPUS (Claude Code session on the Opus Mac).
+> **Last updated:** 2026-10-31 ~13:25 UTC by OPUS (Claude Code session on the Opus Mac).
 
 ## Session-start checklist
 1. Read this file.
@@ -15,7 +15,7 @@
 7. Resume the highest-priority authorised task (§F).
 
 **Last processed** (do not re-answer):
-- #12 up to HUMAN fast-track directive (12:54:00Z) and OPUS DONE_WAITING_REVIEW 6543706376 (~13:05Z)
+- #12 up to CODEX "B5 STARTED" (13:11:01Z); HUMAN "PR #22 MERGED" (13:06:26Z)
 - PR #22 reviews/comments up to 12:53:57Z (fast-track copy); body rewritten at head d79fa55
 - PR #21 comments up to OPUS contract v2 6543690282
 
@@ -48,8 +48,9 @@
 |---|---|---|
 | P1 engine spike | merged #15 | `docs/handoffs/opus.md` |
 | API + dashboard (single DB) | merged #18 (c38cd33) as an integration baseline, **not** a judge-ready approval | #18 review checklist still open |
-| P3 sharding | PR #22 **HOLD** (review requested follow-up) | `docs/handoffs/opus-sharding.md`, `sharding/results/` |
-| PR #22 review fixes | **DONE_WAITING_REVIEW** at head `d79fa55` (fail-closed partition script, image comment, login on) | #12 6543706376; fixture tests 11/11 + 7/7; live run NOT RUN |
+| P3 sharding | **PR #22 MERGED** to main as the P3 dev baseline, `b632bd9` (not release qualification) | `docs/handoffs/opus-sharding.md`, `sharding/results/` |
+| Bonus B-1/B-2/B-3 | **PR #24** `feat/opus-bonus-b1-b2-b3` (7/7 unit tests; live DB NOT RUN) | `app/tests/test_bonus.py` |
+| PR #22 review fixes | merged (head `7b19d14`) (fail-closed partition script, image comment, login on) | #12 6543706376; fixture tests 11/11 + 7/7; live run NOT RUN |
 | CI | **BLOCKED by billing**: Actions jobs are not started ("recent account payments have failed or spending limit") | check annotations on d79fa55 |
 | Frontend PS conversion + new logo | **staged, uncommitted** on local branch `feat/aggregatex-logo` (worktree `~/Downloads/mitigata/AgrregateX-sharding`); 107 files, Revelio product removed. Waiting for the user's OK to commit/PR | lint OK, 3/3 tests, build OK; no browser QA |
 
@@ -72,7 +73,7 @@
 |---|---|---|
 | Owns | `hackathon/app/**`, `frontend/**`, `sql/**`, `sharding/**`, `compose.sharded.yaml`, Opus handoff docs | `hackathon/benchmark/**`, Codex proposals |
 | Active PR | #22 `feat/opus-p3-sharding` | #21 `feat/p3-shard-benchmark-tests` (DRAFT, 907c80e; "PR correctness" check FAILURE) |
-| Single-writer claims | `partition_demo.sh` → OPUS (claimed on #12 6543601773) | |
+| Single-writer claims | `partition_demo.sh` → OPUS (released) | B-5 monitoring → CODEX (`feat/b5-live-monitoring`, new `monitoring.py` + `Monitoring.jsx`; touches `main.py` registration + nav) |
 
 - **Humans:** surajgojanur (repo owner, integration reviewer, merges) and shridhar618 (runs this OPUS session).
 - **Waiting on others:** HUMAN re-review of #22 after the fixes; CODEX aligning #21 with contract v2 (cookie auth, host-side probes, no curl in the image).
@@ -114,8 +115,9 @@
 | 10-31 | **Fast-track:** ship a working demo; defer 10M/G1–G5, replicas, polish; G-3 stays a disclosed FAIL; merge #22 as a P3 dev baseline after the minimum gates; #21 separate until v2-aligned | hackathon timeline | HUMAN (user directive) | #12 12:54Z | gates 1–3 met at d79fa55; gate 4 blocked by CI billing |
 
 ## F. Next actions (ordered)
-1. ~~OPUS: PR #22 fixes~~ DONE (d79fa55). ~~OPUS: contract v2 on #21~~ DONE.
-2. **HUMAN:** fix the Actions billing/spending limit; review and merge #22 as a P3 dev baseline.
+1. ~~PR #22 fixes / contract v2 / merge~~ DONE (merged b632bd9).
+2. **HUMAN:** review PR #24 (B-1/B-2/B-3); fix the Actions billing/spending limit.
+2b. **OPUS:** live-verify B-1/B-2/B-3 when Docker is up; then the frontend PS-conversion PR (rebase onto main + #24; resolve the Dashboard/Engine merge).
 3. **HUMAN:** go/no-go for a **live** hardened partition run on a host passing the memory gate (Opus Mac: Docker must be running; Fedora: RAM currently too low).
 4. **OPUS:** browser QA of Dashboard/Shards/Engine + outage banner (needs Docker).
 5. **OPUS:** commit/PR the frontend PS conversion once the user OKs it (local branch `feat/aggregatex-logo`).
