@@ -8,7 +8,15 @@ P=(psql -v ON_ERROR_STOP=1 --username "$POSTGRES_USER" --dbname "$POSTGRES_DB" -
 S=/ax/sql
 "${P[@]}" -c "CREATE EXTENSION IF NOT EXISTS pg_trickle"
 "${P[@]}" -f $S/00_schema.sql
-if [ -n "${AX_SHARD_TENANTS:-}" ]; then
+if [ "${AX_SEED_MODE:-}" = "synthetic" ]; then
+  # Scale datasets (1M/10, 10M/100): deterministic, chunked, resumable synthetic generator.
+  # Bucket columns are created on the EMPTY table first (the generator fills them itself), so
+  # the 05 backfill below updates nothing instead of rewriting millions of rows.
+  "${P[@]}" -f $S/05_bucket_columns.sql
+  "${P[@]}" -v orders="${AX_SEED_ORDERS:-1000000}" -v tenants="${AX_SEED_TENANTS:-10}" \
+    -v seed="${AX_SEED:-42}" -v zipf_s="${AX_SEED_ZIPF_S:-1.0}" -v chunk="${AX_SEED_CHUNK:-250000}" \
+    -v shard_tenants="${AX_SHARD_TENANTS:-}" -f /ax/gen_synthetic.sql
+elif [ -n "${AX_SHARD_TENANTS:-}" ]; then
   # Sharded mode: same deterministic global dataset, filtered to this shard's tenants.
   "${P[@]}" -v tenants="$AX_SHARD_TENANTS" -v orders="${AX_SEED_ORDERS:-10000}" -v all_tenants="${AX_SEED_TENANTS:-10}" -f /ax/seed_shard.sql
 else

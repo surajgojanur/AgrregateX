@@ -1,0 +1,71 @@
+# AgrregateX SCALE stack: the single-DB topology seeded by integration/scale/gen_synthetic.sql.
+# Disposable, own project name, ports and volume; never reuses the demo stack's data.
+#
+#   1M/10  : AX_SEED_ORDERS=1000000  AX_SEED_TENANTS=10  docker compose -p ax-scale-1m  -f compose.scale.yaml up -d --build db
+#   10M/100: AX_SEED_ORDERS=10000000 AX_SEED_TENANTS=100 AX_SCALE_DB_PORT=25581 AX_SCALE_API_PORT=8096 \
+#            docker compose -p ax-scale-10m -f compose.scale.yaml up -d --build db
+#   Watch the load: docker compose -p <project> -f compose.scale.yaml logs -f db   (ax_gen: orders ...)
+#   Then start the API (and optionally the writer): ... up -d api [writer]
+#
+# The load runs during first boot (docker-entrypoint-initdb.d), before stream tables exist,
+# so no CDC change buffers fill up. It is resumable only from committed chunks if the
+# container is restarted during init; see integration/scale/README.md.
+name: ax-scale
+x-roles: &roles
+  AX_API_PASSWORD: ${AX_API_PASSWORD:-local-demo-api}
+  AX_WRITER_PASSWORD: ${AX_WRITER_PASSWORD:-local-demo-writer}
+  AX_MONITOR_PASSWORD: ${AX_MONITOR_PASSWORD:-local-demo-monitor}
+services:
+  db:
+    image: ghcr.io/trickle-labs/pg_trickle:latest   # PG 18.6 + pg_trickle 0.108.3 (see handoff §0)
+    command: ["postgres", "-c", "shared_buffers=${AX_SCALE_SHARED_BUFFERS:-512MB}",
+              "-c", "maintenance_work_mem=256MB", "-c", "max_wal_size=4GB",
+              "-c", "checkpoint_timeout=15min", "-c", "work_mem=32MB"]
+    environment:
+      <<: *roles
+      POSTGRES_PASSWORD: ${AX_DB_SUPERUSER_PASSWORD:-local-demo-superuser}
+      POSTGRES_DB: aggregatex
+      AX_SEED_MODE: synthetic
+      AX_SEED_ORDERS: ${AX_SEED_ORDERS:-1000000}
+      AX_SEED_TENANTS: ${AX_SEED_TENANTS:-10}
+      AX_SEED: ${AX_SEED:-42}
+      AX_SEED_ZIPF_S: ${AX_SEED_ZIPF_S:-1.0}
+      AX_SEED_CHUNK: ${AX_SEED_CHUNK:-250000}
+    volumes:
+      - ./sql:/ax/sql:ro
+      - ./integration/scale/gen_synthetic.sql:/ax/gen_synthetic.sql:ro
+      - ./app/db/init.sh:/docker-entrypoint-initdb.d/10-aggregatex.sh:ro
+      - scaledata:/var/lib/postgresql
+    ports: ["127.0.0.1:${AX_SCALE_DB_PORT:-25580}:5432"]
+    mem_limit: ${AX_SCALE_DB_MEM:-2g}
+    shm_size: 256m
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -h 127.0.0.1 -U postgres -d aggregatex && psql -h 127.0.0.1 -U postgres -d aggregatex -tAc \"select 1 from pg_roles where rolname='ax_monitor'\" | grep -q 1"]
+      interval: 10s
+      start_period: 2h       # a 10M first-boot load takes minutes to tens of minutes
+      retries: 30
+  api:
+    build: { context: ., dockerfile: app/Dockerfile }
+    environment:
+      <<: *roles
+      AX_DB_HOST: db
+      AX_DB_NAME: aggregatex
+      AX_DEMO_PASSWORD: ${AX_DEMO_PASSWORD:-demo1234}
+      AX_DEMO_TENANTS: ${AX_SEED_TENANTS:-10}
+      AX_ENABLE_DEMO_WRITES: "1"
+      AX_AUTH_DISABLED: ${AX_AUTH_DISABLED:-1}
+    ports: ["127.0.0.1:${AX_SCALE_API_PORT:-8095}:8000"]
+    depends_on: { db: { condition: service_healthy } }
+  writer:
+    build: { context: ., dockerfile: app/Dockerfile }
+    command: ["python", "-m", "axapi.writer"]
+    environment:
+      <<: *roles
+      AX_DB_HOST: db
+      AX_DB_NAME: aggregatex
+      AX_DEMO_TENANTS: ${AX_SEED_TENANTS:-10}
+      AX_WRITER_RATE: ${AX_WRITER_RATE:-5}
+    depends_on: { db: { condition: service_healthy } }
+    profiles: ["writer"]
+volumes:
+  scaledata:
