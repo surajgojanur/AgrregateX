@@ -1,0 +1,4 @@
+# Mac-only local override (approved on #50): arm64 child of the same pinned index, no other change.
+services:
+  db:
+    platform: linux/arm64

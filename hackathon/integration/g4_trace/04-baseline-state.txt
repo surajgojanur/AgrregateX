@@ -1,0 +1,22 @@
+        pgt_name         | status | is_populated | needs_reinit | effective_refresh_mode | has_frontier 
+-------------------------+--------+--------------+--------------+------------------------+--------------
+ st_day_category_status  | ACTIVE | t            | f            | FULL                   | t
+ st_day_product_status   | ACTIVE | t            | f            | FULL                   | t
+ st_hour_category_status | ACTIVE | t            | f            | FULL                   | t
+(3 rows)
+
+        pgt_name         | refresh_id |    action    |  status   | initiated_by | merge_strategy_used 
+-------------------------+------------+--------------+-----------+--------------+---------------------
+ st_day_product_status   |          1 | FULL         | COMPLETED | INITIAL      | FULL
+ st_day_category_status  |          2 | FULL         | COMPLETED | INITIAL      | FULL
+ st_hour_category_status |          3 | FULL         | COMPLETED | INITIAL      | FULL
+ st_day_product_status   |          4 | REINITIALIZE | COMPLETED | MANUAL       | FULL
+ st_day_category_status  |          5 | REINITIALIZE | COMPLETED | MANUAL       | FULL
+ st_hour_category_status |          6 | REINITIALIZE | COMPLETED | MANUAL       | FULL
+(6 rows)
+
+ relrowsecurity | relforcerowsecurity | pg_get_userbyid 
+----------------+---------------------+-----------------
+ t              | t                   | postgres
+(1 row)
+

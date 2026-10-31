@@ -1,0 +1,29 @@
+BEGIN
+INSERT 0 1
+COMMIT
+NOTICE:  table "__pgt_cdc_1_17462" does not exist, skipping
+INFO:  [PGS_PROFILE] decision=2.90ms generate+build=3.69ms merge_exec=4.39ms cleanup_enqueue=0.00ms total=10.98ms affected=1 phantom_cleanup=0 delta_est=1 mode=INCR path=cache_miss hints=none strategy=merge
+INFO:  Stream table ax.st_day_product_status refreshed (DIFFERENTIAL: +1 -0)
+ refresh_stream_table 
+----------------------
+ 
+(1 row)
+
+NOTICE:  table "__pgt_cdc_2_17431" does not exist, skipping
+NOTICE:  table "__pgt_cdc_2_17462" does not exist, skipping
+INFO:  [PGS_PROFILE] decision=2.74ms generate+build=4.51ms merge_exec=12.22ms cleanup_enqueue=0.00ms total=19.48ms affected=1 phantom_cleanup=0 delta_est=1 mode=INCR path=cache_miss hints=none strategy=merge
+INFO:  Stream table ax.st_day_category_status refreshed (DIFFERENTIAL: +1 -0)
+ refresh_stream_table 
+----------------------
+ 
+(1 row)
+
+NOTICE:  table "__pgt_cdc_3_17462" does not exist, skipping
+NOTICE:  table "__pgt_cdc_3_17431" does not exist, skipping
+INFO:  [PGS_PROFILE] decision=2.43ms generate+build=3.95ms merge_exec=8.41ms cleanup_enqueue=0.00ms total=14.79ms affected=1 phantom_cleanup=0 delta_est=1 mode=INCR path=cache_miss hints=none strategy=merge
+INFO:  Stream table ax.st_hour_category_status refreshed (DIFFERENTIAL: +1 -0)
+ refresh_stream_table 
+----------------------
+ 
+(1 row)
+

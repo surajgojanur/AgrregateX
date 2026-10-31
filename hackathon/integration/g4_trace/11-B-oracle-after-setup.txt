@@ -1,0 +1,20 @@
+BEGIN
+SET
+        observed_utc        | snapshot 
+----------------------------+----------
+ 2026-10-31 22:53:31.977684 | 948:948:
+(1 row)
+
+      stream_table       | missing_in_st | extra_in_st 
+-------------------------+---------------+-------------
+ st_day_product_status   |             0 |           0
+ st_day_category_status  |             0 |           0
+ st_hour_category_status |             0 |           0
+(3 rows)
+
+ROLLBACK
+B precondition source|paid
+B precondition stream|paid|1
+st_day_category_status|{"sources": {"17431": {"lsn": "0/227C118", "snapshot_ts": "1793487211Z"}, "17462": {"lsn": "0/22663E0", "snapshot_ts": "1793487211Z"}}, "data_timestamp": "1793487211Z"}
+st_day_product_status|{"sources": {"17462": {"lsn": "0/22663E0", "snapshot_ts": "1793487211Z"}}, "data_timestamp": "1793487211Z"}
+st_hour_category_status|{"sources": {"17431": {"lsn": "0/2294CE8", "snapshot_ts": "1793487211Z"}, "17462": {"lsn": "0/22663E0", "snapshot_ts": "1793487211Z"}}, "data_timestamp": "1793487211Z"}

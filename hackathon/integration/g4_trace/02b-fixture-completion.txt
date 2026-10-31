@@ -1,0 +1,54 @@
+[22:53:06] DEVIATION: prepared fixture.sql aborted at line 40 (refresh of SUSPENDED stream table after 20_security.sql RLS changes; init.sh performs reinitialize_stream_table at this point). Completing bootstrap with that production step; no case data written yet.
+INFO:  repair_stream_table(ax.st_day_product_status): window state reset: scheduled protected rebuild; frontier reset: scheduled full refresh on next cycle; cdc_infrastructure: verified OK; status reset: ACTIVE, errors cleared
+INFO:  repair_stream_table(ax.st_day_category_status): window state reset: scheduled protected rebuild; frontier reset: scheduled full refresh on next cycle; cdc_infrastructure: verified OK; status reset: ACTIVE, errors cleared
+INFO:  repair_stream_table(ax.st_hour_category_status): window state reset: scheduled protected rebuild; frontier reset: scheduled full refresh on next cycle; cdc_infrastructure: verified OK; status reset: ACTIVE, errors cleared
+                                                                                                   reinitialize_stream_table                                                                                                   
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ repair_stream_table(ax.st_day_product_status): window state reset: scheduled protected rebuild; frontier reset: scheduled full refresh on next cycle; cdc_infrastructure: verified OK; status reset: ACTIVE, errors cleared
+ repair_stream_table(ax.st_day_category_status): window state reset: scheduled protected rebuild; frontier reset: scheduled full refresh on next cycle; cdc_infrastructure: verified OK; status reset: ACTIVE, errors cleared
+ repair_stream_table(ax.st_hour_category_status): window state reset: scheduled protected rebuild; frontier reset: scheduled full refresh on next cycle; cdc_infrastructure: verified OK; status reset: ACTIVE, errors cleared
+(3 rows)
+
+ANALYZE
+ANALYZE
+ANALYZE
+ fixture_budget_ok 
+-------------------
+ t
+(1 row)
+
+        pgt_name         | status | needs_reinit | is_populated 
+-------------------------+--------+--------------+--------------
+ st_day_category_status  | ACTIVE | t            | f
+ st_day_product_status   | ACTIVE | t            | f
+ st_hour_category_status | ACTIVE | t            | f
+(3 rows)
+
+INFO:  Stream table ax.st_day_product_status: needs_reinit is set, performing FULL reinitialization
+INFO:  Stream table ax.st_day_product_status refreshed (FULL)
+ refresh_stream_table 
+----------------------
+ 
+(1 row)
+
+INFO:  Stream table ax.st_day_category_status: needs_reinit is set, performing FULL reinitialization
+INFO:  Stream table ax.st_day_category_status refreshed (FULL)
+ refresh_stream_table 
+----------------------
+ 
+(1 row)
+
+INFO:  Stream table ax.st_hour_category_status: needs_reinit is set, performing FULL reinitialization
+INFO:  Stream table ax.st_hour_category_status refreshed (FULL)
+ refresh_stream_table 
+----------------------
+ 
+(1 row)
+
+        pgt_name         | status | needs_reinit | is_populated | has_frontier 
+-------------------------+--------+--------------+--------------+--------------
+ st_day_category_status  | ACTIVE | f            | t            | t
+ st_day_product_status   | ACTIVE | f            | t            | t
+ st_hour_category_status | ACTIVE | f            | t            | t
+(3 rows)
+

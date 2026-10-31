@@ -1,0 +1,607 @@
+BEGIN
+SET
+SET
+SET
+SET
+SET
+SET
+                name                 | setting | reset_val | source  
+-------------------------------------+---------+-----------+---------
+ pg_trickle.aggregate_fast_path      | on      | on        | default
+ pg_trickle.merge_strategy           | auto    | auto      | default
+ pg_trickle.merge_strategy_threshold | 0.01    | 0.01      | default
+(3 rows)
+
+                                                                                                                                                                                        json_build_object                                                                                                                                                                                        
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ {"phase" : "before", "utc" : "2026-10-31T22:53:33.047817+00:00", "snapshot" : "957:957:", "frontier" : {"sources": {"17431": {"lsn": "0/227C118", "snapshot_ts": "1793487211Z"}, "17462": {"lsn": "0/22663E0", "snapshot_ts": "1793487211Z"}}, "data_timestamp": "1793487211Z"}, "needs_reinit" : false, "status" : "ACTIVE", "effective_refresh_mode" : "DIFFERENTIAL", "is_populated" : true}
+(1 row)
+
+psql:/protocol/trace_refresh.sql:49: DEBUG:  building index "pg_toast_17791_index" on table "pg_toast_17791" serially
+psql:/protocol/trace_refresh.sql:49: DEBUG:  index "pg_toast_17791_index" can safely use deduplication
+psql:/protocol/trace_refresh.sql:49: DEBUG:  EventTriggerInvoke 17149
+SELECT 6
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                   json_agg                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ [{"lsn": "0/22663E0", "action": "I", "status": "paid", "utc_day": "2026-11-21T00:00:00", "order_id": 1002, "quantity": 1, "utc_hour": "2026-11-21T12:00:00", "change_id": 2, "tenant_id": 1, "created_at": "2026-11-21T12:00:00+00:00", "line_cents": 1000, "product_id": 2, "source_xid": "943", "updated_at": "2026-10-31T22:53:31.53189+00:00", "customer_id": 1, "__pgt_row_id": "\\x030100000002030180000001040180000000000003eaff", "changed_cols": null, "source_commit_at": null, "unit_price_cents": 1000}, {"lsn": "0/22A85A8", "action": "D", "status": "paid", "utc_day": "2026-11-21T00:00:00", "order_id": 1002, "quantity": 1, "utc_hour": "2026-11-21T12:00:00", "change_id": 3, "tenant_id": 1, "created_at": "2026-11-21T12:00:00+00:00", "line_cents": 1000, "product_id": 2, "source_xid": "948", "updated_at": "2026-10-31T22:53:31.53189+00:00", "customer_id": 1, "__pgt_row_id": "\\x030100000002030180000001040180000000000003eaff", "changed_cols": "000010001000", "source_commit_at": null, "unit_price_cents": 1000}, {"lsn": "0/22A85A8", "action": "I", "status": "cancelled", "utc_day": "2026-11-21T00:00:00", "order_id": 1002, "quantity": 1, "utc_hour": "2026-11-21T12:00:00", "change_id": 4, "tenant_id": 1, "created_at": "2026-11-21T12:00:00+00:00", "line_cents": 1000, "product_id": 2, "source_xid": "948", "updated_at": "2026-10-31T22:53:32.18345+00:00", "customer_id": 1, "__pgt_row_id": "\\x030100000002030180000001040180000000000003eaff", "changed_cols": "000010001000", "source_commit_at": null, "unit_price_cents": 1000}, {"lsn": "0/22EC560", "action": "I", "status": "paid", "utc_day": "2026-11-20T00:00:00", "order_id": 1001, "quantity": 1, "utc_hour": "2026-11-20T12:00:00", "change_id": 5, "tenant_id": 1, "created_at": "2026-11-20T12:00:00+00:00", "line_cents": 1000, "product_id": 1, "source_xid": "953", "updated_at": "2026-10-31T22:53:32.766689+00:00", "customer_id": 1, "__pgt_row_id": "\\x030100000002030180000001040180000000000003e9ff", "changed_cols": null, "source_commit_at": null, "unit_price_cents": 1000}, {"lsn": "0/22EC798", "action": "D", "status": "paid", "utc_day": "2026-11-20T00:00:00", "order_id": 1001, "quantity": 1, "utc_hour": "2026-11-20T12:00:00", "change_id": 6, "tenant_id": 1, "created_at": "2026-11-20T12:00:00+00:00", "line_cents": 1000, "product_id": 1, "source_xid": "954", "updated_at": "2026-10-31T22:53:32.766689+00:00", "customer_id": 1, "__pgt_row_id": "\\x030100000002030180000001040180000000000003e9ff", "changed_cols": "000010001000", "source_commit_at": null, "unit_price_cents": 1000}, {"lsn": "0/22EC798", "action": "I", "status": "cancelled", "utc_day": "2026-11-20T00:00:00", "order_id": 1001, "quantity": 1, "utc_hour": "2026-11-20T12:00:00", "change_id": 7, "tenant_id": 1, "created_at": "2026-11-20T12:00:00+00:00", "line_cents": 1000, "product_id": 1, "source_xid": "954", "updated_at": "2026-10-31T22:53:32.769642+00:00", "customer_id": 1, "__pgt_row_id": "\\x030100000002030180000001040180000000000003e9ff", "changed_cols": "000010001000", "source_commit_at": null, "unit_price_cents": 1000}]
+(1 row)
+
+psql:/protocol/trace_refresh.sql:51: DEBUG:  EventTriggerInvoke 17149
+psql:/protocol/trace_refresh.sql:51: DEBUG:  EventTriggerInvoke 17150
+psql:/protocol/trace_refresh.sql:51: DEBUG:  EventTriggerInvoke 17149
+psql:/protocol/trace_refresh.sql:51: DEBUG:  rehashing catalog cache id 39 for pg_operator; 33 lists, 16 buckets
+psql:/protocol/trace_refresh.sql:51: DEBUG:  rehashing catalog cache id 65 for pg_statistic; 257 tups, 128 buckets
+psql:/protocol/trace_refresh.sql:51: DEBUG:  rehashing catalog cache id 14 for pg_opclass; 17 tups, 8 buckets
+psql:/protocol/trace_refresh.sql:51: DEBUG:  rehashing catalog cache id 46 for pg_proc; 33 lists, 16 buckets
+LINE 1: SELECT md5(string_agg(prosrc || coalesce(probin::text, ''), ...
+                   ^
+QUERY:  SELECT md5(string_agg(prosrc || coalesce(probin::text, ''), ',' ORDER BY oid)) FROM pg_catalog.pg_proc WHERE proname = $1
+psql:/protocol/trace_refresh.sql:51: DEBUG:  [pg_trickle] PREFLIGHT OK for ST ax.st_day_category_status — source OIDs: [17431, 17462]
+psql:/protocol/trace_refresh.sql:51: DEBUG:  relation "pg_temp.__pgt_cdc_2_17431" does not exist
+psql:/protocol/trace_refresh.sql:51: NOTICE:  table "__pgt_cdc_2_17431" does not exist, skipping
+psql:/protocol/trace_refresh.sql:51: DEBUG:  EventTriggerInvoke 17149
+psql:/protocol/trace_refresh.sql:51: DEBUG:  building index "pg_toast_17801_index" on table "pg_toast_17801" serially
+psql:/protocol/trace_refresh.sql:51: DEBUG:  index "pg_toast_17801_index" can safely use deduplication
+psql:/protocol/trace_refresh.sql:51: DEBUG:  EventTriggerInvoke 17149
+psql:/protocol/trace_refresh.sql:51: DEBUG:  EventTriggerInvoke 17149
+psql:/protocol/trace_refresh.sql:51: DEBUG:  EventTriggerInvoke 17149
+psql:/protocol/trace_refresh.sql:51: DEBUG:  relation "pg_temp.__pgt_cdc_2_17462" does not exist
+psql:/protocol/trace_refresh.sql:51: NOTICE:  table "__pgt_cdc_2_17462" does not exist, skipping
+psql:/protocol/trace_refresh.sql:51: DEBUG:  EventTriggerInvoke 17149
+psql:/protocol/trace_refresh.sql:51: DEBUG:  building index "pg_toast_17806_index" on table "pg_toast_17806" serially
+psql:/protocol/trace_refresh.sql:51: DEBUG:  index "pg_toast_17806_index" can safely use deduplication
+psql:/protocol/trace_refresh.sql:51: DEBUG:  EventTriggerInvoke 17149
+psql:/protocol/trace_refresh.sql:51: DEBUG:  EventTriggerInvoke 17149
+psql:/protocol/trace_refresh.sql:51: DEBUG:  EventTriggerInvoke 17149
+psql:/protocol/trace_refresh.sql:51: DEBUG:  [pg_trickle] cache MISS for pgt_id=2
+psql:/protocol/trace_refresh.sql:51: LOG:  [pg_trickle] MERGE SQL TEMPLATE:
+MERGE INTO "ax"."st_day_category_status" AS st USING (WITH __pgt_cte_pk_stats_o_1 AS (
+SELECT c.__pgt_row_id AS __pk_hash, count(*) AS cnt
+FROM pg_temp."__pgt_cdc_2_17462" c
+WHERE c.lsn > '__PGS_PREV_LSN_17462__'::pg_lsn AND c.lsn <= '__PGS_NEW_LSN_17462__'::pg_lsn AND (c.changed_cols IS NULL OR CASE WHEN bit_length(c.changed_cols) = 8 THEN (c.changed_cols & B'11111101') != B'00000000' ELSE TRUE END)
+GROUP BY c.__pgt_row_id
+),
+__pgt_cte_single_o_2 AS (
+SELECT c.__pgt_row_id AS __pk_hash,
+       c.__pgt_row_id AS __pk_hash_old,
+       c.action,
+       c.change_id,
+       c."tenant_id",
+       c."order_id",
+       c."product_id",
+       c."status",
+       c."quantity",
+       c."utc_day",
+       c."line_cents",
+       c.action AS __first_action,
+       c.action AS __last_action,
+       CASE WHEN c.changed_cols IS NULL THEN TRUE WHEN bit_length(c.changed_cols) != 8 THEN TRUE WHEN (c.changed_cols & B'10110100') = B'00000000' THEN FALSE ELSE TRUE END AS __pgt_key_changed
+FROM pg_temp."__pgt_cdc_2_17462" c
+JOIN __pgt_cte_pk_stats_o_1 p ON p.__pk_hash = c.__pgt_row_id AND p.cnt = 1
+WHERE c.lsn > '__PGS_PREV_LSN_17462__'::pg_lsn AND c.lsn <= '__PGS_NEW_LSN_17462__'::pg_lsn AND (c.changed_cols IS NULL OR CASE WHEN bit_length(c.changed_cols) = 8 THEN (c.changed_cols & B'11111101') != B'00000000' ELSE TRUE END)
+),
+__pgt_cte_multi_raw_o_3 AS (
+SELECT c.__pgt_row_id AS __pk_hash,
+       c.__pgt_row_id AS __pk_hash_old,
+       c.action,
+       c.change_id,
+       c."tenant_id",
+       c."order_id",
+       c."product_id",
+       c."status",
+       c."quantity",
+       c."utc_day",
+       c."line_cents",
+       FIRST_VALUE(c.action) OVER (
+           PARTITION BY c.__pgt_row_id ORDER BY c.change_id
+       ) AS __first_action,
+       LAST_VALUE(c.action) OVER (
+           PARTITION BY c.__pgt_row_id ORDER BY c.change_id
+           ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING
+       ) AS __last_action,
+       bool_or(CASE WHEN c.changed_cols IS NULL THEN TRUE WHEN bit_length(c.changed_cols) != 8 THEN TRUE WHEN (c.changed_cols & B'10110100') = B'00000000' THEN FALSE ELSE TRUE END) OVER (PARTITION BY c.__pgt_row_id) AS __pgt_key_changed
+FROM pg_temp."__pgt_cdc_2_17462" c
+JOIN __pgt_cte_pk_stats_o_1 p ON p.__pk_hash = c.__pgt_row_id AND p.cnt > 1
+WHERE c.lsn > '__PGS_PREV_LSN_17462__'::pg_lsn AND c.lsn <= '__PGS_NEW_LSN_17462__'::pg_lsn AND (c.changed_cols IS NULL OR CASE WHEN bit_length(c.changed_cols) = 8 THEN (c.changed_cols & B'11111101') != B'00000000' ELSE TRUE END)
+),
+__pgt_cte_scan_raw_o_4 AS (
+SELECT * FROM __pgt_cte_single_o_2
+UNION ALL
+SELECT * FROM __pgt_cte_multi_raw_o_3
+),
+__pgt_cte_scan_o_5 AS (
+-- DELETE events: row existed before (first_action != 'I')
+-- Uses old_* columns from the earliest non-INSERT change per PK.
+-- __pk_hash_old ensures the row_id matches the existing ST row,
+-- which is critical for keyless tables where all-column hash changes.
+SELECT c.__pk_hash_old AS __pgt_row_id,
+       'D'::TEXT AS __pgt_action,
+       c."tenant_id" AS "tenant_id",
+       c."order_id" AS "order_id",
+       c."product_id" AS "product_id",
+       c."status" AS "status",
+       c."quantity" AS "quantity",
+       c."utc_day" AS "utc_day",
+       c."line_cents" AS "line_cents",
+       c.__pgt_key_changed
+FROM (
+  SELECT DISTINCT ON (s.__pk_hash)
+         s.*
+  FROM __pgt_cte_scan_raw_o_4 s
+  WHERE s.action != 'I' AND s.__first_action != 'I'
+  ORDER BY s.__pk_hash, s.change_id
+) c
+
+UNION ALL
+
+-- INSERT events: row exists after (last_action != 'D')
+-- Uses new_* columns from the latest non-DELETE change per PK.
+SELECT c.__pk_hash AS __pgt_row_id,
+       'I'::TEXT AS __pgt_action,
+       c."tenant_id" AS "tenant_id",
+       c."order_id" AS "order_id",
+       c."product_id" AS "product_id",
+       c."status" AS "status",
+       c."quantity" AS "quantity",
+       c."utc_day" AS "utc_day",
+       c."line_cents" AS "line_cents",
+       c.__pgt_key_changed
+FROM (
+  SELECT DISTINCT ON (s.__pk_hash)
+         s.*
+  FROM __pgt_cte_scan_raw_o_4 s
+  WHERE s.action != 'D' AND s.__last_action != 'D'
+  ORDER BY s.__pk_hash, s.change_id DESC
+) c
+),
+__pgt_cte_pk_stats_p_6 AS (
+SELECT c.__pgt_row_id AS __pk_hash, count(*) AS cnt
+FROM pg_temp."__pgt_cdc_2_17431" c
+WHERE c.lsn > '__PGS_PREV_LSN_17431__'::pg_lsn AND c.lsn <= '__PGS_NEW_LSN_17431__'::pg_lsn
+GROUP BY c.__pgt_row_id
+),
+__pgt_cte_single_p_7 AS (
+SELECT c.__pgt_row_id AS __pk_hash,
+       c.__pgt_row_id AS __pk_hash_old,
+       c.action,
+       c.change_id,
+       c."tenant_id",
+       c."product_id",
+       c."category_id",
+       c.action AS __first_action,
+       c.action AS __last_action
+FROM pg_temp."__pgt_cdc_2_17431" c
+JOIN __pgt_cte_pk_stats_p_6 p ON p.__pk_hash = c.__pgt_row_id AND p.cnt = 1
+WHERE c.lsn > '__PGS_PREV_LSN_17431__'::pg_lsn AND c.lsn <= '__PGS_NEW_LSN_17431__'::pg_lsn
+),
+__pgt_cte_multi_raw_p_8 AS (
+SELECT c.__pgt_row_id AS __pk_hash,
+       c.__pgt_row_id AS __pk_hash_old,
+       c.action,
+       c.change_id,
+       c."tenant_id",
+       c."product_id",
+       c."category_id",
+       FIRST_VALUE(c.action) OVER (
+           PARTITION BY c.__pgt_row_id ORDER BY c.change_id
+       ) AS __first_action,
+       LAST_VALUE(c.action) OVER (
+           PARTITION BY c.__pgt_row_id ORDER BY c.change_id
+           ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING
+       ) AS __last_action
+FROM pg_temp."__pgt_cdc_2_17431" c
+JOIN __pgt_cte_pk_stats_p_6 p ON p.__pk_hash = c.__pgt_row_id AND p.cnt > 1
+WHERE c.lsn > '__PGS_PREV_LSN_17431__'::pg_lsn AND c.lsn <= '__PGS_NEW_LSN_17431__'::pg_lsn
+),
+__pgt_cte_scan_raw_p_9 AS (
+SELECT * FROM __pgt_cte_single_p_7
+UNION ALL
+SELECT * FROM __pgt_cte_multi_raw_p_8
+),
+__pgt_cte_scan_p_10 AS (
+-- DELETE events: row existed before (first_action != 'I')
+-- Uses old_* columns from the earliest non-INSERT change per PK.
+-- __pk_hash_old ensures the row_id matches the existing ST row,
+-- which is critical for keyless tables where all-column hash changes.
+SELECT c.__pk_hash_old AS __pgt_row_id,
+       'D'::TEXT AS __pgt_action,
+       c."tenant_id" AS "tenant_id",
+       c."product_id" AS "product_id",
+       c."category_id" AS "category_id"
+FROM (
+  SELECT DISTINCT ON (s.__pk_hash)
+         s.*
+  FROM __pgt_cte_scan_raw_p_9 s
+  WHERE s.action != 'I' AND s.__first_action != 'I'
+  ORDER BY s.__pk_hash, s.change_id
+) c
+
+UNION ALL
+
+-- INSERT events: row exists after (last_action != 'D')
+-- Uses new_* columns from the latest non-DELETE change per PK.
+SELECT c.__pk_hash AS __pgt_row_id,
+       'I'::TEXT AS __pgt_action,
+       c."tenant_id" AS "tenant_id",
+       c."product_id" AS "product_id",
+       c."category_id" AS "category_id"
+FROM (
+  SELECT DISTINCT ON (s.__pk_hash)
+         s.*
+  FROM __pgt_cte_scan_raw_p_9 s
+  WHERE s.action != 'D' AND s.__last_action != 'D'
+  ORDER BY s.__pk_hash, s.change_id DESC
+) c
+),
+__pgt_cte_join_11 AS (
+-- Part 1: delta_left JOIN current_right (semi-join filtered)
+SELECT pgtrickle.encode_row_id_v3('SCAN_KEY', ROW(dl."tenant_id", dl."order_id", dl."product_id", dl."status", dl."quantity", dl."utc_day", dl."line_cents", r."tenant_id", r."product_id", r."category_id")) AS __pgt_row_id,
+       dl.__pgt_action,
+       dl."tenant_id" AS "o__tenant_id", dl."order_id" AS "o__order_id", dl."product_id" AS "o__product_id", dl."status" AS "o__status", dl."quantity" AS "o__quantity", dl."utc_day" AS "o__utc_day", dl."line_cents" AS "o__line_cents", r."tenant_id" AS "p__tenant_id", r."product_id" AS "p__product_id", r."category_id" AS "p__category_id"
+FROM __pgt_cte_scan_o_5 dl
+JOIN (SELECT * FROM "ax"."products" WHERE tenant_id IN (SELECT DISTINCT tenant_id FROM __pgt_cte_scan_o_5) AND product_id IN (SELECT DISTINCT product_id FROM __pgt_cte_scan_o_5)) r ON (("r"."tenant_id" = "dl"."tenant_id") AND ("r"."product_id" = "dl"."product_id"))
+
+UNION ALL
+
+-- Part 2: pre-change_left JOIN delta_right
+-- For Scan children: L₀ via NOT EXISTS anti-join (DI-2)
+-- For nested joins: L₁ = current snapshot (semi-join filtered, corrected below)
+SELECT pgtrickle.encode_row_id_v3('SCAN_KEY', ROW(l."tenant_id", l."order_id", l."product_id", l."status", l."quantity", l."utc_day", l."line_cents", dr."tenant_id", dr."product_id", dr."category_id")) AS __pgt_row_id,
+       dr.__pgt_action,
+       l."tenant_id" AS "o__tenant_id", l."order_id" AS "o__order_id", l."product_id" AS "o__product_id", l."status" AS "o__status", l."quantity" AS "o__quantity", l."utc_day" AS "o__utc_day", l."line_cents" AS "o__line_cents", dr."tenant_id" AS "p__tenant_id", dr."product_id" AS "p__product_id", dr."category_id" AS "p__category_id"
+FROM (SELECT * FROM (SELECT "tenant_id", "order_id", "product_id", "status", "quantity", "utc_day", "line_cents" FROM "ax"."orders" "o" WHERE NOT EXISTS (SELECT 1 FROM __pgt_cte_scan_o_5 __pgt_d WHERE pgtrickle.row_probe_v1(__pgt_d.__pgt_row_id) = pgtrickle.row_probe_v1(pgtrickle.encode_row_id_v3('SCAN_KEY', ROW("o"."tenant_id", "o"."order_id"))) AND __pgt_d.__pgt_row_id = pgtrickle.encode_row_id_v3('SCAN_KEY', ROW("o"."tenant_id", "o"."order_id"))) UNION ALL SELECT "tenant_id", "order_id", "product_id", "status", "quantity", "utc_day", "line_cents" FROM __pgt_cte_scan_o_5 WHERE __pgt_action = 'D') __l0 WHERE tenant_id IN (SELECT DISTINCT tenant_id FROM __pgt_cte_scan_p_10) AND product_id IN (SELECT DISTINCT product_id FROM __pgt_cte_scan_p_10)) l
+JOIN __pgt_cte_scan_p_10 dr ON (("dr"."tenant_id" = "l"."tenant_id") AND ("dr"."product_id" = "l"."product_id"))
+),
+__pgt_cte_agg_delta_12 AS (
+SELECT "o__tenant_id" AS "tenant_id",
+       "o__utc_day" AS "utc_day",
+       "p__category_id" AS "category_id",
+       "o__status" AS "status",
+       SUM(CASE WHEN __pgt_action = 'I' THEN 1 ELSE 0 END) AS __ins_count,
+       SUM(CASE WHEN __pgt_action = 'D' THEN 1 ELSE 0 END) AS __del_count,
+       SUM(CASE WHEN __pgt_action = 'I' THEN 1 ELSE 0 END) AS "__ins_order_count",
+       SUM(CASE WHEN __pgt_action = 'D' THEN 1 ELSE 0 END) AS "__del_order_count",
+       SUM(CASE WHEN __pgt_action = 'I' THEN o__quantity ELSE 0 END) AS "__ins_units",
+       SUM(CASE WHEN __pgt_action = 'D' THEN o__quantity ELSE 0 END) AS "__del_units",
+       SUM(CASE WHEN __pgt_action = 'I' AND o__quantity IS NOT NULL THEN 1 ELSE 0 END)::bigint AS "__ins_nonnull_units",
+       SUM(CASE WHEN __pgt_action = 'D' AND o__quantity IS NOT NULL THEN 1 ELSE 0 END)::bigint AS "__del_nonnull_units",
+       SUM(CASE WHEN __pgt_action = 'I' THEN o__line_cents ELSE 0 END) AS "__ins_sales_cents",
+       SUM(CASE WHEN __pgt_action = 'D' THEN o__line_cents ELSE 0 END) AS "__del_sales_cents",
+       SUM(CASE WHEN __pgt_action = 'I' AND o__line_cents IS NOT NULL THEN 1 ELSE 0 END)::bigint AS "__ins_nonnull_sales_cents",
+       SUM(CASE WHEN __pgt_action = 'D' AND o__line_cents IS NOT NULL THEN 1 ELSE 0 END)::bigint AS "__del_nonnull_sales_cents"
+FROM __pgt_cte_join_11
+GROUP BY "o__tenant_id", "o__utc_day", "p__category_id", "o__status"
+),
+__pgt_cte_agg_merge_13 AS (
+SELECT COALESCE(st.__pgt_row_id, pgtrickle.encode_row_id_v3('GROUP_KEY', ROW((d."tenant_id"), (d."utc_day"), (d."category_id"), (d."status")))) AS __pgt_row_id,
+       d."tenant_id",
+       d."utc_day",
+       d."category_id",
+       d."status",
+       COALESCE(st.__pgt_count, 0) + COALESCE(d.__ins_count, 0) - COALESCE(d.__del_count, 0) AS new_count,
+       COALESCE(st.__pgt_count, 0) AS old_count,
+       COALESCE(st."order_count", 0) + COALESCE(d."__ins_order_count", 0) - COALESCE(d."__del_order_count", 0) AS "new_order_count",
+       st."order_count" AS "old_order_count",
+       CASE WHEN (COALESCE(st."__pgt_aux_nonnull_units", 0) + COALESCE(d."__ins_nonnull_units", 0) - COALESCE(d."__del_nonnull_units", 0)) > 0 THEN COALESCE(st."units", 0) + COALESCE(d."__ins_units", 0) - COALESCE(d."__del_units", 0) ELSE NULL END AS "new_units",
+       st."units" AS "old_units",
+       COALESCE(st."__pgt_aux_nonnull_units", 0) + COALESCE(d."__ins_nonnull_units", 0) - COALESCE(d."__del_nonnull_units", 0) AS "new___pgt_aux_nonnull_units",
+       CASE WHEN (COALESCE(st."__pgt_aux_nonnull_sales_cents", 0) + COALESCE(d."__ins_nonnull_sales_cents", 0) - COALESCE(d."__del_nonnull_sales_cents", 0)) > 0 THEN COALESCE(st."sales_cents", 0) + COALESCE(d."__ins_sales_cents", 0) - COALESCE(d."__del_sales_cents", 0) ELSE NULL END AS "new_sales_cents",
+       st."sales_cents" AS "old_sales_cents",
+       COALESCE(st."__pgt_aux_nonnull_sales_cents", 0) + COALESCE(d."__ins_nonnull_sales_cents", 0) - COALESCE(d."__del_nonnull_sales_cents", 0) AS "new___pgt_aux_nonnull_sales_cents",
+       CASE
+    WHEN st.__pgt_count IS NULL AND (COALESCE(d.__ins_count, 0) - COALESCE(d.__del_count, 0)) > 0 THEN 'I'
+    WHEN COALESCE(st.__pgt_count, 0) + COALESCE(d.__ins_count, 0) - COALESCE(d.__del_count, 0) <= 0 THEN 'D'
+    ELSE 'U'
+END AS __pgt_meta_action
+FROM __pgt_cte_agg_delta_12 AS d("tenant_id", "utc_day", "category_id", "status")
+LEFT JOIN "ax"."st_day_category_status" st ON st."tenant_id" IS NOT DISTINCT FROM d."tenant_id" AND st."utc_day" IS NOT DISTINCT FROM d."utc_day" AND st."category_id" IS NOT DISTINCT FROM d."category_id" AND st."status" IS NOT DISTINCT FROM d."status"
+),
+__pgt_cte_agg_final_14 AS (
+SELECT m.__pgt_row_id,
+       CASE WHEN m.__pgt_meta_action = 'D' THEN 'D' ELSE 'I' END AS __pgt_action,
+       m."tenant_id" AS "tenant_id", m."utc_day" AS "utc_day", m."category_id" AS "category_id", m."status" AS "status", CASE WHEN m.__pgt_meta_action = 'D' THEN m.old_count ELSE m.new_count END AS __pgt_count,
+       CASE WHEN m.__pgt_meta_action = 'D' THEN m."old_order_count" ELSE m."new_order_count" END AS "order_count",
+       CASE WHEN m.__pgt_meta_action = 'D' THEN m."old_units" ELSE m."new_units" END AS "units",
+       CASE WHEN m.__pgt_meta_action = 'D' THEN 0 ELSE m."new___pgt_aux_nonnull_units" END AS "__pgt_aux_nonnull_units",
+       CASE WHEN m.__pgt_meta_action = 'D' THEN m."old_sales_cents" ELSE m."new_sales_cents" END AS "sales_cents",
+       CASE WHEN m.__pgt_meta_action = 'D' THEN 0 ELSE m."new___pgt_aux_nonnull_sales_cents" END AS "__pgt_aux_nonnull_sales_cents"
+FROM __pgt_cte_agg_merge_13 m
+WHERE m.__pgt_meta_action IN ('I', 'D')
+   OR (m.__pgt_meta_action = 'U'
+       AND (m.new_count IS DISTINCT FROM m.old_count
+          OR m."new_order_count"::text IS DISTINCT FROM m."old_order_count"::text
+          OR m."new_units"::text IS DISTINCT FROM m."old_units"::text
+          OR m."new_sales_cents"::text IS DISTINCT FROM m."old_sales_cents"::text))
+)
+SELECT * FROM __pgt_cte_agg_final_14) AS d ON pgtrickle.row_probe_v1(st.__pgt_row_id) = pgtrickle.row_probe_v1(d.__pgt_row_id) AND st.__pgt_row_id = d.__pgt_row_id WHEN MATCHED AND d.__pgt_action = 'D' THEN DELETE WHEN MATCHED AND d.__pgt_action = 'I' AND (st."tenant_id"::text IS DISTINCT FROM d."tenant_id"::text OR st."utc_day"::text IS DISTINCT FROM d."utc_day"::text OR st."category_id"::text IS DISTINCT FROM d."category_id"::text OR st."status"::text IS DISTINCT FROM d."status"::text OR st."__pgt_count"::text IS DISTINCT FROM d."__pgt_count"::text OR st."order_count"::text IS DISTINCT FROM d."order_count"::text OR st."units"::text IS DISTINCT FROM d."units"::text OR st."__pgt_aux_nonnull_units"::text IS DISTINCT FROM d."__pgt_aux_nonnull_units"::text OR st."sales_cents"::text IS DISTINCT FROM d."sales_cents"::text OR st."__pgt_aux_nonnull_sales_cents"::text IS DISTINCT FROM d."__pgt_aux_nonnull_sales_cents"::text) THEN UPDATE SET "tenant_id" = d."tenant_id", "utc_day" = d."utc_day", "category_id" = d."category_id", "status" = d."status", "__pgt_count" = d."__pgt_count", "order_count" = d."order_count", "units" = d."units", "__pgt_aux_nonnull_units" = d."__pgt_aux_nonnull_units", "sales_cents" = d."sales_cents", "__pgt_aux_nonnull_sales_cents" = d."__pgt_aux_nonnull_sales_cents" WHEN NOT MATCHED AND d.__pgt_action = 'I' THEN INSERT (__pgt_row_id, "tenant_id", "utc_day", "category_id", "status", "__pgt_count", "order_count", "units", "__pgt_aux_nonnull_units", "sales_cents", "__pgt_aux_nonnull_sales_cents") VALUES (d.__pgt_row_id, d."tenant_id", d."utc_day", d."category_id", d."status", d."__pgt_count", d."order_count", d."units", d."__pgt_aux_nonnull_units", d."sales_cents", d."__pgt_aux_nonnull_sales_cents")
+psql:/protocol/trace_refresh.sql:51: DEBUG:  [pg_trickle] DELTA SQL for ax.st_day_category_status (pgt_id=2):
+WITH __pgt_cte_pk_stats_o_1 AS (
+SELECT c.__pgt_row_id AS __pk_hash, count(*) AS cnt
+FROM pg_temp."__pgt_cdc_2_17462" c
+WHERE c.lsn > '0/22663E0'::pg_lsn AND c.lsn <= '0/22EC798'::pg_lsn AND (c.changed_cols IS NULL OR CASE WHEN bit_length(c.changed_cols) = 8 THEN (c.changed_cols & B'11111101') != B'00000000' ELSE TRUE END)
+GROUP BY c.__pgt_row_id
+),
+__pgt_cte_single_o_2 AS (
+SELECT c.__pgt_row_id AS __pk_hash,
+       c.__pgt_row_id AS __pk_hash_old,
+       c.action,
+       c.change_id,
+       c."tenant_id",
+       c."order_id",
+       c."product_id",
+       c."status",
+       c."quantity",
+       c."utc_day",
+       c."line_cents",
+       c.action AS __first_action,
+       c.action AS __last_action,
+       CASE WHEN c.changed_cols IS NULL THEN TRUE WHEN bit_length(c.changed_cols) != 8 THEN TRUE WHEN (c.changed_cols & B'10110100') = B'00000000' THEN FALSE ELSE TRUE END AS __pgt_key_changed
+FROM pg_temp."__pgt_cdc_2_17462" c
+JOIN __pgt_cte_pk_stats_o_1 p ON p.__pk_hash = c.__pgt_row_id AND p.cnt = 1
+WHERE c.lsn > '0/22663E0'::pg_lsn AND c.lsn <= '0/22EC798'::pg_lsn AND (c.changed_cols IS NULL OR CASE WHEN bit_length(c.changed_cols) = 8 THEN (c.changed_cols & B'11111101') != B'00000000' ELSE TRUE END)
+),
+__pgt_cte_multi_raw_o_3 AS (
+SELECT c.__pgt_row_id AS __pk_hash,
+       c.__pgt_row_id AS __pk_hash_old,
+       c.action,
+       c.change_id,
+       c."tenant_id",
+       c."order_id",
+       c."product_id",
+       c."status",
+       c."quantity",
+       c."utc_day",
+       c."line_cents",
+       FIRST_VALUE(c.action) OVER (
+           PARTITION BY c.__pgt_row_id ORDER BY c.change_id
+       ) AS __first_action,
+       LAST_VALUE(c.action) OVER (
+           PARTITION BY c.__pgt_row_id ORDER BY c.change_id
+           ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING
+       ) AS __last_action,
+       bool_or(CASE WHEN c.changed_cols IS NULL THEN TRUE WHEN bit_length(c.changed_cols) != 8 THEN TRUE WHEN (c.changed_cols & B'10110100') = B'00000000' THEN FALSE ELSE TRUE END) OVER (PARTITION BY c.__pgt_row_id) AS __pgt_key_changed
+FROM pg_temp."__pgt_cdc_2_17462" c
+JOIN __pgt_cte_pk_stats_o_1 p ON p.__pk_hash = c.__pgt_row_id AND p.cnt > 1
+WHERE c.lsn > '0/22663E0'::pg_lsn AND c.lsn <= '0/22EC798'::pg_lsn AND (c.changed_cols IS NULL OR CASE WHEN bit_length(c.changed_cols) = 8 THEN (c.changed_cols & B'11111101') != B'00000000' ELSE TRUE END)
+),
+__pgt_cte_scan_raw_o_4 AS (
+SELECT * FROM __pgt_cte_single_o_2
+UNION ALL
+SELECT * FROM __pgt_cte_multi_raw_o_3
+),
+__pgt_cte_scan_o_5 AS (
+-- DELETE events: row existed before (first_action != 'I')
+-- Uses old_* columns from the earliest non-INSERT change per PK.
+-- __pk_hash_old ensures the row_id matches the existing ST row,
+-- which is critical for keyless tables where all-column hash changes.
+SELECT c.__pk_hash_old AS __pgt_row_id,
+       'D'::TEXT AS __pgt_action,
+       c."tenant_id" AS "tenant_id",
+       c."order_id" AS "order_id",
+       c."product_id" AS "product_id",
+       c."status" AS "status",
+       c."quantity" AS "quantity",
+       c."utc_day" AS "utc_day",
+       c."line_cents" AS "line_cents",
+       c.__pgt_key_changed
+FROM (
+  SELECT DISTINCT ON (s.__pk_hash)
+         s.*
+  FROM __pgt_cte_scan_raw_o_4 s
+  WHERE s.action != 'I' AND s.__first_action != 'I'
+  ORDER BY s.__pk_hash, s.change_id
+) c
+
+UNION ALL
+
+-- INSERT events: row exists after (last_action != 'D')
+-- Uses new_* columns from the latest non-DELETE change per PK.
+SELECT c.__pk_hash AS __pgt_row_id,
+       'I'::TEXT AS __pgt_action,
+       c."tenant_id" AS "tenant_id",
+       c."order_id" AS "order_id",
+       c."product_id" AS "product_id",
+       c."status" AS "status",
+       c."quantity" AS "quantity",
+       c."utc_day" AS "utc_day",
+       c."line_cents" AS "line_cents",
+       c.__pgt_key_changed
+FROM (
+  SELECT DISTINCT ON (s.__pk_hash)
+         s.*
+  FROM __pgt_cte_scan_raw_o_4 s
+  WHERE s.action != 'D' AND s.__last_action != 'D'
+  ORDER BY s.__pk_hash, s.change_id DESC
+) c
+),
+__pgt_cte_pk_stats_p_6 AS (
+SELECT c.__pgt_row_id AS __pk_hash, count(*) AS cnt
+FROM pg_temp."__pgt_cdc_2_17431" c
+WHERE FALSE /* B3-1: zero-change source pruned */
+GROUP BY c.__pgt_row_id
+),
+__pgt_cte_single_p_7 AS (
+SELECT c.__pgt_row_id AS __pk_hash,
+       c.__pgt_row_id AS __pk_hash_old,
+       c.action,
+       c.change_id,
+       c."tenant_id",
+       c."product_id",
+       c."category_id",
+       c.action AS __first_action,
+       c.action AS __last_action
+FROM pg_temp."__pgt_cdc_2_17431" c
+JOIN __pgt_cte_pk_stats_p_6 p ON p.__pk_hash = c.__pgt_row_id AND p.cnt = 1
+WHERE FALSE /* B3-1: zero-change source pruned */
+),
+__pgt_cte_multi_raw_p_8 AS (
+SELECT c.__pgt_row_id AS __pk_hash,
+       c.__pgt_row_id AS __pk_hash_old,
+       c.action,
+       c.change_id,
+       c."tenant_id",
+       c."product_id",
+       c."category_id",
+       FIRST_VALUE(c.action) OVER (
+           PARTITION BY c.__pgt_row_id ORDER BY c.change_id
+       ) AS __first_action,
+       LAST_VALUE(c.action) OVER (
+           PARTITION BY c.__pgt_row_id ORDER BY c.change_id
+           ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING
+       ) AS __last_action
+FROM pg_temp."__pgt_cdc_2_17431" c
+JOIN __pgt_cte_pk_stats_p_6 p ON p.__pk_hash = c.__pgt_row_id AND p.cnt > 1
+WHERE FALSE /* B3-1: zero-change source pruned */
+),
+__pgt_cte_scan_raw_p_9 AS (
+SELECT * FROM __pgt_cte_single_p_7
+UNION ALL
+SELECT * FROM __pgt_cte_multi_raw_p_8
+),
+__pgt_cte_scan_p_10 AS (
+-- DELETE events: row existed before (first_action != 'I')
+-- Uses old_* columns from the earliest non-INSERT change per PK.
+-- __pk_hash_old ensures the row_id matches the existing ST row,
+-- which is critical for keyless tables where all-column hash changes.
+SELECT c.__pk_hash_old AS __pgt_row_id,
+       'D'::TEXT AS __pgt_action,
+       c."tenant_id" AS "tenant_id",
+       c."product_id" AS "product_id",
+       c."category_id" AS "category_id"
+FROM (
+  SELECT DISTINCT ON (s.__pk_hash)
+         s.*
+  FROM __pgt_cte_scan_raw_p_9 s
+  WHERE s.action != 'I' AND s.__first_action != 'I'
+  ORDER BY s.__pk_hash, s.change_id
+) c
+
+UNION ALL
+
+-- INSERT events: row exists after (last_action != 'D')
+-- Uses new_* columns from the latest non-DELETE change per PK.
+SELECT c.__pk_hash AS __pgt_row_id,
+       'I'::TEXT AS __pgt_action,
+       c."tenant_id" AS "tenant_id",
+       c."product_id" AS "product_id",
+       c."category_id" AS "category_id"
+FROM (
+  SELECT DISTINCT ON (s.__pk_hash)
+         s.*
+  FROM __pgt_cte_scan_raw_p_9 s
+  WHERE s.action != 'D' AND s.__last_action != 'D'
+  ORDER BY s.__pk_hash, s.change_id DESC
+) c
+),
+__pgt_cte_join_11 AS (
+-- Part 1: delta_left JOIN current_right (semi-join filtered)
+SELECT pgtrickle.encode_row_id_v3('SCAN_KEY', ROW(dl."tenant_id", dl."order_id", dl."product_id", dl."status", dl."quantity", dl."utc_day", dl."line_cents", r."tenant_id", r."product_id", r."category_id")) AS __pgt_row_id,
+       dl.__pgt_action,
+       dl."tenant_id" AS "o__tenant_id", dl."order_id" AS "o__order_id", dl."product_id" AS "o__product_id", dl."status" AS "o__status", dl."quantity" AS "o__quantity", dl."utc_day" AS "o__utc_day", dl."line_cents" AS "o__line_cents", r."tenant_id" AS "p__tenant_id", r."product_id" AS "p__product_id", r."category_id" AS "p__category_id"
+FROM __pgt_cte_scan_o_5 dl
+JOIN (SELECT * FROM "ax"."products" WHERE tenant_id IN (SELECT DISTINCT tenant_id FROM __pgt_cte_scan_o_5) AND product_id IN (SELECT DISTINCT product_id FROM __pgt_cte_scan_o_5)) r ON (("r"."tenant_id" = "dl"."tenant_id") AND ("r"."product_id" = "dl"."product_id"))
+
+UNION ALL
+
+-- Part 2: pre-change_left JOIN delta_right
+-- For Scan children: L₀ via NOT EXISTS anti-join (DI-2)
+-- For nested joins: L₁ = current snapshot (semi-join filtered, corrected below)
+SELECT pgtrickle.encode_row_id_v3('SCAN_KEY', ROW(l."tenant_id", l."order_id", l."product_id", l."status", l."quantity", l."utc_day", l."line_cents", dr."tenant_id", dr."product_id", dr."category_id")) AS __pgt_row_id,
+       dr.__pgt_action,
+       l."tenant_id" AS "o__tenant_id", l."order_id" AS "o__order_id", l."product_id" AS "o__product_id", l."status" AS "o__status", l."quantity" AS "o__quantity", l."utc_day" AS "o__utc_day", l."line_cents" AS "o__line_cents", dr."tenant_id" AS "p__tenant_id", dr."product_id" AS "p__product_id", dr."category_id" AS "p__category_id"
+FROM (SELECT * FROM (SELECT "tenant_id", "order_id", "product_id", "status", "quantity", "utc_day", "line_cents" FROM "ax"."orders" "o" WHERE NOT EXISTS (SELECT 1 FROM __pgt_cte_scan_o_5 __pgt_d WHERE pgtrickle.row_probe_v1(__pgt_d.__pgt_row_id) = pgtrickle.row_probe_v1(pgtrickle.encode_row_id_v3('SCAN_KEY', ROW("o"."tenant_id", "o"."order_id"))) AND __pgt_d.__pgt_row_id = pgtrickle.encode_row_id_v3('SCAN_KEY', ROW("o"."tenant_id", "o"."order_id"))) UNION ALL SELECT "tenant_id", "order_id", "product_id", "status", "quantity", "utc_day", "line_cents" FROM __pgt_cte_scan_o_5 WHERE __pgt_action = 'D') __l0 WHERE tenant_id IN (SELECT DISTINCT tenant_id FROM __pgt_cte_scan_p_10) AND product_id IN (SELECT DISTINCT product_id FROM __pgt_cte_scan_p_10)) l
+JOIN __pgt_cte_scan_p_10 dr ON (("dr"."tenant_id" = "l"."tenant_id") AND ("dr"."product_id" = "l"."product_id"))
+),
+__pgt_cte_agg_delta_12 AS (
+SELECT "o__tenant_id" AS "tenant_id",
+       "o__utc_day" AS "utc_day",
+       "p__category_id" AS "category_id",
+       "o__status" AS "status",
+       SUM(CASE WHEN __pgt_action = 'I' THEN 1 ELSE 0 END) AS __ins_count,
+       SUM(CASE WHEN __pgt_action = 'D' THEN 1 ELSE 0 END) AS __del_count,
+       SUM(CASE WHEN __pgt_action = 'I' THEN 1 ELSE 0 END) AS "__ins_order_count",
+       SUM(CASE WHEN __pgt_action = 'D' THEN 1 ELSE 0 END) AS "__del_order_count",
+       SUM(CASE WHEN __pgt_action = 'I' THEN o__quantity ELSE 0 END) AS "__ins_units",
+       SUM(CASE WHEN __pgt_action = 'D' THEN o__quantity ELSE 0 END) AS "__del_units",
+       SUM(CASE WHEN __pgt_action = 'I' AND o__quantity IS NOT NULL THEN 1 ELSE 0 END)::bigint AS "__ins_nonnull_units",
+       SUM(CASE WHEN __pgt_action = 'D' AND o__quantity IS NOT NULL THEN 1 ELSE 0 END)::bigint AS "__del_nonnull_units",
+       SUM(CASE WHEN __pgt_action = 'I' THEN o__line_cents ELSE 0 END) AS "__ins_sales_cents",
+       SUM(CASE WHEN __pgt_action = 'D' THEN o__line_cents ELSE 0 END) AS "__del_sales_cents",
+       SUM(CASE WHEN __pgt_action = 'I' AND o__line_cents IS NOT NULL THEN 1 ELSE 0 END)::bigint AS "__ins_nonnull_sales_cents",
+       SUM(CASE WHEN __pgt_action = 'D' AND o__line_cents IS NOT NULL THEN 1 ELSE 0 END)::bigint AS "__del_nonnull_sales_cents"
+FROM __pgt_cte_join_11
+GROUP BY "o__tenant_id", "o__utc_day", "p__category_id", "o__status"
+),
+__pgt_cte_agg_merge_13 AS (
+SELECT COALESCE(st.__pgt_row_id, pgtrickle.encode_row_id_v3('GROUP_KEY', ROW((d."tenant_id"), (d."utc_day"), (d."category_id"), (d."status")))) AS __pgt_row_id,
+       d."tenant_id",
+       d."utc_day",
+       d."category_id",
+       d."status",
+       COALESCE(st.__pgt_count, 0) + COALESCE(d.__ins_count, 0) - COALESCE(d.__del_count, 0) AS new_count,
+       COALESCE(st.__pgt_count, 0) AS old_count,
+       COALESCE(st."order_count", 0) + COALESCE(d."__ins_order_count", 0) - COALESCE(d."__del_order_count", 0) AS "new_order_count",
+       st."order_count" AS "old_order_count",
+       CASE WHEN (COALESCE(st."__pgt_aux_nonnull_units", 0) + COALESCE(d."__ins_nonnull_units", 0) - COALESCE(d."__del_nonnull_units", 0)) > 0 THEN COALESCE(st."units", 0) + COALESCE(d."__ins_units", 0) - COALESCE(d."__del_units", 0) ELSE NULL END AS "new_units",
+       st."units" AS "old_units",
+       COALESCE(st."__pgt_aux_nonnull_units", 0) + COALESCE(d."__ins_nonnull_units", 0) - COALESCE(d."__del_nonnull_units", 0) AS "new___pgt_aux_nonnull_units",
+       CASE WHEN (COALESCE(st."__pgt_aux_nonnull_sales_cents", 0) + COALESCE(d."__ins_nonnull_sales_cents", 0) - COALESCE(d."__del_nonnull_sales_cents", 0)) > 0 THEN COALESCE(st."sales_cents", 0) + COALESCE(d."__ins_sales_cents", 0) - COALESCE(d."__del_sales_cents", 0) ELSE NULL END AS "new_sales_cents",
+       st."sales_cents" AS "old_sales_cents",
+       COALESCE(st."__pgt_aux_nonnull_sales_cents", 0) + COALESCE(d."__ins_nonnull_sales_cents", 0) - COALESCE(d."__del_nonnull_sales_cents", 0) AS "new___pgt_aux_nonnull_sales_cents",
+       CASE
+    WHEN st.__pgt_count IS NULL AND (COALESCE(d.__ins_count, 0) - COALESCE(d.__del_count, 0)) > 0 THEN 'I'
+    WHEN COALESCE(st.__pgt_count, 0) + COALESCE(d.__ins_count, 0) - COALESCE(d.__del_count, 0) <= 0 THEN 'D'
+    ELSE 'U'
+END AS __pgt_meta_action
+FROM __pgt_cte_agg_delta_12 AS d("tenant_id", "utc_day", "category_id", "status")
+LEFT JOIN "ax"."st_day_category_status" st ON st."tenant_id" IS NOT DISTINCT FROM d."tenant_id" AND st."utc_day" IS NOT DISTINCT FROM d."utc_day" AND st."category_id" IS NOT DISTINCT FROM d."category_id" AND st."status" IS NOT DISTINCT FROM d."status"
+),
+__pgt_cte_agg_final_14 AS (
+SELECT m.__pgt_row_id,
+       CASE WHEN m.__pgt_meta_action = 'D' THEN 'D' ELSE 'I' END AS __pgt_action,
+       m."tenant_id" AS "tenant_id", m."utc_day" AS "utc_day", m."category_id" AS "category_id", m."status" AS "status", CASE WHEN m.__pgt_meta_action = 'D' THEN m.old_count ELSE m.new_count END AS __pgt_count,
+       CASE WHEN m.__pgt_meta_action = 'D' THEN m."old_order_count" ELSE m."new_order_count" END AS "order_count",
+       CASE WHEN m.__pgt_meta_action = 'D' THEN m."old_units" ELSE m."new_units" END AS "units",
+       CASE WHEN m.__pgt_meta_action = 'D' THEN 0 ELSE m."new___pgt_aux_nonnull_units" END AS "__pgt_aux_nonnull_units",
+       CASE WHEN m.__pgt_meta_action = 'D' THEN m."old_sales_cents" ELSE m."new_sales_cents" END AS "sales_cents",
+       CASE WHEN m.__pgt_meta_action = 'D' THEN 0 ELSE m."new___pgt_aux_nonnull_sales_cents" END AS "__pgt_aux_nonnull_sales_cents"
+FROM __pgt_cte_agg_merge_13 m
+WHERE m.__pgt_meta_action IN ('I', 'D')
+   OR (m.__pgt_meta_action = 'U'
+       AND (m.new_count IS DISTINCT FROM m.old_count
+          OR m."new_order_count"::text IS DISTINCT FROM m."old_order_count"::text
+          OR m."new_units"::text IS DISTINCT FROM m."old_units"::text
+          OR m."new_sales_cents"::text IS DISTINCT FROM m."old_sales_cents"::text))
+)
+SELECT * FROM __pgt_cte_agg_final_14
+psql:/protocol/trace_refresh.sql:51: DEBUG:  [pg_trickle] MT-8 fallback=partition_or_trigger_apply_constraint for ax.st_day_category_status
+psql:/protocol/trace_refresh.sql:51: DEBUG:  rehashing catalog cache id 39 for pg_operator; 65 lists, 32 buckets
+psql:/protocol/trace_refresh.sql:51: INFO:  [PGS_PROFILE] decision=2.13ms generate+build=2.66ms merge_exec=16.30ms cleanup_enqueue=0.00ms total=21.10ms affected=3 phantom_cleanup=0 delta_est=5 mode=INCR path=cache_miss hints=none strategy=merge
+psql:/protocol/trace_refresh.sql:51: WARNING:  [pg_trickle] DIFF refresh for ax.st_day_category_status took 21.1ms vs last FULL 7.1ms — DIFF is 3.0x slower
+psql:/protocol/trace_refresh.sql:51: DEBUG:  [pg_trickle] Adaptive threshold: INCR=21.1ms vs FULL=7.1ms (ratio=2.96), threshold 0.120 → 0.096
+psql:/protocol/trace_refresh.sql:51: INFO:  Stream table ax.st_day_category_status refreshed (DIFFERENTIAL: +3 -0)
+ refresh_stream_table 
+----------------------
+ 
+(1 row)
+
+                                                                                                                                                                        json_build_object                                                                                                                                                                        
+-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ {"phase" : "after", "utc" : "2026-10-31T22:53:33.091377+00:00", "snapshot" : "957:957:", "frontier" : {"sources": {"17431": {"lsn": "0/2306628", "snapshot_ts": "1793487213Z"}, "17462": {"lsn": "0/22EC798", "snapshot_ts": "1793487213Z"}}, "data_timestamp": "1793487213Z"}, "effective_mode" : "DIFFERENTIAL", "status" : "ACTIVE", "needs_reinit" : false}
+(1 row)
+
+psql:/protocol/trace_refresh.sql:58: DEBUG:  relation "pg_temp.__pgt_delta_2" does not exist
+                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    json_agg                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                    
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ [{"lsn": "0/22A85A8", "action": "D", "status": "paid", "utc_day": "2026-11-21T00:00:00", "order_id": 1002, "quantity": 1, "utc_hour": "2026-11-21T12:00:00", "change_id": 3, "tenant_id": 1, "created_at": "2026-11-21T12:00:00+00:00", "line_cents": 1000, "product_id": 2, "source_xid": "948", "updated_at": "2026-10-31T22:53:31.53189+00:00", "customer_id": 1, "__pgt_row_id": "\\x030100000002030180000001040180000000000003eaff", "changed_cols": "000010001000", "source_commit_at": null, "unit_price_cents": 1000, "__pgt_trace_context": null}, {"lsn": "0/22A85A8", "action": "I", "status": "cancelled", "utc_day": "2026-11-21T00:00:00", "order_id": 1002, "quantity": 1, "utc_hour": "2026-11-21T12:00:00", "change_id": 4, "tenant_id": 1, "created_at": "2026-11-21T12:00:00+00:00", "line_cents": 1000, "product_id": 2, "source_xid": "948", "updated_at": "2026-10-31T22:53:32.18345+00:00", "customer_id": 1, "__pgt_row_id": "\\x030100000002030180000001040180000000000003eaff", "changed_cols": "000010001000", "source_commit_at": null, "unit_price_cents": 1000, "__pgt_trace_context": null}, {"lsn": "0/22EC560", "action": "I", "status": "paid", "utc_day": "2026-11-20T00:00:00", "order_id": 1001, "quantity": 1, "utc_hour": "2026-11-20T12:00:00", "change_id": 5, "tenant_id": 1, "created_at": "2026-11-20T12:00:00+00:00", "line_cents": 1000, "product_id": 1, "source_xid": "953", "updated_at": "2026-10-31T22:53:32.766689+00:00", "customer_id": 1, "__pgt_row_id": "\\x030100000002030180000001040180000000000003e9ff", "changed_cols": null, "source_commit_at": null, "unit_price_cents": 1000, "__pgt_trace_context": null}, {"lsn": "0/22EC798", "action": "I", "status": "cancelled", "utc_day": "2026-11-20T00:00:00", "order_id": 1001, "quantity": 1, "utc_hour": "2026-11-20T12:00:00", "change_id": 7, "tenant_id": 1, "created_at": "2026-11-20T12:00:00+00:00", "line_cents": 1000, "product_id": 1, "source_xid": "954", "updated_at": "2026-10-31T22:53:32.769642+00:00", "customer_id": 1, "__pgt_row_id": "\\x030100000002030180000001040180000000000003e9ff", "changed_cols": "000010001000", "source_commit_at": null, "unit_price_cents": 1000, "__pgt_trace_context": null}]
+(1 row)
+
+AGGREGATE_DELTA_TRACE INCONCLUSIVE: selected path may not materialize this relation; SQL logs are not row evidence
+ refresh_id |          start_time           |           end_time           |    action    |  status   | initiated_by | delta_row_count | merge_strategy_used | was_full_fallback | refresh_reason 
+------------+-------------------------------+------------------------------+--------------+-----------+--------------+-----------------+---------------------+-------------------+----------------
+         14 | 2026-10-31 22:53:33.057475+00 | 2026-10-31 22:53:33.08941+00 | DIFFERENTIAL | COMPLETED | MANUAL       |               3 | merge               | f                 | 
+(1 row)
+
+psql:/protocol/trace_refresh.sql:76: ERROR:  column "t" does not exist
+LINE 3:  'stage_observed',t,'materialized_delta_observed',f,
+                          ^
