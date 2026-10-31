@@ -1,7 +1,6 @@
 import { useId } from 'react'
 
-// AggregateX brand. Inline SVG, so it scales crisply and follows the light/dark theme.
-// Mark: three rising bars resting on one "sum" bar: many rows aggregated into one answer.
+// AggregateX brand: an architectural AX monogram made from layered data rails.
 export const LogoMark = ({ size = 32, animated = false, title }) => {
   const id = useId().replace(/:/g, '')
   return (
@@ -17,15 +16,17 @@ export const LogoMark = ({ size = 32, animated = false, title }) => {
     >
       <defs>
         <linearGradient id={`axg-${id}`} x1="0" y1="0" x2="1" y2="1">
-          <stop offset="0" stopColor="#22d3ee" />
-          <stop offset="1" stopColor="#2563eb" />
+          <stop offset="0" className="logo-gradient__start" />
+          <stop offset="1" className="logo-gradient__end" />
         </linearGradient>
+        <filter id={`axs-${id}`} x="-20%" y="-20%" width="140%" height="140%">
+          <feDropShadow dx="0" dy="4" stdDeviation="4" floodColor="#07111f" floodOpacity="0.28" />
+        </filter>
       </defs>
-      <rect width="64" height="64" rx="15" fill={`url(#axg-${id})`} />
-      <rect x="14" y="30" width="9" height="14" rx="3" fill="#fff" opacity="0.72" />
-      <rect x="27.5" y="22" width="9" height="22" rx="3" fill="#fff" opacity="0.86" />
-      <rect x="41" y="14" width="9" height="30" rx="3" fill="#fff" />
-      <rect x="14" y="47" width="36" height="5" rx="2.5" fill="#fff" />
+      <rect width="64" height="64" rx="17" fill={`url(#axg-${id})`} />
+      <path d="M14 16.5 31.5 34 14 51.5" fill="none" stroke="#fff" strokeWidth="7" strokeLinecap="round" strokeLinejoin="round" filter={`url(#axs-${id})`} />
+      <path d="M50 16.5 32.5 34 50 51.5" fill="none" stroke="#fff" strokeWidth="7" strokeLinecap="round" strokeLinejoin="round" opacity="0.96" />
+      <circle cx="32" cy="34" r="4.5" fill="#11264a" stroke="#dffaff" strokeWidth="2" />
     </svg>
   )
 }

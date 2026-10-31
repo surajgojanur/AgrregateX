@@ -25,8 +25,8 @@ MIN_MB=${AX_MIN_AVAILABLE_MB:-1024}
 A_TIMEOUT=${AX_A_TIMEOUT_S:-10}
 RECOVERY_TIMEOUT=${AX_RECOVERY_TIMEOUT_S:-30}
 export PGPASSWORD=${AX_DB_SUPERUSER_PASSWORD:-local-demo-superuser}
-PSQL_A=(psql -h 127.0.0.1 -p 25571 -U postgres -d aggregatex -XAtq -v ON_ERROR_STOP=1)
-PSQL_B=(psql -h 127.0.0.1 -p 25572 -U postgres -d aggregatex -XAtq -v ON_ERROR_STOP=1)
+PSQL_A=(psql -h 127.0.0.1 -p "${AX_SHARD_A_PORT:-25571}" -U postgres -d aggregatex -XAtq -v ON_ERROR_STOP=1)
+PSQL_B=(psql -h 127.0.0.1 -p "${AX_SHARD_B_PORT:-25572}" -U postgres -d aggregatex -XAtq -v ON_ERROR_STOP=1)
 
 AX_STATE_DIR=$(mktemp -d)
 JAR="$AX_STATE_DIR/cookies"

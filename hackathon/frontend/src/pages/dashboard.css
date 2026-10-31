@@ -1,6 +1,12 @@
 /* AgrregateX dashboard + engine pages. Uses the app's theme tokens (light/dark handled there). */
 .ax-dash { display: flex; flex-direction: column; gap: 16px; min-width: 0; }
+.ax-dash > * { animation: axReveal 420ms var(--ease) both; }
+.ax-dash > *:nth-child(2) { animation-delay: 45ms; }
+.ax-dash > *:nth-child(3) { animation-delay: 90ms; }
+.ax-dash > *:nth-child(4) { animation-delay: 135ms; }
 .ax-panel { padding: 16px; min-width: 0; overflow-x: auto; }
+.ax-panel { background-image: linear-gradient(145deg, rgba(40, 215, 242, 0.018), transparent 38%); }
+.ax-panel:hover { border-color: color-mix(in srgb, var(--border-strong) 75%, var(--cyan) 25%); transform: translateY(-1px); }
 .ax-panel .panel__head { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
 .ax-panel .panel__head .ax-ms, .ax-panel .panel__head .label { margin-left: auto; }
 .ax-grid2 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
@@ -59,6 +65,38 @@
 .ax-fresh--warn { border-color: color-mix(in srgb, var(--amber) 55%, transparent); }
 .ax-shardline { margin: -6px 0 0; font-size: 11.5px; }
 .ax-outage { border-color: var(--red); }
+.ax-kpis .stat {
+  position: relative;
+  overflow: hidden;
+  min-height: 128px;
+  border-radius: 16px;
+}
+.ax-kpis .stat::after {
+  content: '';
+  position: absolute;
+  right: -28px;
+  bottom: -48px;
+  width: 118px;
+  height: 118px;
+  border-radius: 50%;
+  background: radial-gradient(circle, var(--cyan-soft), transparent 68%);
+  pointer-events: none;
+}
+.ax-kpis .stat:nth-child(2)::after { background: radial-gradient(circle, var(--blue-soft), transparent 68%); }
+.ax-kpis .stat:nth-child(3)::after { background: radial-gradient(circle, var(--green-soft), transparent 68%); }
+.ax-kpis .stat:nth-child(4)::after { background: radial-gradient(circle, var(--amber-soft), transparent 68%); }
+.ax-kpis .stat__value {
+  font-family: var(--display);
+  font-weight: 650;
+}
+.ax-filters {
+  border-radius: 16px;
+  background-image: linear-gradient(135deg, rgba(40, 215, 242, 0.035), transparent 48%);
+}
+@keyframes axReveal {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
 .ax-shards { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
 .ax-shard__head { display: flex; align-items: center; gap: 8px; }
 .ax-shard__head h3 { margin: 0; font-size: 18px; }

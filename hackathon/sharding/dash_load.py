@@ -1,7 +1,7 @@
 """Continuous dashboard load on shard A tenants for N seconds (4 threads). usage: dash_load.py seconds"""
 import json, os, sys, threading, time, urllib.error, urllib.request
 from http.cookiejar import CookieJar
-B = "http://127.0.0.1:8091"; END = time.time() + float(sys.argv[1]); n = [0]
+B = os.environ.get("AX_BASE", "http://127.0.0.1:8091"); END = time.time() + float(sys.argv[1]); n = [0]
 op = urllib.request.build_opener(urllib.request.HTTPCookieProcessor(CookieJar()))
 try:  # login is on by default; harmless when disabled
     op.open(urllib.request.Request(B + "/api/auth/login", json.dumps({"email": "admin@demo.local",

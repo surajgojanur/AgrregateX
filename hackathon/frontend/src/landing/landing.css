@@ -6,6 +6,24 @@
 }
 .ax-land a { color: inherit; }
 
+.ax-land .panel {
+  color: var(--text);
+  background: linear-gradient(145deg, var(--panel-2), var(--panel));
+  border-color: var(--border);
+}
+
+:root[data-theme='light'] .ax-land .panel {
+  color: var(--text);
+  background: linear-gradient(145deg, #ffffff, var(--panel));
+  border-color: var(--border);
+  box-shadow: 0 8px 24px rgba(70, 91, 48, 0.08);
+}
+
+:root[data-theme='light'] .ax-land .faint,
+:root[data-theme='light'] .ax-land .muted {
+  color: var(--text-2);
+}
+
 .ax-land__nav {
   position: sticky;
   top: 0;
