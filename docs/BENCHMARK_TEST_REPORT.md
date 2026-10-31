@@ -1,6 +1,7 @@
 # AgrregateX benchmark and acceptance report
 
 **Run date:** 2026-10-31 UTC
+**Benchmark code commit:** `8d2b3fd3d95f00af60fed39d961587501f8b6b6b`
 **Command:** `python3 benchmarks/acceptance.py --bounded`
 **Runner:** COMPLETED
 **Overall PRD result:** FAIL for this bounded run; official full-scale compliance is NOT VERIFIED.
@@ -31,40 +32,42 @@ The harness completed **720/720 HTTP requests** with zero errors. It covered sum
 
 | Family / mode | Requests | p50 ms | p95 ms | p99 ms | Maximum ms |
 |---|---:|---:|---:|---:|---:|
-| Summary, sequential | 96 | 3.470 | 10.156 | 12.943 | 12.943 |
-| Summary, 4 concurrent | 48 | 13.580 | 38.709 | 46.852 | 46.852 |
-| Daily trends, sequential | 96 | 3.788 | 11.028 | 17.147 | 17.147 |
-| Daily trends, 4 concurrent | 48 | 13.629 | 54.976 | 61.660 | 61.660 |
-| Hourly trends, sequential | 96 | 8.804 | 29.619 | 43.735 | 43.735 |
-| Hourly trends, 4 concurrent | 48 | 22.519 | 64.019 | 78.787 | 78.787 |
-| Top-N, sequential | 96 | 3.608 | 8.521 | 11.462 | 11.462 |
-| Top-N, 4 concurrent | 48 | 15.508 | 36.403 | 50.473 | 50.473 |
-| Breakdown, sequential | 96 | 4.391 | 10.021 | 16.282 | 16.282 |
-| Breakdown, 4 concurrent | 48 | 14.094 | 41.587 | 56.177 | 56.177 |
+| Summary, sequential | 96 | 3.833 | 8.763 | 9.940 | 9.940 |
+| Summary, 4 concurrent | 48 | 8.494 | 17.490 | 23.102 | 23.102 |
+| Daily trends, sequential | 96 | 4.175 | 12.466 | 13.498 | 13.498 |
+| Daily trends, 4 concurrent | 48 | 9.238 | 23.443 | 32.413 | 32.413 |
+| Hourly trends, sequential | 96 | 8.189 | 26.046 | 33.045 | 33.045 |
+| Hourly trends, 4 concurrent | 48 | 15.827 | 58.508 | 71.100 | 71.100 |
+| Top-N, sequential | 96 | 3.444 | 8.441 | 9.456 | 9.456 |
+| Top-N, 4 concurrent | 48 | 11.940 | 28.768 | 43.040 | 43.040 |
+| Breakdown, sequential | 96 | 3.825 | 10.456 | 11.758 | 11.758 |
+| Breakdown, 4 concurrent | 48 | 8.404 | 18.414 | 21.197 | 21.197 |
 
-G-1 passed this measured 1M set: maximum 78.787 ms (<200 ms). This does not establish the 10M target.
+G-1 passed this measured 1M set: maximum 71.100 ms (<200 ms). This does not establish the 10M target.
 
 ## Freshness (G-2, 1M only)
 
-Thirty commit-to-correct-response observations covered 10 inserts, 10 updates, and 10 cancellations. All passed; worst observed visibility time was **0.216 seconds**. Fixture cleanup and source snapshots matched. This is 1M representative-data evidence only.
+Thirty commit-to-correct-response observations covered 10 inserts, 10 updates, and 10 cancellations. All passed; worst observed visibility time was **0.184 seconds**. Fixture cleanup and source snapshots matched. This is 1M representative-data evidence only.
 
 ## Database safety (G-3; measured FAIL)
 
 The latest bounded run used eight randomized matched pairs. Each arm executed 120 mixed OLTP transactions (60 selects, 30 updates, 30 inserts), targeting 40 OLTP operations/second; loaded arms also targeted 20 dashboard requests/second using four workers distributed across four tenants to avoid intentionally triggering the API's per-tenant concurrency guard. The sequence was the same within each pair, and baseline/load arm order was randomized.
 
-Observed achieved rates were 39.14–39.77 OLTP transactions/second and 20.87–21.18 dashboard requests/second. There were zero operational errors and zero dashboard HTTP errors. The artifact contains 1,920 raw operation timings, 32 phase events, and 27 telemetry samples with container CPU, memory and block I/O plus PostgreSQL WAL counters, lock counts/waiters and database activity counters.
+Observed achieved rates were 39.09–39.77 OLTP transactions/second and 20.85–21.16 dashboard requests/second. There were zero operational errors and zero dashboard HTTP errors. The artifact contains 1,920 raw operation timings, 32 phase events, and 27 telemetry samples with container CPU, memory and block I/O plus PostgreSQL WAL counters, lock counts/waiters and database activity counters.
 
 | Full transaction latency | Baseline | Dashboard load | Slowdown |
 |---|---:|---:|---:|
-| Mean | 1.572 ms | 1.664 ms | +5.84% |
-| p50 | 1.490 ms | 1.542 ms | — |
-| p95 | 2.969 ms | 4.471 ms | +50.59% |
-| p99 | 9.766 ms | 8.668 ms | — |
-| Maximum | 26.994 ms | 17.595 ms | — |
+| Mean | 2.025 ms | 2.548 ms | +25.82% |
+| p50 | 1.589 ms | 1.665 ms | — |
+| p95 | 7.312 ms | 9.719 ms | +32.92% |
+| p99 | 11.924 ms | 17.060 ms | — |
+| Maximum | 19.195 ms | 44.747 ms | — |
 
-Across eight matched pairs, the mean of pair-level mean slowdowns was +6.13%; the median pair-level p95 slowdown was +25.13%. The worst pair had +37.01% mean and +86.09% p95 slowdown. Operation-level statistics are retained in the JSON artifact.
+Across eight matched pairs, the mean of pair-level mean slowdowns was +33.89%; the median pair-level mean slowdown was +20.78%, and the median pair-level p95 slowdown was +31.30%. The worst pair had +156.67% mean and +435.59% p95 slowdown. Operation-level statistics are retained in the JSON artifact.
 
-**G-3: FAIL.** The pooled and matched-pair p95 slowdowns exceed 10%, despite the pooled mean being +5.84%. The distribution is variable; this run is not evidence of a stable improvement or a backend architecture decision. The harness now preserves the p95/tail result and fails closed. Follow-up should examine repeated safety runs under controlled host background load and record the same telemetry; no architecture change is made here.
+A previous bounded run of the same paired harness on the same baseline measured +5.84% pooled mean and +50.59% pooled p95 slowdown (with +6.13% mean of pair-level means). The variation between these completed runs is material. Both runs fail the p95 criterion; neither supports claiming a repeatable improvement.
+
+**G-3: FAIL.** Both pooled mean (+25.82%) and p95 (+32.92%) exceed 10%; matched-pair mean and p95 results also exceed the target. This is consistent with the previous bounded run's elevated p95, while pair-level results show substantial variation. The harness preserves the full distribution and fails closed. Follow-up should examine the dashboard-induced database work and repeat under controlled host background load; no architecture change is made here.
 
 ## PRD scorecard
 
@@ -79,9 +82,9 @@ FR results describe the bounded representative dataset and tested API contracts,
 | FR-5 tenant isolation | PASS (10 populated tenants) | 100 API identities, RLS and cross-tenant tests; not a 100-populated-tenant dataset. |
 | FR-6 mutations and replay | PASS (bounded) | Insert/update/cancel/delete, historical changes, duplicate replay, conflict and rollback checks. |
 | FR-7 API | PASS (bounded) | Health, REST calls, dashboard and OpenAPI/Swagger checks. |
-| G-1 query speed <200 ms | PASS (1M only) | 720/720 HTTP successes; maximum 78.787 ms. |
-| G-2 freshness <30 sec | PASS (1M only) | 30/30 observations; maximum 0.216 sec. |
-| G-3 DB slowdown <10% | FAIL | Full mixed transaction p95 slowdown +50.59%; matched median pair p95 +25.13%. |
+| G-1 query speed <200 ms | PASS (1M only) | 720/720 HTTP successes; maximum 71.100 ms. |
+| G-2 freshness <30 sec | PASS (1M only) | 30/30 observations; maximum 0.184 sec. |
+| G-3 DB slowdown <10% | FAIL | Full mixed transaction mean slowdown +25.82%, p95 +32.92%; matched median pair mean +20.78%, p95 +31.30%. |
 | G-4 exact correctness | PASS (measured 1M scopes) | 65 API/source comparisons and two full rollup reconciliations; zero mismatches. |
 | G-5 growth <2x, 1M to 10M | NOT TESTED | No 10M dataset or valid matched 10M artifact was run. |
 

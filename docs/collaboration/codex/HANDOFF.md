@@ -21,11 +21,11 @@
 
 - Machine: Fedora 44 x86_64, PostgreSQL 18.6 in rootless Podman; existing 1M / 10-tenant representative dataset.
 - Functional: 163/163 assertions passed.
-- HTTP: 720/720 successful; maximum 78.787 ms.
+- HTTP: 720/720 successful; maximum 71.100 ms.
 - Correctness: 65 API/source comparisons and two full rollup comparisons; zero mismatches.
-- Freshness: 30/30 passed; worst 0.216 seconds.
+- Freshness: 30/30 passed; worst 0.184 seconds.
 - Tenant isolation: 100 credential identities and 9,900 cross-identity rejection pairs; dataset has 10 populated tenants.
-- G-3: FAIL. Eight pairs / 960 operations per arm; 39.14–39.77 OLTP ops/s, 20.87–21.18 dashboard req/s, zero errors. Mixed transaction mean slowdown +5.84%; pooled p95 +50.59%; median paired p95 +25.13%. High tail variability is retained as a failure, not normalized away.
+- G-3: FAIL. Eight pairs / 960 operations per arm; 39.09–39.77 OLTP ops/s, 20.85–21.16 dashboard req/s, zero errors. Mixed transaction mean slowdown +25.82%; pooled p95 +32.92%; median matched-pair mean +20.78%, p95 +31.30%. High tail variability is retained as a failure.
 - G-5: NOT TESTED; no 10M load or benchmark was run. Official dataset compatibility remains NOT VERIFIED.
 - Baseline: unchanged 1,000,000 orders, 10 tenants, 82,256 daily rollup rows, 331,361 hourly rollup rows.
 
