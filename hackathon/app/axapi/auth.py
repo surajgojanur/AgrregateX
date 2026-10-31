@@ -82,6 +82,8 @@ def verify(token: str | None) -> User | None:
 
 
 def current_user(request: Request) -> User:
+    if config.AUTH_DISABLED:
+        return User("admin@demo.local", "admin", None)
     user = verify(request.cookies.get(COOKIE))
     if user is None:
         raise HTTPException(401, "Not signed in.")

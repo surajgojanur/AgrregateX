@@ -25,6 +25,8 @@ SESSION_SECRET = (_env("AX_SESSION_SECRET") or secrets.token_hex(32)).encode()
 SESSION_TTL_S = int(_env("AX_SESSION_TTL_S", "28800"))
 COOKIE_SECURE = _env("AX_COOKIE_SECURE", "0") == "1"
 
+# No-login mode: every request is the operator (local demo only; DB RLS still applies).
+AUTH_DISABLED = _env("AX_AUTH_DISABLED", "0") == "1"
 ENABLE_DEMO_WRITES = _env("AX_ENABLE_DEMO_WRITES", "0") == "1"
 STATIC_DIR = _env("AX_STATIC_DIR")  # built frontend (dist/); served at / when set
 MAX_RANGE_DAYS = 400

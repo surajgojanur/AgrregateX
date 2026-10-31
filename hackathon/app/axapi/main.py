@@ -6,7 +6,7 @@ from typing import Literal
 
 from fastapi import Depends, FastAPI, HTTPException, Query, Request, Response
 from fastapi.concurrency import run_in_threadpool
-from fastapi.responses import FileResponse, JSONResponse
+from fastapi.responses import FileResponse, JSONResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 
@@ -194,6 +194,13 @@ def api_not_found(rest: str):
 # ── built frontend (single-port demo) ──────────────────────────────────────
 if config.STATIC_DIR and Path(config.STATIC_DIR, "index.html").is_file():
     _index = Path(config.STATIC_DIR, "index.html")
+
+    if config.AUTH_DISABLED:  # no login: land directly on the dashboard
+        @app.get("/", include_in_schema=False)
+        @app.get("/login", include_in_schema=False)
+        @app.get("/register", include_in_schema=False)
+        def to_dashboard():
+            return RedirectResponse("/app#/dashboard", status_code=307)
 
     @app.get("/app", include_in_schema=False)
     @app.get("/login", include_in_schema=False)
