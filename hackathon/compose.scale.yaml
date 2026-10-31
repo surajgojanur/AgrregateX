@@ -17,7 +17,7 @@ x-roles: &roles
   AX_MONITOR_PASSWORD: ${AX_MONITOR_PASSWORD:-local-demo-monitor}
 services:
   db:
-    image: ghcr.io/trickle-labs/pg_trickle:latest   # PG 18.6 + pg_trickle 0.108.3 (see handoff §0)
+    image: ${AX_PG_TRICKLE_IMAGE:-ghcr.io/trickle-labs/pg_trickle@sha256:94344bb98995b19c826f939739672481abaab8c25710e3910b48bdb7cf5b3b8d}   # PG 18.6 + pg_trickle 0.108.3; multi-arch index pinned (#39), was mutable :latest
     command: ["postgres", "-c", "shared_buffers=${AX_SCALE_SHARED_BUFFERS:-512MB}",
               "-c", "maintenance_work_mem=256MB", "-c", "max_wal_size=4GB",
               "-c", "checkpoint_timeout=15min", "-c", "work_mem=32MB"]
