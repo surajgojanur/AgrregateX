@@ -1,0 +1,22 @@
+BEGIN
+SET
+SET
+SET
+SET
+     stream_table      | missing_in_st | extra_in_st 
+-----------------------+---------------+-------------
+ st_day_product_status |             0 |           0
+(1 row)
+
+      stream_table      | missing_in_st | extra_in_st 
+------------------------+---------------+-------------
+ st_day_category_status |             0 |           0
+(1 row)
+
+      stream_table       | missing_in_st | extra_in_st 
+-------------------------+---------------+-------------
+ st_hour_category_status |             0 |           0
+(1 row)
+
+COMMIT
+[04:49:34]   took 0s

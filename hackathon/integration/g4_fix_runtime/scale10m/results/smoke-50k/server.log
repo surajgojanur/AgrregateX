@@ -1,0 +1,156 @@
+2026-11-01 10:19:31.254 IST [68824] LOG:  pg_trickle: initialized (shared_preload_libraries)
+2026-11-01 10:19:31.256 IST [68824] LOG:  starting PostgreSQL 18.6 (Homebrew) on aarch64-apple-darwin27.0.0, compiled by Apple clang version 21.0.0 (clang-2100.3.34.2), 64-bit
+2026-11-01 10:19:31.257 IST [68824] LOG:  listening on IPv4 address "127.0.0.1", port 55432
+2026-11-01 10:19:31.261 IST [68830] LOG:  database system was shut down at 2026-11-01 10:19:31 IST
+2026-11-01 10:19:31.263 IST [68824] LOG:  database system is ready to accept connections
+2026-11-01 10:19:32.398 IST [68875] LOG:  pg_trickle: pre-warmed delta+MERGE cache for ax.st_day_product_status
+2026-11-01 10:19:32.398 IST [68875] STATEMENT:  SELECT pgtrickle.create_stream_table(
+	    name         => 'ax.st_day_product_status',
+	    query        => $q$
+	        SELECT o.tenant_id, o.utc_day, o.product_id, o.status,
+	               COUNT(*)            AS order_count,
+	               SUM(o.quantity)     AS units,
+	               SUM(o.line_cents)   AS sales_cents
+	        FROM ax.orders o
+	        GROUP BY o.tenant_id, o.utc_day, o.product_id, o.status
+	    $q$,
+	    schedule     => NULLIF('1h', ''),
+	    refresh_mode => 'DIFFERENTIAL',
+	    cdc_mode     => 'trigger'
+	);
+2026-11-01 10:19:32.630 IST [68875] LOG:  pg_trickle: pre-warmed delta+MERGE cache for ax.st_day_category_status
+2026-11-01 10:19:32.630 IST [68875] STATEMENT:  SELECT pgtrickle.create_stream_table(
+	    name         => 'ax.st_day_category_status',
+	    query        => $q$
+	        SELECT o.tenant_id, o.utc_day, p.category_id, o.status,
+	               COUNT(*)            AS order_count,
+	               SUM(o.quantity)     AS units,
+	               SUM(o.line_cents)   AS sales_cents
+	        FROM ax.orders o
+	        JOIN ax.products p ON p.tenant_id = o.tenant_id AND p.product_id = o.product_id
+	        GROUP BY o.tenant_id, o.utc_day, p.category_id, o.status
+	    $q$,
+	    schedule     => NULLIF('1h', ''),
+	    refresh_mode => 'DIFFERENTIAL',
+	    cdc_mode     => 'trigger'
+	);
+2026-11-01 10:19:33.014 IST [68875] LOG:  pg_trickle: pre-warmed delta+MERGE cache for ax.st_hour_category_status
+2026-11-01 10:19:33.014 IST [68875] STATEMENT:  SELECT pgtrickle.create_stream_table(
+	    name         => 'ax.st_hour_category_status',
+	    query        => $q$
+	        SELECT o.tenant_id, o.utc_hour, p.category_id, o.status,
+	               COUNT(*)            AS order_count,
+	               SUM(o.quantity)     AS units,
+	               SUM(o.line_cents)   AS sales_cents
+	        FROM ax.orders o
+	        JOIN ax.products p ON p.tenant_id = o.tenant_id AND p.product_id = o.product_id
+	        GROUP BY o.tenant_id, o.utc_hour, p.category_id, o.status
+	    $q$,
+	    schedule     => NULLIF('1h', ''),
+	    refresh_mode => 'DIFFERENTIAL',
+	    cdc_mode     => 'trigger'
+	);
+2026-11-01 10:19:33.042 IST [68875] WARNING:  pg_trickle_ddl_tracker: ST 2 suspended (SOURCE_DEPENDENCY_AMBIGUOUS) after source DDL on ax.orders
+2026-11-01 10:19:33.042 IST [68875] CONTEXT:  SQL statement "ALTER TABLE ax.orders ENABLE ROW LEVEL SECURITY"
+	PL/pgSQL function inline_code_block line 6 at EXECUTE
+2026-11-01 10:19:33.042 IST [68875] WARNING:  pg_trickle_ddl_tracker: ST 3 suspended (SOURCE_DEPENDENCY_AMBIGUOUS) after source DDL on ax.orders
+2026-11-01 10:19:33.042 IST [68875] CONTEXT:  SQL statement "ALTER TABLE ax.orders ENABLE ROW LEVEL SECURITY"
+	PL/pgSQL function inline_code_block line 6 at EXECUTE
+2026-11-01 10:19:33.043 IST [68875] WARNING:  pg_trickle_ddl_tracker: ST 1 suspended (SOURCE_DEPENDENCY_AMBIGUOUS) after source DDL on ax.orders
+2026-11-01 10:19:33.043 IST [68875] CONTEXT:  SQL statement "ALTER TABLE ax.orders ENABLE ROW LEVEL SECURITY"
+	PL/pgSQL function inline_code_block line 6 at EXECUTE
+2026-11-01 10:19:33.044 IST [68875] WARNING:  pg_trickle_ddl_tracker: ALTER TABLE on ax.orders → 3 ST(s) suspended
+2026-11-01 10:19:33.044 IST [68875] CONTEXT:  SQL statement "ALTER TABLE ax.orders ENABLE ROW LEVEL SECURITY"
+	PL/pgSQL function inline_code_block line 6 at EXECUTE
+2026-11-01 10:19:33.045 IST [68875] WARNING:  pg_trickle_ddl_tracker: ST 2 suspended (SOURCE_DEPENDENCY_AMBIGUOUS) after source DDL on ax.orders
+2026-11-01 10:19:33.045 IST [68875] CONTEXT:  SQL statement "ALTER TABLE ax.orders FORCE ROW LEVEL SECURITY"
+	PL/pgSQL function inline_code_block line 7 at EXECUTE
+2026-11-01 10:19:33.045 IST [68875] WARNING:  pg_trickle_ddl_tracker: ST 3 suspended (SOURCE_DEPENDENCY_AMBIGUOUS) after source DDL on ax.orders
+2026-11-01 10:19:33.045 IST [68875] CONTEXT:  SQL statement "ALTER TABLE ax.orders FORCE ROW LEVEL SECURITY"
+	PL/pgSQL function inline_code_block line 7 at EXECUTE
+2026-11-01 10:19:33.046 IST [68875] WARNING:  pg_trickle_ddl_tracker: ST 1 suspended (SOURCE_DEPENDENCY_AMBIGUOUS) after source DDL on ax.orders
+2026-11-01 10:19:33.046 IST [68875] CONTEXT:  SQL statement "ALTER TABLE ax.orders FORCE ROW LEVEL SECURITY"
+	PL/pgSQL function inline_code_block line 7 at EXECUTE
+2026-11-01 10:19:33.047 IST [68875] WARNING:  pg_trickle_ddl_tracker: ALTER TABLE on ax.orders → 3 ST(s) suspended
+2026-11-01 10:19:33.047 IST [68875] CONTEXT:  SQL statement "ALTER TABLE ax.orders FORCE ROW LEVEL SECURITY"
+	PL/pgSQL function inline_code_block line 7 at EXECUTE
+2026-11-01 10:19:33.047 IST [68875] WARNING:  pg_trickle_ddl_tracker: ST 2 suspended (SOURCE_DEPENDENCY_AMBIGUOUS) after source DDL on tenant_read on ax.orders
+2026-11-01 10:19:33.047 IST [68875] CONTEXT:  SQL statement "CREATE POLICY tenant_read ON ax.orders FOR SELECT TO ax_api USING (tenant_id = ax.current_tenant())"
+	PL/pgSQL function inline_code_block line 9 at EXECUTE
+2026-11-01 10:19:33.047 IST [68875] WARNING:  pg_trickle_ddl_tracker: ST 3 suspended (SOURCE_DEPENDENCY_AMBIGUOUS) after source DDL on tenant_read on ax.orders
+2026-11-01 10:19:33.047 IST [68875] CONTEXT:  SQL statement "CREATE POLICY tenant_read ON ax.orders FOR SELECT TO ax_api USING (tenant_id = ax.current_tenant())"
+	PL/pgSQL function inline_code_block line 9 at EXECUTE
+2026-11-01 10:19:33.048 IST [68875] WARNING:  pg_trickle_ddl_tracker: ST 1 suspended (SOURCE_DEPENDENCY_AMBIGUOUS) after source DDL on tenant_read on ax.orders
+2026-11-01 10:19:33.048 IST [68875] CONTEXT:  SQL statement "CREATE POLICY tenant_read ON ax.orders FOR SELECT TO ax_api USING (tenant_id = ax.current_tenant())"
+	PL/pgSQL function inline_code_block line 9 at EXECUTE
+2026-11-01 10:19:33.048 IST [68875] LOG:  pg_trickle_ddl_tracker: policy change on tenant_read on ax.orders → 3 ST(s) suspended
+2026-11-01 10:19:33.048 IST [68875] CONTEXT:  SQL statement "CREATE POLICY tenant_read ON ax.orders FOR SELECT TO ax_api USING (tenant_id = ax.current_tenant())"
+	PL/pgSQL function inline_code_block line 9 at EXECUTE
+2026-11-01 10:19:33.048 IST [68875] STATEMENT:  DO $$
+	DECLARE t text;
+	BEGIN
+	    FOREACH t IN ARRAY ARRAY['st_day_product_status','st_day_category_status',
+	                             'st_hour_category_status','orders','products'] LOOP
+	        EXECUTE format('ALTER TABLE ax.%I ENABLE ROW LEVEL SECURITY', t);
+	        EXECUTE format('ALTER TABLE ax.%I FORCE ROW LEVEL SECURITY', t);
+	        EXECUTE format('DROP POLICY IF EXISTS tenant_read ON ax.%I', t);
+	        EXECUTE format('CREATE POLICY tenant_read ON ax.%I FOR SELECT TO ax_api '
+	                       'USING (tenant_id = ax.current_tenant())', t);
+	    END LOOP;
+	END $$;
+2026-11-01 10:19:33.048 IST [68875] WARNING:  pg_trickle_ddl_tracker: ST 2 suspended (SOURCE_DEPENDENCY_AMBIGUOUS) after source DDL on ax.products
+2026-11-01 10:19:33.048 IST [68875] CONTEXT:  SQL statement "ALTER TABLE ax.products ENABLE ROW LEVEL SECURITY"
+	PL/pgSQL function inline_code_block line 6 at EXECUTE
+2026-11-01 10:19:33.049 IST [68875] WARNING:  pg_trickle_ddl_tracker: ST 3 suspended (SOURCE_DEPENDENCY_AMBIGUOUS) after source DDL on ax.products
+2026-11-01 10:19:33.049 IST [68875] CONTEXT:  SQL statement "ALTER TABLE ax.products ENABLE ROW LEVEL SECURITY"
+	PL/pgSQL function inline_code_block line 6 at EXECUTE
+2026-11-01 10:19:33.050 IST [68875] WARNING:  pg_trickle_ddl_tracker: ALTER TABLE on ax.products → 2 ST(s) suspended
+2026-11-01 10:19:33.050 IST [68875] CONTEXT:  SQL statement "ALTER TABLE ax.products ENABLE ROW LEVEL SECURITY"
+	PL/pgSQL function inline_code_block line 6 at EXECUTE
+2026-11-01 10:19:33.051 IST [68875] WARNING:  pg_trickle_ddl_tracker: ST 2 suspended (SOURCE_DEPENDENCY_AMBIGUOUS) after source DDL on ax.products
+2026-11-01 10:19:33.051 IST [68875] CONTEXT:  SQL statement "ALTER TABLE ax.products FORCE ROW LEVEL SECURITY"
+	PL/pgSQL function inline_code_block line 7 at EXECUTE
+2026-11-01 10:19:33.051 IST [68875] WARNING:  pg_trickle_ddl_tracker: ST 3 suspended (SOURCE_DEPENDENCY_AMBIGUOUS) after source DDL on ax.products
+2026-11-01 10:19:33.051 IST [68875] CONTEXT:  SQL statement "ALTER TABLE ax.products FORCE ROW LEVEL SECURITY"
+	PL/pgSQL function inline_code_block line 7 at EXECUTE
+2026-11-01 10:19:33.052 IST [68875] WARNING:  pg_trickle_ddl_tracker: ALTER TABLE on ax.products → 2 ST(s) suspended
+2026-11-01 10:19:33.052 IST [68875] CONTEXT:  SQL statement "ALTER TABLE ax.products FORCE ROW LEVEL SECURITY"
+	PL/pgSQL function inline_code_block line 7 at EXECUTE
+2026-11-01 10:19:33.052 IST [68875] WARNING:  pg_trickle_ddl_tracker: ST 2 suspended (SOURCE_DEPENDENCY_AMBIGUOUS) after source DDL on tenant_read on ax.products
+2026-11-01 10:19:33.052 IST [68875] CONTEXT:  SQL statement "CREATE POLICY tenant_read ON ax.products FOR SELECT TO ax_api USING (tenant_id = ax.current_tenant())"
+	PL/pgSQL function inline_code_block line 9 at EXECUTE
+2026-11-01 10:19:33.053 IST [68875] WARNING:  pg_trickle_ddl_tracker: ST 3 suspended (SOURCE_DEPENDENCY_AMBIGUOUS) after source DDL on tenant_read on ax.products
+2026-11-01 10:19:33.053 IST [68875] CONTEXT:  SQL statement "CREATE POLICY tenant_read ON ax.products FOR SELECT TO ax_api USING (tenant_id = ax.current_tenant())"
+	PL/pgSQL function inline_code_block line 9 at EXECUTE
+2026-11-01 10:19:33.053 IST [68875] LOG:  pg_trickle_ddl_tracker: policy change on tenant_read on ax.products → 2 ST(s) suspended
+2026-11-01 10:19:33.053 IST [68875] CONTEXT:  SQL statement "CREATE POLICY tenant_read ON ax.products FOR SELECT TO ax_api USING (tenant_id = ax.current_tenant())"
+	PL/pgSQL function inline_code_block line 9 at EXECUTE
+2026-11-01 10:19:33.053 IST [68875] STATEMENT:  DO $$
+	DECLARE t text;
+	BEGIN
+	    FOREACH t IN ARRAY ARRAY['st_day_product_status','st_day_category_status',
+	                             'st_hour_category_status','orders','products'] LOOP
+	        EXECUTE format('ALTER TABLE ax.%I ENABLE ROW LEVEL SECURITY', t);
+	        EXECUTE format('ALTER TABLE ax.%I FORCE ROW LEVEL SECURITY', t);
+	        EXECUTE format('DROP POLICY IF EXISTS tenant_read ON ax.%I', t);
+	        EXECUTE format('CREATE POLICY tenant_read ON ax.%I FOR SELECT TO ax_api '
+	                       'USING (tenant_id = ax.current_tenant())', t);
+	    END LOOP;
+	END $$;
+2026-11-01 10:19:33.055 IST [68875] WARNING:  pg_trickle_ddl_tracker: ST 2 suspended (SOURCE_DEPENDENCY_AMBIGUOUS) after source DDL on tenant_write on ax.orders
+2026-11-01 10:19:33.055 IST [68875] WARNING:  pg_trickle_ddl_tracker: ST 3 suspended (SOURCE_DEPENDENCY_AMBIGUOUS) after source DDL on tenant_write on ax.orders
+2026-11-01 10:19:33.055 IST [68875] WARNING:  pg_trickle_ddl_tracker: ST 1 suspended (SOURCE_DEPENDENCY_AMBIGUOUS) after source DDL on tenant_write on ax.orders
+2026-11-01 10:19:33.055 IST [68875] LOG:  pg_trickle_ddl_tracker: policy change on tenant_write on ax.orders → 3 ST(s) suspended
+2026-11-01 10:19:33.055 IST [68875] STATEMENT:  CREATE POLICY tenant_write ON ax.orders FOR ALL TO ax_writer
+	    USING (tenant_id = ax.current_tenant()) WITH CHECK (tenant_id = ax.current_tenant());
+2026-11-01 10:19:37.630 IST [68925] WARNING:  [pg_trickle] DAG-3: Delta amplification detected for ax.st_day_category_status: 2 input rows → 378 output rows (189.0× amplification, threshold is 100×). Consider restructuring the query to reduce join fan-out, or raise pg_trickle.delta_amplification_threshold.
+2026-11-01 10:19:38.973 IST [68925] WARNING:  [pg_trickle] DAG-3: Delta amplification detected for ax.st_hour_category_status: 2 input rows → 526 output rows (263.0× amplification, threshold is 100×). Consider restructuring the query to reduce join fan-out, or raise pg_trickle.delta_amplification_threshold.
+2026-11-01 10:19:39.635 IST [68925] ERROR:  canceling statement due to statement timeout
+2026-11-01 10:19:39.635 IST [68925] STATEMENT:  SELECT pgtrickle.refresh_stream_table('ax.st_day_product_status');
+2026-11-01 10:19:41.794 IST [68824] LOG:  received fast shutdown request
+2026-11-01 10:19:41.795 IST [68824] LOG:  aborting any active transactions
+2026-11-01 10:19:41.795 IST [68824] LOG:  background worker "logical replication launcher" (PID 68834) exited with exit code 1
+2026-11-01 10:19:41.796 IST [68828] LOG:  shutting down
+2026-11-01 10:19:41.797 IST [68828] LOG:  checkpoint starting: shutdown immediate
+2026-11-01 10:19:41.966 IST [68828] LOG:  checkpoint complete: wrote 7152 buffers (21.8%), wrote 3 SLRU buffers; 0 WAL file(s) added, 0 removed, 4 recycled; write=0.135 s, sync=0.033 s, total=0.170 s; sync files=582, longest=0.003 s, average=0.001 s; distance=65191 kB, estimate=65191 kB; lsn=0/5736CE8, redo lsn=0/5736CE8
+2026-11-01 10:19:41.977 IST [68824] LOG:  database system is shut down

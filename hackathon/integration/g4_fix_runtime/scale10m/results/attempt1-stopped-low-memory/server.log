@@ -1,0 +1,65 @@
+2026-11-01 10:19:58.459 IST [69084] LOG:  pg_trickle: initialized (shared_preload_libraries)
+2026-11-01 10:19:58.462 IST [69084] LOG:  starting PostgreSQL 18.6 (Homebrew) on aarch64-apple-darwin27.0.0, compiled by Apple clang version 21.0.0 (clang-2100.3.34.2), 64-bit
+2026-11-01 10:19:58.462 IST [69084] LOG:  listening on IPv4 address "127.0.0.1", port 55432
+2026-11-01 10:19:58.466 IST [69090] LOG:  database system was shut down at 2026-11-01 10:19:58 IST
+2026-11-01 10:19:58.467 IST [69084] LOG:  database system is ready to accept connections
+2026-11-01 10:20:10.267 IST [69088] LOG:  checkpoints are occurring too frequently (12 seconds apart)
+2026-11-01 10:20:10.267 IST [69088] HINT:  Consider increasing the configuration parameter "max_wal_size".
+2026-11-01 10:20:10.269 IST [69088] LOG:  checkpoint starting: wal
+2026-11-01 10:20:20.451 IST [69088] LOG:  checkpoint complete: wrote 11377 buffers (34.7%), wrote 3 SLRU buffers; 0 WAL file(s) added, 0 removed, 33 recycled; write=9.735 s, sync=0.439 s, total=10.182 s; sync files=520, longest=0.345 s, average=0.001 s; distance=536329 kB, estimate=536329 kB; lsn=0/400DF498, redo lsn=0/2234F718
+2026-11-01 10:20:22.084 IST [69088] LOG:  checkpoints are occurring too frequently (12 seconds apart)
+2026-11-01 10:20:22.084 IST [69088] HINT:  Consider increasing the configuration parameter "max_wal_size".
+2026-11-01 10:20:22.084 IST [69088] LOG:  checkpoint starting: wal
+2026-11-01 10:20:33.711 IST [69088] LOG:  checkpoint complete: wrote 13456 buffers (41.1%), wrote 1 SLRU buffers; 0 WAL file(s) added, 0 removed, 33 recycled; write=11.354 s, sync=0.266 s, total=11.627 s; sync files=6, longest=0.218 s, average=0.045 s; distance=539829 kB, estimate=539829 kB; lsn=0/60F99EE0, redo lsn=0/4327CB78
+2026-11-01 10:20:35.305 IST [69088] LOG:  checkpoints are occurring too frequently (13 seconds apart)
+2026-11-01 10:20:35.305 IST [69088] HINT:  Consider increasing the configuration parameter "max_wal_size".
+2026-11-01 10:20:35.305 IST [69088] LOG:  checkpoint starting: wal
+2026-11-01 10:20:52.553 IST [69088] LOG:  checkpoint complete: wrote 16271 buffers (49.7%), wrote 1 SLRU buffers; 0 WAL file(s) added, 0 removed, 33 recycled; write=17.137 s, sync=0.106 s, total=17.249 s; sync files=7, longest=0.059 s, average=0.016 s; distance=540960 kB, estimate=540960 kB; lsn=0/821B07A8, redo lsn=0/642C4DB0
+2026-11-01 10:20:53.737 IST [69088] LOG:  checkpoints are occurring too frequently (18 seconds apart)
+2026-11-01 10:20:53.737 IST [69088] HINT:  Consider increasing the configuration parameter "max_wal_size".
+2026-11-01 10:20:53.737 IST [69088] LOG:  checkpoint starting: wal
+2026-11-01 10:21:01.280 IST [69088] LOG:  checkpoint complete: wrote 14960 buffers (45.7%), wrote 1 SLRU buffers; 0 WAL file(s) added, 0 removed, 33 recycled; write=7.513 s, sync=0.021 s, total=7.543 s; sync files=21, longest=0.010 s, average=0.001 s; distance=540685 kB, estimate=540933 kB; lsn=0/A3506320, redo lsn=0/852C83E8
+2026-11-01 10:21:02.107 IST [69088] LOG:  checkpoints are occurring too frequently (9 seconds apart)
+2026-11-01 10:21:02.107 IST [69088] HINT:  Consider increasing the configuration parameter "max_wal_size".
+2026-11-01 10:21:02.108 IST [69088] LOG:  checkpoint starting: wal
+2026-11-01 10:21:11.088 IST [69088] LOG:  checkpoint complete: wrote 182 buffers (0.6%), wrote 1 SLRU buffers; 0 WAL file(s) added, 0 removed, 33 recycled; write=8.882 s, sync=0.038 s, total=8.977 s; sync files=2, longest=0.038 s, average=0.019 s; distance=546043 kB, estimate=546043 kB; lsn=0/C4CF7DD8, redo lsn=0/A6807300
+2026-11-01 10:21:11.664 IST [69088] LOG:  checkpoints are occurring too frequently (9 seconds apart)
+2026-11-01 10:21:11.664 IST [69088] HINT:  Consider increasing the configuration parameter "max_wal_size".
+2026-11-01 10:21:11.666 IST [69088] LOG:  checkpoint starting: wal
+2026-11-01 10:21:22.082 IST [69495] ERROR:  canceling autovacuum task
+2026-11-01 10:21:22.082 IST [69495] CONTEXT:  while scanning block 11608 of relation "ax.orders"
+	automatic vacuum of table "ax_g4_regress.ax.orders"
+2026-11-01 10:21:33.556 IST [69088] LOG:  checkpoint complete: wrote 22025 buffers (67.2%), wrote 1 SLRU buffers; 1 WAL file(s) added, 33 removed, 0 recycled; write=21.478 s, sync=0.068 s, total=21.892 s; sync files=30, longest=0.054 s, average=0.003 s; distance=540807 kB, estimate=545520 kB; lsn=1/DC97598, redo lsn=0/C7829118
+2026-11-01 10:21:33.556 IST [69088] LOG:  checkpoints are occurring too frequently (22 seconds apart)
+2026-11-01 10:21:33.556 IST [69088] HINT:  Consider increasing the configuration parameter "max_wal_size".
+2026-11-01 10:21:33.556 IST [69088] LOG:  checkpoint starting: wal
+2026-11-01 10:22:00.148 IST [69084] LOG:  received fast shutdown request
+2026-11-01 10:22:00.364 IST [69084] LOG:  aborting any active transactions
+2026-11-01 10:22:00.367 IST [69698] FATAL:  terminating connection due to administrator command
+2026-11-01 10:22:00.367 IST [69698] CONTEXT:  SQL statement "INSERT INTO "ax"."st_day_product_status" SELECT pgtrickle.encode_row_id_v3('GROUP_KEY', ROW(sub."tenant_id", sub."utc_day", sub."product_id", sub."status")) AS __pgt_row_id, sub.* FROM (
+	        SELECT o.tenant_id, o.utc_day, o.product_id, o.status,
+	               COUNT(*)            AS order_count,
+	               SUM(o.quantity)     AS units,
+	               SUM(o.line_cents)   AS sales_cents, COUNT(*) AS __pgt_count, COUNT(CASE WHEN ("o"."quantity") IS NOT NULL THEN 1 END) AS "__pgt_aux_nonnull_units", COALESCE(CASE WHEN pg_catalog.pg_typeof(SUM(CASE WHEN true THEN ("o"."quantity") END))::oid IN (700,701,1700) THEN pg_catalog.jsonb_build_object('finite', COALESCE(SUM(CASE WHEN pg_catalog.pg_typeof(CASE WHEN true THEN ("o"."quantity") END)::oid IN (700,701,1700) THEN CASE WHEN (CASE WHEN true THEN ("o"."quantity") END)::text IN ('NaN','Infinity','-Infinity') THEN NULL ELSE (CASE WHEN true THEN ("o"."quantity") END)::text::numeric END END), 0), 'nan',COUNT(CASE WHEN pg_catalog.pg_typeof(CASE WHEN true THEN ("o"."quantity") END)::oid IN (700,701,1700) AND (CASE WHEN true THEN ("o"."quantity") END)::text='NaN' THEN 1 END), 'pos',COUNT(CASE WHEN pg_catalog.pg_typeof(CASE WHEN true THEN ("o"."quantity") END)::oid IN (700,701,1700) AND (CASE WHEN true THEN ("o"."quantity") END)::text='Infinity' THEN 1 END), 'neg',COUNT(CASE WHEN pg_catalog.pg_typeof(CASE WHEN true THEN ("o"."quantity") END)::oid IN (700,701,1700) AND (CASE WHEN true THEN ("o"."quantity") END)::text='-Infinity' THEN 1 END)) END, 'null'::jsonb) AS "__pgt_aux_special_units", COUNT(CASE WHEN ("o"."line_cents") IS NOT NULL THEN 1 END) AS "__pgt_aux_nonnull_sales_cents", COALESCE(CASE WHEN pg_catalog.pg_typeof(SUM(CASE WHEN true THEN ("o"."line_cents") END))::oid IN (700,701,1700) THEN pg_catalog.jsonb_build_object('finite', COALESCE(SUM(CASE WHEN pg_catalog.pg_typeof(CASE WHEN true THEN ("o"."line_cents") END)::oid IN (700,701,1700) THEN CASE WHEN (CASE WHEN true THEN ("o"."line_cents") END)::text IN ('NaN','Infinity','-Infinity') THEN NULL ELSE (CASE WHEN true THEN ("o"."line_cents") END)::text::numeric END END), 0), 'nan',COUNT(CASE WHEN pg_catalog.pg_typeof(CASE WHEN true THEN ("o"."line_cents") END)::oid IN (700,701,1700) AND (CASE WHEN true THEN ("o"."line_cents") END)::text='NaN' THEN 1 END), 'pos',COUNT(CASE WHEN pg_catalog.pg_typeof(CASE WHEN true THEN ("o"."line_cents") END)::oid IN (700,701,1700) AND (CASE WHEN true THEN ("o"."line_cents") END)::text='Infinity' THEN 1 END), 'neg',COUNT(CASE WHEN pg_catalog.pg_typeof(CASE WHEN true THEN ("o"."line_cents") END)::oid IN (700,701,1700) AND (CASE WHEN true THEN ("o"."line_cents") END)::text='-Infinity' THEN 1 END)) END, 'null'::jsonb) AS "__pgt_aux_special_sales_cents" FROM ax.orders o
+	        GROUP BY o.tenant_id, o.utc_day, o.product_id, o.status
+	    ) sub"
+2026-11-01 10:22:00.367 IST [69698] STATEMENT:  SELECT pgtrickle.create_stream_table(
+	    name         => 'ax.st_day_product_status',
+	    query        => $q$
+	        SELECT o.tenant_id, o.utc_day, o.product_id, o.status,
+	               COUNT(*)            AS order_count,
+	               SUM(o.quantity)     AS units,
+	               SUM(o.line_cents)   AS sales_cents
+	        FROM ax.orders o
+	        GROUP BY o.tenant_id, o.utc_day, o.product_id, o.status
+	    $q$,
+	    schedule     => NULLIF('1h', ''),
+	    refresh_mode => 'DIFFERENTIAL',
+	    cdc_mode     => 'trigger'
+	);
+2026-11-01 10:22:00.368 IST [69084] LOG:  background worker "logical replication launcher" (PID 69094) exited with exit code 1
+2026-11-01 10:22:02.515 IST [69088] LOG:  checkpoint complete: wrote 7385 buffers (22.5%), wrote 1 SLRU buffers; 0 WAL file(s) added, 8 removed, 62 recycled; write=28.708 s, sync=0.186 s, total=28.957 s; sync files=66, longest=0.180 s, average=0.003 s; distance=1151417 kB, estimate=1151417 kB; lsn=1/DDA3638, redo lsn=1/DC97638
+2026-11-01 10:22:02.517 IST [69088] LOG:  shutting down
+2026-11-01 10:22:02.518 IST [69088] LOG:  checkpoint starting: shutdown immediate
+2026-11-01 10:22:02.691 IST [69088] LOG:  checkpoint complete: wrote 193 buffers (0.6%), wrote 1 SLRU buffers; 0 WAL file(s) added, 0 removed, 0 recycled; write=0.068 s, sync=0.099 s, total=0.174 s; sync files=76, longest=0.010 s, average=0.002 s; distance=1072 kB, estimate=1036382 kB; lsn=1/DDA36B0, redo lsn=1/DDA36B0
+2026-11-01 10:22:02.724 IST [69084] LOG:  database system is shut down

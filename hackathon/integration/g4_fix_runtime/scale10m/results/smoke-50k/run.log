@@ -1,0 +1,23 @@
+[04:49:30] pg_trickle.dylib sha256 6867f6bc9a09c55e00f85f5d15c11f3a6bc41e1b12d872d3013ae1ad46d02460
+[04:49:30] disk free 13 GiB; total = 8192.00M  used = 6692.00M  free = 1500.00M  (encrypted)
+[04:49:31] schema + generate 50000 orders / 10 tenants (seed 42, Zipf 1.0)
+[04:49:31]   took 0s
+[04:49:31]   took 0s
+orders=50000
+1:17053 2:8568 3:5666 4:4331 5:3394 6:2767 7:2434 8:2181 9:1919 10:1687
+[04:49:32] stream tables, RLS, roles, initial populate (FULL, expected)
+[04:49:34]   took 2s
+db size 75 MB
+[04:49:34] FULL 10M oracle BEFORE cases
+[04:49:34]   took 0s
+ st_day_product_status |             0 |           0
+ st_day_category_status |             0 |           0
+ st_hour_category_status |             0 |           0
+picks: \set o12 221 \set o17 273 \set o2 25 \set o22 324 \set o27 404 \set o32 473 \set o37 508 \set o42 563 \set o7 26 \set t2 178 [04:49:34] 22 cases (one refresh window each; scoped oracle after each)
+[04:49:41]   took 7s
+[04:49:41] FULL 10M oracle AFTER cases
+[04:49:41]   took 0s
+ st_day_product_status |             0 |           0
+ st_day_category_status |             0 |           0
+ st_hour_category_status |             0 |           0
+[04:49:41] cases ok: 22/22

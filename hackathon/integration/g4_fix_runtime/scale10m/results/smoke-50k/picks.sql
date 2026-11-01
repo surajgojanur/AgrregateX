@@ -1,0 +1,10 @@
+\set o12 221
+\set o17 273
+\set o2 25
+\set o22 324
+\set o27 404
+\set o32 473
+\set o37 508
+\set o42 563
+\set o7 26
+\set t2 178
