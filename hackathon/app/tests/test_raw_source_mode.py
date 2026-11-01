@@ -303,6 +303,9 @@ class TestRawModeAPI(unittest.TestCase):
         self.assertEqual(
             body["provenance"]["consistency"], "single_sql_statement_snapshot"
         )
+        self.assertEqual(
+            body["provenance"]["consistency_scope"], "per_http_response_only"
+        )
         self.assertIsNone(body["freshness"])
         self.assertIsNone(body["source"]["stream_table_range"])
         self.assertEqual(len(body["source"]["raw_edge_ranges"]), 1)
@@ -391,6 +394,12 @@ class TestRawModeAPI(unittest.TestCase):
         body = response.json()
         self.assertEqual(body["analytics_mode"], "rollup")
         self.assertTrue(body["provenance"]["uses_stream_tables"])
+        self.assertEqual(
+            body["provenance"]["consistency"], "single_sql_statement_snapshot"
+        )
+        self.assertEqual(
+            body["provenance"]["consistency_scope"], "per_http_response_only"
+        )
         self.assertIn("stream_table_range", body["source"])
         self.assertIn("raw_edge_ranges", body["source"])
         self.assertEqual(body["summary"], {"orders": 0})

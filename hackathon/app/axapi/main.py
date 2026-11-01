@@ -87,7 +87,8 @@ def _meta(tenant_id: int, start: datetime, end: datetime, w: queries.Window,
         needs_products = family == "top_products" or (family == "breakdown" and breakdown_by == "category")
         source_tables = ["ax.orders", "ax.products"] if needs_products else ["ax.orders"]
         provenance = {"source_tables": source_tables, "uses_stream_tables": False,
-                      "consistency": "single_sql_statement_snapshot"}
+                      "consistency": "single_sql_statement_snapshot",
+                      "consistency_scope": "per_http_response_only"}
     else:
         has_full = w.full_lo < w.full_hi
         edges = [[start.isoformat(), w.edge1_end.isoformat()]] if start < w.edge1_end else []
@@ -99,7 +100,8 @@ def _meta(tenant_id: int, start: datetime, end: datetime, w: queries.Window,
         source_key = f"trends_{extra.get('grain')}" if family == "trends" else \
                      f"breakdown_{breakdown_by}" if family == "breakdown" else family
         provenance = {"source_tables": rollup_sources[source_key],
-                      "uses_stream_tables": True, "consistency": "single_sql_statement_snapshot"}
+                      "uses_stream_tables": True, "consistency": "single_sql_statement_snapshot",
+                      "consistency_scope": "per_http_response_only"}
     return {"tenant_id": tenant_id, "shard": db.shard_for(tenant_id).name,
             "from": start.isoformat(), "to": end.isoformat(), "source": source,
             "analytics_mode": mode, "provenance": provenance, **extra}
