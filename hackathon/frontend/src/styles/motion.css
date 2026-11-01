@@ -1,0 +1,116 @@
+/* ==========================================================================
+   Purposeful motion: workflow status, processing, reveals and interaction
+   feedback. Every continuous animation is switched off for reduced motion
+   at the end of this file. Entrance animations use `backwards` fill so they
+   never hold a transform that would block hover states.
+   ========================================================================== */
+
+/* ---------- 1. Generation status ---------- */
+
+/* ---------- 2. Preview processing and reveal ---------- */
+
+/* ---------- 3. Description to traits ---------- */
+
+/* ---------- 4. Workflow stepper ---------- */
+
+/* ---------- 5. Revisions ---------- */
+
+/* Integrity: status changes cross-fade; checks pop in only when they turn green. */
+
+/* ---------- 6. Compare ---------- */
+
+/* ---------- 7. Cases and library ---------- */
+
+/* The studio remounts per case, so the case header settles in on every switch. */
+
+/* ---------- 8. Empty-state illustrations ---------- */
+
+/* ---------- 9. Theme transition ---------- */
+html.theme-anim,
+html.theme-anim *,
+html.theme-anim *::before,
+html.theme-anim *::after {
+  transition: background-color 300ms ease, border-color 300ms ease, color 300ms ease, fill 300ms ease, stroke 300ms ease, box-shadow 300ms ease !important;
+}
+
+.theme-toggle__icon { display: inline-flex; animation: themeIconIn 320ms var(--ease) backwards; }
+
+@keyframes themeIconIn {
+  from { opacity: 0; transform: rotate(-90deg) scale(0.6); }
+  to { opacity: 1; transform: none; }
+}
+
+/* ---------- 10. Hover and focus polish ---------- */
+.btn--primary:hover:not(:disabled) { transform: translateY(-1px); }
+.btn--primary:active:not(:disabled) { transform: none; }
+.btn .icon { transition: transform var(--t-fast) var(--ease); }
+.btn:hover:not(:disabled) .icon { transform: translateY(-1px); }
+
+.status-card::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  transform: translateX(-115%);
+  background: linear-gradient(100deg, transparent 35%, color-mix(in srgb, var(--cyan) 8%, transparent) 50%, transparent 65%);
+  animation: statusShimmer 5.5s ease-in-out infinite;
+  pointer-events: none;
+}
+
+@keyframes sidebarGlow {
+  0%, 100% { transform: translate(0, 0) scale(1); opacity: 0.6; }
+  50% { transform: translate(28px, -18px) scale(1.2); opacity: 1; }
+}
+
+@keyframes statusShimmer {
+  0%, 65% { transform: translateX(-115%); }
+  85%, 100% { transform: translateX(115%); }
+}
+
+/* ---------- 11. Reduced motion ----------
+   Continuous and entrance animations are removed outright (not just shortened),
+   leaving static states: a still reticle, a solid progress line and plain lists. */
+@media (prefers-reduced-motion: reduce) {
+
+  .theme-toggle__icon { animation: none !important; }
+  .content,
+  .ax-dash > *,
+  .ax-kpis .stat__value,
+  .ax-line,
+  .ax-area,
+  .ax-dot,
+  .ax-bars__fill,
+  .ax-table tbody tr,
+  .dot--pulse,
+  .ax-filters::after,
+  .brand-logo.is-animated,
+  .logo-mark.is-animated,
+  .sidebar::before,
+  .status-card::after,
+  .ax-tip {
+    animation: none !important;
+  }
+  .ax-line { stroke-dashoffset: 0 !important; }
+  .ax-area { opacity: 1 !important; }
+  .ax-bars__fill { transform: none !important; }
+
+  .btn--primary:hover:not(:disabled), .btn:hover:not(:disabled) .icon { transform: none; }
+}
+
+.reduce-motion .theme-toggle__icon { animation: none !important; }
+
+.reduce-motion .btn--primary:hover:not(:disabled), .reduce-motion .btn:hover:not(:disabled) .icon { transform: none; }
+.reduce-motion .content,
+.reduce-motion .ax-dash > *,
+.reduce-motion .ax-kpis .stat__value,
+.reduce-motion .ax-line,
+.reduce-motion .ax-area,
+.reduce-motion .ax-dot,
+.reduce-motion .ax-bars__fill,
+.reduce-motion .ax-table tbody tr,
+.reduce-motion .dot--pulse,
+.reduce-motion .ax-filters::after,
+.reduce-motion .sidebar::before,
+.reduce-motion .status-card::after,
+.reduce-motion .ax-tip { animation: none !important; }
+.reduce-motion .ax-line { stroke-dashoffset: 0 !important; }
+.reduce-motion .ax-area { opacity: 1 !important; }

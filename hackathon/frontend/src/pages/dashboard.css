@@ -1,0 +1,285 @@
+/* AgrregateX dashboard + engine pages. Uses the app's theme tokens (light/dark handled there). */
+.ax-dash { display: flex; flex-direction: column; gap: 16px; min-width: 0; }
+.ax-dash > * { animation: axReveal 420ms var(--ease) both; }
+.ax-dash > *:nth-child(2) { animation-delay: 45ms; }
+.ax-dash > *:nth-child(3) { animation-delay: 90ms; }
+.ax-dash > *:nth-child(4) { animation-delay: 135ms; }
+.ax-panel { padding: 16px; min-width: 0; overflow-x: auto; }
+.ax-panel { background-image: linear-gradient(145deg, rgba(40, 215, 242, 0.018), transparent 38%); }
+.ax-panel:hover { border-color: color-mix(in srgb, var(--border-strong) 75%, var(--cyan) 25%); transform: translateY(-1px); }
+.ax-panel .panel__head { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.ax-panel .panel__head .ax-ms, .ax-panel .panel__head .label { margin-left: auto; }
+.ax-grid2 { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+.ax-kpis .stat__value { font-size: 26px; }
+.ax-filters { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 16px; padding: 12px 16px; }
+.ax-field { display: flex; flex-direction: column; gap: 6px; }
+.ax-field--check { flex-direction: row; align-items: center; gap: 8px; font-size: 13px; }
+.ax-seg { display: flex; gap: 4px; flex-wrap: wrap; }
+.ax-range { margin-left: auto; font-size: 11px; }
+.ax-row { display: flex; gap: 8px; flex-wrap: wrap; margin: 10px 0; }
+.ax-note { font-size: 11.5px; margin: 8px 0 0; }
+.ax-sub { display: block; margin-top: 14px; }
+
+.ax-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+.ax-table th { text-align: left; font-weight: 500; color: var(--text-3); font-size: 11px; text-transform: uppercase;
+  letter-spacing: 0.06em; padding: 6px 8px; border-bottom: 1px solid var(--border); }
+.ax-table td { padding: 6px 8px; border-bottom: 1px solid var(--border); color: var(--text); }
+.ax-table .num { text-align: right; }
+
+.ax-chart { position: relative; }
+.ax-chart svg { width: 100%; height: auto; display: block; cursor: crosshair; }
+.ax-grid { stroke: var(--border); stroke-width: 1; }
+.ax-axis { fill: var(--text-3); font-size: 11px; font-family: var(--mono); }
+.ax-line { fill: none; stroke: var(--cyan); stroke-width: 2; stroke-linejoin: round; stroke-linecap: round; }
+.ax-area { fill: var(--cyan-soft); }
+.ax-cross { stroke: var(--text-3); stroke-width: 1; stroke-dasharray: 3 3; }
+.ax-dot { fill: var(--cyan); stroke: var(--panel); stroke-width: 2; }
+.ax-tip { position: absolute; top: 0; transform: translateX(-50%); padding: 8px 10px; display: flex; flex-direction: column;
+  gap: 2px; font-size: 12px; pointer-events: none; white-space: nowrap; z-index: 2; color: var(--text); }
+.ax-tip b { color: var(--text); font-weight: 600; }
+
+.ax-bars { list-style: none; margin: 8px 0 0; padding: 0; display: flex; flex-direction: column; gap: 8px; }
+.ax-bars li { display: grid; grid-template-columns: 110px minmax(0, 1fr) 96px; align-items: center; gap: 10px; font-size: 13px; }
+.ax-bars__label { color: var(--text-2); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ax-bars__track { height: 10px; border-radius: 4px; background: var(--panel-2); overflow: hidden; }
+.ax-bars__fill { display: block; height: 100%; background: var(--cyan); border-radius: 0 4px 4px 0; min-width: 2px; }
+.ax-bars__value { text-align: right; color: var(--text); }
+
+.ax-fresh__head { display: flex; align-items: center; gap: 8px; margin: 4px 0 10px; }
+.ax-live { margin-top: 10px; padding: 10px 12px; border: 1px solid var(--border); border-radius: var(--r-md); }
+.ax-live ul { list-style: none; padding: 0; margin: 6px 0; display: flex; flex-direction: column; gap: 2px; font-size: 13px; }
+.ax-health { list-style: none; padding: 0; margin: 6px 0 0; display: flex; flex-direction: column; gap: 4px; font-size: 12.5px; }
+
+@media (max-width: 1000px) {
+  .ax-grid2 { grid-template-columns: minmax(0, 1fr); }
+  .ax-kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 520px) {
+  .ax-kpis { grid-template-columns: minmax(0, 1fr); }
+  .ax-bars li { grid-template-columns: 80px minmax(0, 1fr) 80px; }
+  .ax-range { margin-left: 0; }
+}
+
+.ax-fresh { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; padding: 3px 10px;
+  border: 1px solid color-mix(in srgb, var(--green) 45%, transparent); border-radius: 999px; color: var(--text); }
+.ax-fresh--warn { border-color: color-mix(in srgb, var(--amber) 55%, transparent); }
+.ax-shardline { margin: -6px 0 0; font-size: 11.5px; }
+.ax-outage { border-color: var(--red); }
+.ax-kpis .stat {
+  position: relative;
+  overflow: hidden;
+  min-height: 128px;
+  border-radius: 16px;
+}
+.ax-kpis .stat::after {
+  content: '';
+  position: absolute;
+  right: -28px;
+  bottom: -48px;
+  width: 118px;
+  height: 118px;
+  border-radius: 50%;
+  background: radial-gradient(circle, var(--cyan-soft), transparent 68%);
+  pointer-events: none;
+}
+.ax-kpis .stat:nth-child(2)::after { background: radial-gradient(circle, var(--blue-soft), transparent 68%); }
+.ax-kpis .stat:nth-child(3)::after { background: radial-gradient(circle, var(--green-soft), transparent 68%); }
+.ax-kpis .stat:nth-child(4)::after { background: radial-gradient(circle, var(--amber-soft), transparent 68%); }
+.ax-kpis .stat__value {
+  font-family: var(--display);
+  font-weight: 650;
+}
+.ax-filters {
+  border-radius: 16px;
+  background-image: linear-gradient(135deg, rgba(40, 215, 242, 0.035), transparent 48%);
+}
+@keyframes axReveal {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* Richer live-workspace polish */
+.ax-filters {
+  isolation: isolate;
+  box-shadow: var(--shadow), inset 3px 0 0 color-mix(in srgb, var(--cyan) 65%, transparent);
+}
+
+.ax-filters::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border-radius: inherit;
+  background: linear-gradient(110deg, transparent 20%, color-mix(in srgb, var(--cyan) 7%, transparent) 45%, transparent 70%);
+  background-size: 220% 100%;
+  animation: axFilterSweep 8s var(--ease-in-out) infinite;
+  pointer-events: none;
+}
+
+.ax-kpis .stat {
+  transition: transform var(--t) var(--ease), border-color var(--t) ease, box-shadow var(--t) ease;
+}
+
+.ax-kpis .stat:hover {
+  transform: translateY(-4px);
+  border-color: color-mix(in srgb, var(--border-strong) 60%, var(--cyan) 40%);
+  box-shadow: var(--shadow-lg);
+}
+
+.ax-kpis .stat__value {
+  animation: axValueIn 520ms 180ms var(--ease) both;
+}
+
+.ax-panel {
+  transition:
+    transform var(--t) var(--ease),
+    border-color var(--t) ease,
+    box-shadow var(--t) ease,
+    background-color var(--t) ease;
+}
+
+.ax-panel:hover {
+  box-shadow: var(--shadow-lg);
+}
+
+.ax-line {
+  stroke-dasharray: 1800;
+  stroke-dashoffset: 1800;
+  animation: axLineDraw 900ms 180ms var(--ease) forwards;
+  filter: drop-shadow(0 4px 8px color-mix(in srgb, var(--cyan) 22%, transparent));
+}
+
+.ax-area {
+  opacity: 0;
+  animation: axAreaIn 700ms 520ms var(--ease) forwards;
+}
+
+.ax-dot {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: axDotPop 260ms var(--ease) both;
+}
+
+.ax-bars__fill {
+  position: relative;
+  transform-origin: left;
+  animation: axBarGrow 650ms var(--ease) both;
+  box-shadow: 0 0 14px color-mix(in srgb, var(--cyan) 16%, transparent);
+}
+
+.ax-table tbody tr {
+  animation: axRowIn 360ms var(--ease) both;
+  transition: background-color var(--t-fast) ease;
+}
+
+.ax-table tbody tr:nth-child(2) { animation-delay: 35ms; }
+.ax-table tbody tr:nth-child(3) { animation-delay: 70ms; }
+.ax-table tbody tr:nth-child(4) { animation-delay: 105ms; }
+.ax-table tbody tr:nth-child(5) { animation-delay: 140ms; }
+.ax-table tbody tr:nth-child(n + 6) { animation-delay: 175ms; }
+.ax-table tbody tr:hover { background: color-mix(in srgb, var(--cyan-soft) 55%, transparent); }
+
+.btn {
+  transition:
+    transform var(--t-fast) var(--ease),
+    background var(--t-fast) ease,
+    border-color var(--t-fast) ease,
+    color var(--t-fast) ease,
+    box-shadow var(--t-fast) ease;
+}
+
+.btn:active:not(:disabled) {
+  transform: scale(0.96);
+}
+
+.btn--primary {
+  box-shadow: 0 6px 18px color-mix(in srgb, var(--cyan) 12%, transparent);
+}
+
+.dot--pulse {
+  box-shadow: 0 0 0 0 color-mix(in srgb, var(--green) 50%, transparent);
+  animation: axStatusPulse 2s var(--ease-in-out) infinite;
+}
+
+@keyframes axFilterSweep {
+  0%, 20% { background-position: 180% 0; }
+  70%, 100% { background-position: -80% 0; }
+}
+
+@keyframes axValueIn {
+  from { opacity: 0; transform: translateY(7px); filter: blur(4px); }
+  to { opacity: 1; transform: translateY(0); filter: blur(0); }
+}
+
+@keyframes axLineDraw { to { stroke-dashoffset: 0; } }
+@keyframes axAreaIn { to { opacity: 1; } }
+@keyframes axDotPop {
+  from { opacity: 0; transform: scale(0); }
+  to { opacity: 1; transform: scale(1); }
+}
+@keyframes axBarGrow {
+  from { transform: scaleX(0); opacity: 0.35; }
+  to { transform: scaleX(1); opacity: 1; }
+}
+@keyframes axRowIn {
+  from { opacity: 0; transform: translateX(-5px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+@keyframes axStatusPulse {
+  0% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--green) 45%, transparent); }
+  70% { box-shadow: 0 0 0 7px transparent; }
+  100% { box-shadow: 0 0 0 0 transparent; }
+}
+
+.ax-fresh {
+  backdrop-filter: blur(8px);
+  box-shadow: 0 8px 24px color-mix(in srgb, var(--green) 7%, transparent);
+}
+
+.ax-tip {
+  animation: axTipIn 140ms var(--ease) both;
+  box-shadow: var(--shadow-lg);
+  backdrop-filter: blur(12px);
+}
+
+.ax-kpis .stat::before {
+  content: '';
+  position: absolute;
+  width: 80px;
+  height: 80px;
+  left: -55px;
+  top: -55px;
+  border-radius: 50%;
+  border: 1px solid color-mix(in srgb, var(--cyan) 22%, transparent);
+  transition: transform 500ms var(--ease);
+}
+
+.ax-kpis .stat:hover::before {
+  transform: translate(18px, 18px) scale(1.35);
+}
+
+.ax-filters .btn--primary,
+.ax-grid2 .panel__head .btn--primary {
+  box-shadow: 0 0 18px color-mix(in srgb, var(--cyan) 16%, transparent);
+}
+
+.ax-live,
+.ax-health {
+  position: relative;
+}
+
+.ax-live {
+  background: linear-gradient(135deg, color-mix(in srgb, var(--green-soft) 70%, transparent), transparent);
+}
+
+@keyframes axTipIn {
+  from { opacity: 0; transform: translate(-50%, 5px) scale(0.96); }
+  to { opacity: 1; transform: translate(-50%, 0) scale(1); }
+}
+.ax-shards { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
+.ax-shard__head { display: flex; align-items: center; gap: 8px; }
+.ax-shard__head h3 { margin: 0; font-size: 18px; }
+.ax-kv { display: grid; grid-template-columns: max-content 1fr; gap: 4px 14px; font-size: 13px; margin: 10px 0; }
+.ax-kv dt { color: var(--text-3); }
+.ax-kv dd { margin: 0; }
+@media (max-width: 1000px) { .ax-shards { grid-template-columns: minmax(0, 1fr); } }
