@@ -15,7 +15,7 @@
 - `hackathon/frontend/src/pages/dashboard.css` — compact theme-token indicator, badges, panel warning/error styles, and narrow viewport layout.
 - `hackathon/frontend/src/components/analytics/AnalyticsProvenance.jsx` — accessible source/freshness UI components.
 - `hackathon/frontend/src/lib/analyticsProvenance.js` — strict response metadata, source-range, and four-panel classification helpers.
-- `hackathon/frontend/src/lib/dashboardRequestGate.js` and `dashboardState.js` — abort/generation gate, independent panel result states, and malformed collection-row fail-closed validation.
+- `hackathon/frontend/src/lib/dashboardRequestGate.js` and `dashboardState.js` — abort/generation gate, independent panel result states, and fail-closed validation for required summary fields and malformed collection rows.
 - `hackathon/frontend/scripts/tests/analytics-provenance*.test.mjs` and `dashboard-state.test.mjs` — classification, state, and rendered accessibility tests.
 - `hackathon/app/axapi/main.py` — explicit per-response consistency scope in API provenance.
 - `hackathon/app/tests/test_raw_source_mode.py` — raw and rollup metadata assertions.

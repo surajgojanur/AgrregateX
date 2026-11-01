@@ -18,7 +18,8 @@ const sourceResponse = (family) => ({
   },
   source: { stream_table_range: null, raw_edge_ranges: [[range.from, range.to]] },
   freshness: null,
-  ...(family === 'summary' ? { summary: { orders: 1 } } : {}),
+  ...(family === 'summary' ? { summary: { orders: 1, sale_orders: 1, units_sold: 2, sales_cents: 2998,
+    avg_order_cents: 2998, cancelled_or_refunded: 0, cancel_rate: 0, by_status: { paid: { orders: 1 } } } } : {}),
   ...(family === 'trends' ? { points: [] } : {}),
   ...(family === 'products' ? { products: [] } : {}),
   ...(family === 'breakdown' ? { rows: [], by: 'status' } : {}),
@@ -54,6 +55,8 @@ test('malformed entries in analytics collections are rejected before panel rende
     ['products', { products: [null] }],
     ['breakdown', { rows: [null], by: 'status' }],
     ['summary', { summary: [] }],
+    ['summary', { summary: { orders: 1, sale_orders: 1, units_sold: 2, avg_order_cents: 2,
+      cancelled_or_refunded: 0, cancel_rate: 0, by_status: {} } }],
   ]
   for (const [family, payload] of cases) {
     const panel = buildDashboardResults({

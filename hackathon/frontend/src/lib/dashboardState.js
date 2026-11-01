@@ -1,7 +1,9 @@
 import { normalizeAnalyticsResponse } from './analyticsProvenance.js'
 
 const PAYLOADS = {
-  summary: (response) => isRecord(response.summary),
+  summary: (response) => isRecord(response.summary) &&
+    ['orders', 'sale_orders', 'units_sold', 'sales_cents', 'avg_order_cents', 'cancelled_or_refunded', 'cancel_rate']
+      .every((key) => finite(response.summary[key])) && isRecord(response.summary.by_status),
   trends: (response) => Array.isArray(response.points) && response.points.every((point) =>
     isRecord(point) && validTimestamp(point.bucket) &&
     finite(point.orders) && finite(point.sales_cents) && finite(point.cancelled_or_refunded)),
