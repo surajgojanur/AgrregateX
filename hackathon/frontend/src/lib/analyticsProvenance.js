@@ -164,7 +164,8 @@ export function classifyAnalyticsSet(panels) {
   const responses = ANALYTICS_FAMILIES.map(([key]) => panels?.[key])
   const sources = responses.map((panel) => panel?.source)
   const complete = responses.every((panel) => panel?.status === 'success') &&
-    sources.every((source) => source?.status === 'verified')
+    sources.every((source) => source?.status === 'verified' &&
+      (source.mode === 'raw_source' || source.mode === 'rollup'))
   const modes = new Set(sources.filter((source) => source?.status === 'verified').map((source) => source.mode))
   if (complete && modes.size === 1) {
     const mode = [...modes][0]

@@ -129,6 +129,9 @@ test('all endpoint families can agree on raw or rollup mode', () => {
     status: 'uniform', mode: 'raw_source', label: 'Direct source queries',
   })
   assert.equal(classifyAnalyticsSet(panelsFor('rollup')).mode, 'rollup')
+  const invalidMode = panelsFor()
+  invalidMode.summary.source = { status: 'verified', mode: 'future' }
+  assert.equal(classifyAnalyticsSet(invalidMode).status, 'mixed')
 })
 
 test('mixed, missing and legacy response sets are not labelled uniformly', () => {
