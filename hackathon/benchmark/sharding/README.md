@@ -23,6 +23,8 @@ Default invocation refuses before Docker. Requires AX_FAULT_APPROVED=1 (only aft
 approval), AX_DISPOSABLE=1, the exact aggregatex-sharded project/localhost8091 contract,
 2GiB available RAM, <=1GiB swap used, 5GiB free disk, exactly the two expected project database
 volumes carrying io.aggregatex.disposable=true and attached to their expected shard containers.
+Disk headroom is checked on both inspected Docker volume mountpoints (using the lower free-space
+reading), not on the checkout filesystem. An unavailable or invalid mountpoint fails closed.
 These labels must be assigned when provisioning NEW disposable volumes; never relabel existing ones.
 Writer must already be quiesced; no competing writers. The reference then validates exact Compose
 ownership/network membership and detaches API+writer from net_a only. It asserts A503 with shard a,
