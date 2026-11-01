@@ -15,12 +15,13 @@
 - `hackathon/frontend/src/pages/dashboard.css` — compact theme-token indicator, badges, panel warning/error styles, and narrow viewport layout.
 - `hackathon/frontend/src/components/analytics/AnalyticsProvenance.jsx` — accessible source/freshness UI components.
 - `hackathon/frontend/src/lib/analyticsProvenance.js` — strict response metadata, source-range, and four-panel classification helpers.
-- `hackathon/frontend/src/lib/dashboardRequestGate.js` and `dashboardState.js` — abort/generation gate and independent panel result states.
+- `hackathon/frontend/src/lib/dashboardRequestGate.js` and `dashboardState.js` — abort/generation gate, independent panel result states, and malformed collection-row fail-closed validation.
 - `hackathon/frontend/scripts/tests/analytics-provenance*.test.mjs` and `dashboard-state.test.mjs` — classification, state, and rendered accessibility tests.
 - `hackathon/app/axapi/main.py` — explicit per-response consistency scope in API provenance.
 - `hackathon/app/tests/test_raw_source_mode.py` — raw and rollup metadata assertions.
 - `hackathon/docs/RAW_SOURCE_CORRECTNESS_MODE.md` — refreshed mode, freshness, activation, rollback, and verification guidance.
 - `hackathon/docs/issue55/VALIDATION_REPORT.md` and `DISPOSABLE_POSTGRESQL_RUNBOOK.md` — evidence and approval-gated live test instructions.
+- `hackathon/docs/issue55/BROWSER_QA.md` and `browser-qa/*.png` — local mock API screenshots and browser results.
 
 ## Implemented behavior
 
@@ -38,12 +39,12 @@
 From `hackathon/frontend`:
 
 - `npm ci` — completed; 156 packages installed. npm reported 6 moderate dependency audit findings; dependencies were not upgraded.
-- `npm test` — **22/22 passed**, including the malformed-summary/valid-provenance regression, request selector mismatches, stale request handling, partial 503s, and server-rendered accessibility labels.
+- `npm test` — **24/24 passed**, including the malformed-summary/valid-provenance regression, malformed chart/table rows, contradictory tenant metadata, request selector mismatches, stale request handling, partial 503s, and server-rendered accessibility labels.
 - `npm run lint` — passed with zero warnings/errors.
 - `npm run build` — passed (Vite production build).
 - From `hackathon/app`, `/tmp/ax-raw-source-venv/bin/python -m unittest discover -s tests -v` — **55/55 passed**, including mocked raw-source route selection, signed auth/tenant checks, API-mode override rejection, restricted tenant transaction setup, unavailable-shard behavior, and rollup response compatibility.
 
-The UI component was rendered through React server rendering as an offline test. **Interactive browser QA and screenshots were not run**: the CUA browser host was unavailable in this session. No browser pointed at the preserved demo.
+Mocked interactive Chromium QA was run against a local-only Vite server using deterministic `/api/**` route fixtures. Results and screenshots are recorded in [`BROWSER_QA.md`](BROWSER_QA.md). All tested viewports had no horizontal overflow; raw, rollup, mixed, unknown, malformed-panel, 503, reload and light-theme scenarios rendered without uncaught page exceptions. The expected mock 503 console error was observed. The browser never contacted the preserved demo.
 
 The new malformed-summary regression was run before the classifier fix and failed as expected: classifyAnalyticsSet returned uniform for three successful raw panels plus an error panel whose provenance was verified. It passes after requiring every panel to have succeeded.
 
@@ -57,9 +58,9 @@ Offline mocks do not prove signed-cookie authentication, cross-tenant denial, fo
 
 ## GitHub CI provisioning failure
 
-Inspected PR #59's CI run [41256340026](https://github.com/surajgojanur/AgrregateX/actions/runs/41256340026). Both **Unit tests (PR gate, linux-amd64)** and **Integration tests** failed in the Setup pgrx environment step; their Rust test and integration steps were skipped. The composite action's Linux PostgreSQL install block downloads the PGDG signing key with curl and then runs apt-get update/install. The job log ends with **curl: (56) Failure when receiving data from the peer** and exit code 56 during that block.
+Inspected PR #59's CI run [41256340026](https://github.com/surajgojanur/AgrregateX/actions/runs/41256340026). Both **Unit tests (PR gate, linux-amd64)** and **Integration tests** failed in the Setup pgrx environment step; their Rust test and integration steps were skipped. The exact failing command was the HTTPS fetch of the PGDG signing key and its log reports **curl: (56) Failure when receiving data from the peer**. A narrow bounded-retry improvement and detailed diagnosis are being delivered separately in the CI reliability PR; this does not establish that a later hosted run passes.
 
-The only explicit curl command in that setup block downloads the public PGDG signing key, so that transfer is the most likely failure point. However, the command block lacks per-command tracing and does not conclusively identify the failing request. This is a provisioning/network failure, not a failed test assertion. Other independent checks (secret scanning, release evidence, upgrade completeness, and monitoring contract) succeeded; the aggregate PR correctness check failed transitively because the required jobs did not pass. No workflow/setup code was changed and the failed run was not manually retried or represented as green. A subsequent PR push triggered CI run [41260105093](https://github.com/surajgojanur/AgrregateX/actions/runs/41260105093), which was pending at the time of this report update; its outcome is not yet known.
+The shared setup step identifies the failing command directly. This is a provisioning/network failure, not a failed test assertion. Other independent checks (secret scanning, release evidence, upgrade completeness, and monitoring contract) succeeded; the aggregate PR correctness check failed transitively because the required jobs did not pass. No CI rerun was manually launched or represented as green.
 
 ## Correctness and known issue
 

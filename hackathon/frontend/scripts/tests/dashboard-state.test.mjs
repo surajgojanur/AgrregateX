@@ -48,6 +48,32 @@ test('malformed successful payload is an explicit error without rendering data',
   assert.equal(panels.summary.data, undefined)
 })
 
+test('malformed entries in analytics collections are rejected before panel rendering', () => {
+  const cases = [
+    ['trends', { points: [null] }],
+    ['products', { products: [null] }],
+    ['breakdown', { rows: [null], by: 'status' }],
+    ['summary', { summary: [] }],
+  ]
+  for (const [family, payload] of cases) {
+    const panel = buildDashboardResults({
+      [family]: { status: 'fulfilled', value: { data: { ...sourceResponse(family), ...payload } } },
+    }, { requestedRange: range })[family]
+    assert.equal(panel.status, 'error', `${family} malformed payload must not reach a renderer`)
+    assert.equal(panel.data, undefined)
+  }
+})
+
+test('contradictory tenant metadata prevents rendering response data', () => {
+  const data = { ...sourceResponse('summary'), tenant_id: 3 }
+  const panel = buildDashboardResults({
+    summary: { status: 'fulfilled', value: { data, ms: 1, receivedAt: range.to } },
+  }, { requestedRange: range, requestedTenant: 2 }).summary
+  assert.equal(panel.status, 'error')
+  assert.equal(panel.data, undefined)
+  assert.equal(panel.source.status, 'contradictory')
+})
+
 test('three raw successes plus malformed summary with valid provenance are not uniform', () => {
   const settled = Object.fromEntries(['summary', 'trends', 'products', 'breakdown'].map((family) => [family, success(family)]))
   settled.summary = {
