@@ -1,0 +1,46 @@
+[+0s] running starting | psql:/ax/gen_synthetic.sql:157: NOTICE:  ax_gen: orders 1500001 .. 1750000 of 10000000 (250000 rows, 0.9 s) | swap 7929.69M
+[+16s] running starting | psql:/ax/gen_synthetic.sql:157: NOTICE:  ax_gen: orders 5250001 .. 5500000 of 10000000 (250000 rows, 0.9 s) | swap 8369.69M
+[+32s] running starting | psql:/ax/gen_synthetic.sql:157: NOTICE:  ax_gen: orders 9000001 .. 9250000 of 10000000 (250000 rows, 1.0 s) | swap 8545.25M
+[+47s] running starting | psql:/ax/gen_synthetic.sql:157: NOTICE:  ax_gen: orders 9750001 .. 10000000 of 10000000 (250000 rows, 0.9 s) | swap 8706.56M
+[+68s] running starting | psql:/ax/gen_synthetic.sql:157: NOTICE:  ax_gen: orders 9750001 .. 10000000 of 10000000 (250000 rows, 0.9 s) | swap 8643.12M
+[+84s] running starting | psql:/ax/gen_synthetic.sql:157: NOTICE:  ax_gen: orders 9750001 .. 10000000 of 10000000 (250000 rows, 0.9 s) | swap 8603.75M
+[+100s] running starting | psql:/ax/gen_synthetic.sql:157: NOTICE:  ax_gen: orders 9750001 .. 10000000 of 10000000 (250000 rows, 0.9 s) | swap 8702.94M
+[+116s] running starting | psql:/ax/gen_synthetic.sql:157: NOTICE:  ax_gen: orders 9750001 .. 10000000 of 10000000 (250000 rows, 0.9 s) | swap 8615.38M
+[+132s] running starting | psql:/ax/gen_synthetic.sql:157: NOTICE:  ax_gen: orders 9750001 .. 10000000 of 10000000 (250000 rows, 0.9 s) | swap 8537.94M
+[+148s] running starting | psql:/ax/gen_synthetic.sql:157: NOTICE:  ax_gen: orders 9750001 .. 10000000 of 10000000 (250000 rows, 0.9 s) | swap 8702.50M
+[+165s] running starting | psql:/ax/gen_synthetic.sql:157: NOTICE:  ax_gen: orders 9750001 .. 10000000 of 10000000 (250000 rows, 0.9 s) | swap 8590.31M
+[+181s] running starting | psql:/ax/gen_synthetic.sql:157: NOTICE:  ax_gen: orders 9750001 .. 10000000 of 10000000 (250000 rows, 0.9 s) | swap 8529.31M
+[+197s] running starting | psql:/ax/gen_synthetic.sql:157: NOTICE:  ax_gen: orders 9750001 .. 10000000 of 10000000 (250000 rows, 0.9 s) | swap 8357.00M
+[+215s] running starting | psql:/ax/gen_synthetic.sql:157: NOTICE:  ax_gen: orders 9750001 .. 10000000 of 10000000 (250000 rows, 0.9 s) | swap 8491.12M
+[+232s] running starting | psql:/ax/gen_synthetic.sql:157: NOTICE:  ax_gen: orders 9750001 .. 10000000 of 10000000 (250000 rows, 0.9 s) | swap 8369.25M
+[+249s] running starting | psql:/ax/gen_synthetic.sql:157: NOTICE:  ax_gen: orders 9750001 .. 10000000 of 10000000 (250000 rows, 0.9 s) | swap 8112.62M
+[+266s] running starting | psql:/ax/gen_synthetic.sql:157: NOTICE:  ax_gen: orders 9750001 .. 10000000 of 10000000 (250000 rows, 0.9 s) | swap 8159.19M
+[+281s] running starting | psql:/ax/gen_synthetic.sql:157: NOTICE:  ax_gen: orders 9750001 .. 10000000 of 10000000 (250000 rows, 0.9 s) | swap 8101.62M
+[+297s] running starting | psql:/ax/gen_synthetic.sql:157: NOTICE:  ax_gen: orders 9750001 .. 10000000 of 10000000 (250000 rows, 0.9 s) | swap 8064.69M
+[+314s] running starting | psql:/ax/gen_synthetic.sql:157: NOTICE:  ax_gen: orders 9750001 .. 10000000 of 10000000 (250000 rows, 0.9 s) | swap 7992.69M
+[+330s] running starting | psql:/ax/gen_synthetic.sql:157: NOTICE:  ax_gen: orders 9750001 .. 10000000 of 10000000 (250000 rows, 0.9 s) | swap 7968.69M
+[+346s] running starting | psql:/ax/gen_synthetic.sql:157: NOTICE:  ax_gen: orders 9750001 .. 10000000 of 10000000 (250000 rows, 0.9 s) | swap 7936.69M
+[+368s] running starting | psql:/ax/gen_synthetic.sql:157: NOTICE:  ax_gen: orders 9750001 .. 10000000 of 10000000 (250000 rows, 0.9 s) | swap 8076.56M
+[+384s] running starting | psql:/ax/gen_synthetic.sql:157: NOTICE:  ax_gen: orders 9750001 .. 10000000 of 10000000 (250000 rows, 0.9 s) | swap 8169.19M
+[+400s] running starting | psql:/ax/gen_synthetic.sql:157: NOTICE:  ax_gen: orders 9750001 .. 10000000 of 10000000 (250000 rows, 0.9 s) | swap 8229.88M
+[+417s] running starting | psql:/ax/gen_synthetic.sql:157: NOTICE:  ax_gen: orders 9750001 .. 10000000 of 10000000 (250000 rows, 0.9 s) | swap 8189.25M
+[+433s] running starting | psql:/ax/gen_synthetic.sql:157: NOTICE:  ax_gen: orders 9750001 .. 10000000 of 10000000 (250000 rows, 0.9 s) | swap 8231.62M
+[+449s] running starting | psql:/ax/gen_synthetic.sql:157: NOTICE:  ax_gen: orders 9750001 .. 10000000 of 10000000 (250000 rows, 0.9 s) | swap 8216.25M
+[+469s] running starting | psql:/ax/gen_synthetic.sql:157: NOTICE:  ax_gen: orders 9750001 .. 10000000 of 10000000 (250000 rows, 0.9 s) | swap 8263.19M
+[+485s] running starting | psql:/ax/gen_synthetic.sql:157: NOTICE:  ax_gen: orders 9750001 .. 10000000 of 10000000 (250000 rows, 0.9 s) | swap 8342.12M
+[+500s] running starting | psql:/ax/gen_synthetic.sql:157: NOTICE:  ax_gen: orders 9750001 .. 10000000 of 10000000 (250000 rows, 0.9 s) | swap 8331.12M
+[+516s] running starting | psql:/ax/gen_synthetic.sql:157: NOTICE:  ax_gen: orders 9750001 .. 10000000 of 10000000 (250000 rows, 0.9 s) | swap 8227.12M
+[+532s] running starting | AgrregateX demo database initialised. | swap 8099.12M
+[+547s] running starting | AgrregateX demo database initialised. | swap 8099.12M
+[+563s] running starting | AgrregateX demo database initialised. | swap 8096.38M
+[+579s] running starting | AgrregateX demo database initialised. | swap 8000.38M
+[+594s] exited unhealthy | AgrregateX demo database initialised. | swap 7928.38M
+[+610s] exited unhealthy | AgrregateX demo database initialised. | swap 8055.06M
+[+625s] exited unhealthy | AgrregateX demo database initialised. | swap 8041.25M
+[+641s] exited unhealthy | AgrregateX demo database initialised. | swap 8069.94M
+[+656s] exited unhealthy | AgrregateX demo database initialised. | swap 8112.25M
+[+671s] exited unhealthy | AgrregateX demo database initialised. | swap 8167.94M
+[+687s] exited unhealthy | AgrregateX demo database initialised. | swap 8165.31M
+[+702s] exited unhealthy | AgrregateX demo database initialised. | swap 8149.31M
+[+718s] running starting | 2026-10-31 23:39:12.428 UTC [49] FATAL:  the database system is not yet accepting connections | swap 8613.12M
+END running starting

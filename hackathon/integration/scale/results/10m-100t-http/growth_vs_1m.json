@@ -1,0 +1,586 @@
+{
+ "median": 1.18,
+ "min": 0.41,
+ "max": 5.18,
+ "n": 72,
+ "under_2x": 66,
+ "under_5x": 71,
+ "ratios": [
+  {
+   "ratio": 0.41,
+   "endpoint": "trends",
+   "role": "largest",
+   "window": "1d",
+   "p95_1m": 11.53,
+   "p95_10m": 4.78
+  },
+  {
+   "ratio": 0.58,
+   "endpoint": "breakdown",
+   "role": "smallest",
+   "window": "1d",
+   "p95_1m": 5.49,
+   "p95_10m": 3.21
+  },
+  {
+   "ratio": 0.66,
+   "endpoint": "summary",
+   "role": "smallest",
+   "window": "partial_7d",
+   "p95_1m": 6.49,
+   "p95_10m": 4.28
+  },
+  {
+   "ratio": 0.72,
+   "endpoint": "trends",
+   "role": "largest",
+   "window": "1h",
+   "p95_1m": 4.66,
+   "p95_10m": 3.35
+  },
+  {
+   "ratio": 0.75,
+   "endpoint": "breakdown",
+   "role": "largest",
+   "window": "1h",
+   "p95_1m": 4.89,
+   "p95_10m": 3.67
+  },
+  {
+   "ratio": 0.78,
+   "endpoint": "summary",
+   "role": "largest",
+   "window": "30d",
+   "p95_1m": 41.4,
+   "p95_10m": 32.43
+  },
+  {
+   "ratio": 0.81,
+   "endpoint": "summary",
+   "role": "largest",
+   "window": "1d",
+   "p95_1m": 4.39,
+   "p95_10m": 3.54
+  },
+  {
+   "ratio": 0.83,
+   "endpoint": "trends",
+   "role": "largest",
+   "window": "30d",
+   "p95_1m": 6.63,
+   "p95_10m": 5.52
+  },
+  {
+   "ratio": 0.84,
+   "endpoint": "top_products",
+   "role": "smallest",
+   "window": "90d",
+   "p95_1m": 21.06,
+   "p95_10m": 17.74
+  },
+  {
+   "ratio": 0.85,
+   "endpoint": "top_products",
+   "role": "smallest",
+   "window": "partial_7d",
+   "p95_1m": 5.29,
+   "p95_10m": 4.49
+  },
+  {
+   "ratio": 0.92,
+   "endpoint": "summary",
+   "role": "largest",
+   "window": "7d",
+   "p95_1m": 10.37,
+   "p95_10m": 9.54
+  },
+  {
+   "ratio": 0.92,
+   "endpoint": "top_products",
+   "role": "largest",
+   "window": "1d",
+   "p95_1m": 5.27,
+   "p95_10m": 4.84
+  },
+  {
+   "ratio": 0.93,
+   "endpoint": "trends",
+   "role": "smallest",
+   "window": "7d",
+   "p95_1m": 7.46,
+   "p95_10m": 6.91
+  },
+  {
+   "ratio": 0.94,
+   "endpoint": "breakdown",
+   "role": "median",
+   "window": "90d",
+   "p95_1m": 26.17,
+   "p95_10m": 24.6
+  },
+  {
+   "ratio": 0.94,
+   "endpoint": "breakdown",
+   "role": "smallest",
+   "window": "90d",
+   "p95_1m": 19.0,
+   "p95_10m": 17.85
+  },
+  {
+   "ratio": 0.95,
+   "endpoint": "summary",
+   "role": "median",
+   "window": "90d",
+   "p95_1m": 30.81,
+   "p95_10m": 29.32
+  },
+  {
+   "ratio": 1.0,
+   "endpoint": "breakdown",
+   "role": "smallest",
+   "window": "partial_7d",
+   "p95_1m": 4.26,
+   "p95_10m": 4.26
+  },
+  {
+   "ratio": 1.02,
+   "endpoint": "breakdown",
+   "role": "smallest",
+   "window": "30d",
+   "p95_1m": 8.42,
+   "p95_10m": 8.55
+  },
+  {
+   "ratio": 1.03,
+   "endpoint": "trends",
+   "role": "median",
+   "window": "partial_7d",
+   "p95_1m": 7.21,
+   "p95_10m": 7.41
+  },
+  {
+   "ratio": 1.08,
+   "endpoint": "top_products",
+   "role": "smallest",
+   "window": "1d",
+   "p95_1m": 3.23,
+   "p95_10m": 3.5
+  },
+  {
+   "ratio": 1.09,
+   "endpoint": "breakdown",
+   "role": "median",
+   "window": "1h",
+   "p95_1m": 2.39,
+   "p95_10m": 2.6
+  },
+  {
+   "ratio": 1.09,
+   "endpoint": "trends",
+   "role": "largest",
+   "window": "partial_7d",
+   "p95_1m": 14.75,
+   "p95_10m": 16.1
+  },
+  {
+   "ratio": 1.11,
+   "endpoint": "breakdown",
+   "role": "median",
+   "window": "1d",
+   "p95_1m": 2.65,
+   "p95_10m": 2.95
+  },
+  {
+   "ratio": 1.11,
+   "endpoint": "top_products",
+   "role": "median",
+   "window": "90d",
+   "p95_1m": 25.2,
+   "p95_10m": 27.88
+  },
+  {
+   "ratio": 1.12,
+   "endpoint": "summary",
+   "role": "median",
+   "window": "7d",
+   "p95_1m": 4.31,
+   "p95_10m": 4.83
+  },
+  {
+   "ratio": 1.13,
+   "endpoint": "summary",
+   "role": "median",
+   "window": "30d",
+   "p95_1m": 13.04,
+   "p95_10m": 14.79
+  },
+  {
+   "ratio": 1.15,
+   "endpoint": "top_products",
+   "role": "median",
+   "window": "partial_7d",
+   "p95_1m": 6.85,
+   "p95_10m": 7.87
+  },
+  {
+   "ratio": 1.16,
+   "endpoint": "trends",
+   "role": "smallest",
+   "window": "1h",
+   "p95_1m": 2.08,
+   "p95_10m": 2.42
+  },
+  {
+   "ratio": 1.16,
+   "endpoint": "trends",
+   "role": "smallest",
+   "window": "partial_7d",
+   "p95_1m": 7.63,
+   "p95_10m": 8.86
+  },
+  {
+   "ratio": 1.17,
+   "endpoint": "summary",
+   "role": "smallest",
+   "window": "90d",
+   "p95_1m": 18.72,
+   "p95_10m": 21.96
+  },
+  {
+   "ratio": 1.17,
+   "endpoint": "top_products",
+   "role": "median",
+   "window": "1d",
+   "p95_1m": 2.88,
+   "p95_10m": 3.36
+  },
+  {
+   "ratio": 1.17,
+   "endpoint": "top_products",
+   "role": "smallest",
+   "window": "30d",
+   "p95_1m": 7.17,
+   "p95_10m": 8.41
+  },
+  {
+   "ratio": 1.17,
+   "endpoint": "trends",
+   "role": "smallest",
+   "window": "1d",
+   "p95_1m": 2.48,
+   "p95_10m": 2.89
+  },
+  {
+   "ratio": 1.18,
+   "endpoint": "breakdown",
+   "role": "largest",
+   "window": "1d",
+   "p95_1m": 3.62,
+   "p95_10m": 4.26
+  },
+  {
+   "ratio": 1.18,
+   "endpoint": "breakdown",
+   "role": "median",
+   "window": "partial_7d",
+   "p95_1m": 4.09,
+   "p95_10m": 4.84
+  },
+  {
+   "ratio": 1.18,
+   "endpoint": "top_products",
+   "role": "largest",
+   "window": "7d",
+   "p95_1m": 8.25,
+   "p95_10m": 9.75
+  },
+  {
+   "ratio": 1.18,
+   "endpoint": "trends",
+   "role": "median",
+   "window": "7d",
+   "p95_1m": 7.4,
+   "p95_10m": 8.72
+  },
+  {
+   "ratio": 1.19,
+   "endpoint": "breakdown",
+   "role": "median",
+   "window": "7d",
+   "p95_1m": 4.0,
+   "p95_10m": 4.76
+  },
+  {
+   "ratio": 1.2,
+   "endpoint": "breakdown",
+   "role": "smallest",
+   "window": "1h",
+   "p95_1m": 2.53,
+   "p95_10m": 3.04
+  },
+  {
+   "ratio": 1.2,
+   "endpoint": "top_products",
+   "role": "median",
+   "window": "7d",
+   "p95_1m": 5.87,
+   "p95_10m": 7.05
+  },
+  {
+   "ratio": 1.23,
+   "endpoint": "summary",
+   "role": "median",
+   "window": "partial_7d",
+   "p95_1m": 5.45,
+   "p95_10m": 6.69
+  },
+  {
+   "ratio": 1.23,
+   "endpoint": "trends",
+   "role": "smallest",
+   "window": "90d",
+   "p95_1m": 8.09,
+   "p95_10m": 9.94
+  },
+  {
+   "ratio": 1.25,
+   "endpoint": "breakdown",
+   "role": "largest",
+   "window": "7d",
+   "p95_1m": 10.45,
+   "p95_10m": 13.08
+  },
+  {
+   "ratio": 1.26,
+   "endpoint": "summary",
+   "role": "smallest",
+   "window": "7d",
+   "p95_1m": 6.8,
+   "p95_10m": 8.59
+  },
+  {
+   "ratio": 1.29,
+   "endpoint": "top_products",
+   "role": "smallest",
+   "window": "1h",
+   "p95_1m": 2.43,
+   "p95_10m": 3.14
+  },
+  {
+   "ratio": 1.3,
+   "endpoint": "summary",
+   "role": "smallest",
+   "window": "1d",
+   "p95_1m": 2.52,
+   "p95_10m": 3.28
+  },
+  {
+   "ratio": 1.3,
+   "endpoint": "top_products",
+   "role": "largest",
+   "window": "30d",
+   "p95_1m": 19.92,
+   "p95_10m": 25.84
+  },
+  {
+   "ratio": 1.33,
+   "endpoint": "summary",
+   "role": "largest",
+   "window": "1h",
+   "p95_1m": 4.34,
+   "p95_10m": 5.78
+  },
+  {
+   "ratio": 1.33,
+   "endpoint": "summary",
+   "role": "median",
+   "window": "1d",
+   "p95_1m": 2.5,
+   "p95_10m": 3.32
+  },
+  {
+   "ratio": 1.34,
+   "endpoint": "top_products",
+   "role": "smallest",
+   "window": "7d",
+   "p95_1m": 3.73,
+   "p95_10m": 4.99
+  },
+  {
+   "ratio": 1.36,
+   "endpoint": "breakdown",
+   "role": "largest",
+   "window": "90d",
+   "p95_1m": 60.37,
+   "p95_10m": 82.32
+  },
+  {
+   "ratio": 1.39,
+   "endpoint": "summary",
+   "role": "smallest",
+   "window": "1h",
+   "p95_1m": 2.23,
+   "p95_10m": 3.1
+  },
+  {
+   "ratio": 1.41,
+   "endpoint": "breakdown",
+   "role": "median",
+   "window": "30d",
+   "p95_1m": 10.55,
+   "p95_10m": 14.88
+  },
+  {
+   "ratio": 1.41,
+   "endpoint": "summary",
+   "role": "median",
+   "window": "1h",
+   "p95_1m": 2.15,
+   "p95_10m": 3.03
+  },
+  {
+   "ratio": 1.46,
+   "endpoint": "trends",
+   "role": "median",
+   "window": "1d",
+   "p95_1m": 2.67,
+   "p95_10m": 3.9
+  },
+  {
+   "ratio": 1.48,
+   "endpoint": "summary",
+   "role": "smallest",
+   "window": "30d",
+   "p95_1m": 7.41,
+   "p95_10m": 10.93
+  },
+  {
+   "ratio": 1.5,
+   "endpoint": "top_products",
+   "role": "median",
+   "window": "1h",
+   "p95_1m": 2.25,
+   "p95_10m": 3.37
+  },
+  {
+   "ratio": 1.51,
+   "endpoint": "summary",
+   "role": "largest",
+   "window": "90d",
+   "p95_1m": 60.77,
+   "p95_10m": 91.81
+  },
+  {
+   "ratio": 1.52,
+   "endpoint": "top_products",
+   "role": "largest",
+   "window": "1h",
+   "p95_1m": 3.19,
+   "p95_10m": 4.84
+  },
+  {
+   "ratio": 1.55,
+   "endpoint": "trends",
+   "role": "median",
+   "window": "30d",
+   "p95_1m": 3.31,
+   "p95_10m": 5.12
+  },
+  {
+   "ratio": 1.58,
+   "endpoint": "trends",
+   "role": "median",
+   "window": "90d",
+   "p95_1m": 5.88,
+   "p95_10m": 9.27
+  },
+  {
+   "ratio": 1.68,
+   "endpoint": "trends",
+   "role": "largest",
+   "window": "7d",
+   "p95_1m": 12.13,
+   "p95_10m": 20.36
+  },
+  {
+   "ratio": 1.7,
+   "endpoint": "breakdown",
+   "role": "largest",
+   "window": "30d",
+   "p95_1m": 25.95,
+   "p95_10m": 44.19
+  },
+  {
+   "ratio": 1.89,
+   "endpoint": "trends",
+   "role": "median",
+   "window": "1h",
+   "p95_1m": 2.6,
+   "p95_10m": 4.91
+  },
+  {
+   "ratio": 1.9,
+   "endpoint": "trends",
+   "role": "smallest",
+   "window": "30d",
+   "p95_1m": 3.08,
+   "p95_10m": 5.84
+  },
+  {
+   "ratio": 1.95,
+   "endpoint": "breakdown",
+   "role": "smallest",
+   "window": "7d",
+   "p95_1m": 4.04,
+   "p95_10m": 7.86
+  },
+  {
+   "ratio": 2.07,
+   "endpoint": "top_products",
+   "role": "median",
+   "window": "30d",
+   "p95_1m": 12.28,
+   "p95_10m": 25.4
+  },
+  {
+   "ratio": 2.12,
+   "endpoint": "trends",
+   "role": "largest",
+   "window": "90d",
+   "p95_1m": 7.34,
+   "p95_10m": 15.54
+  },
+  {
+   "ratio": 2.27,
+   "endpoint": "top_products",
+   "role": "largest",
+   "window": "partial_7d",
+   "p95_1m": 15.49,
+   "p95_10m": 35.14
+  },
+  {
+   "ratio": 3.37,
+   "endpoint": "summary",
+   "role": "largest",
+   "window": "partial_7d",
+   "p95_1m": 11.39,
+   "p95_10m": 38.35
+  },
+  {
+   "ratio": 3.62,
+   "endpoint": "breakdown",
+   "role": "largest",
+   "window": "partial_7d",
+   "p95_1m": 10.12,
+   "p95_10m": 36.65
+  },
+  {
+   "ratio": 5.18,
+   "endpoint": "top_products",
+   "role": "largest",
+   "window": "90d",
+   "p95_1m": 46.43,
+   "p95_10m": 240.56
+  }
+ ]
+}
