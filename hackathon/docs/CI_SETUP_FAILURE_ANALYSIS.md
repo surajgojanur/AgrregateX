@@ -15,7 +15,7 @@ The evidence establishes a peer-closed transfer reported by curl 56. It does not
 
 ## Narrow correction
 
-The shared action now retries only the idempotent signing-key download up to three times after the initial attempt, with bounded connect/overall timeouts. It uses HTTPS with TLS 1.2 or later, leaves certificate verification enabled, verifies a nonempty temporary download, and installs the key with restrictive predictable permissions before the existing APT `signed-by` configuration. APT package signature checks remain unchanged. The retry does not suppress failures.
+The shared action now retries only the idempotent signing-key download up to three times after the initial attempt, with bounded connect/overall timeouts. It restricts both the initial request and redirects to HTTPS, requires TLS 1.2 or later, leaves certificate verification enabled, verifies a nonempty temporary download, and installs the key with predictable permissions before the existing APT `signed-by` configuration. APT package signature checks remain unchanged. The retry does not suppress failures.
 
 ## Local validation
 

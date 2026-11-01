@@ -136,7 +136,7 @@ runs:
         key_tmp="$(mktemp)"
         trap 'rm -f "$key_tmp"' EXIT
         curl --fail --show-error --silent --location \
-          --proto '=https' --tlsv1.2 \
+          --proto '=https' --proto-redir '=https' --tlsv1.2 \
           --retry 3 --retry-all-errors --retry-delay 2 \
           --connect-timeout 10 --max-time 60 \
           --output "$key_tmp" \
