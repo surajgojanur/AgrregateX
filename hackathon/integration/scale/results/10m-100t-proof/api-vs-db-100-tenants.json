@@ -1,0 +1,810 @@
+{
+ "rows": [
+  {
+   "tenant_id": 1,
+   "api_orders": 1930247,
+   "db_orders": 1930247,
+   "match": true,
+   "ms": 987.4,
+   "raw_edges": []
+  },
+  {
+   "tenant_id": 2,
+   "api_orders": 964797,
+   "db_orders": 964797,
+   "match": true,
+   "ms": 487.8,
+   "raw_edges": []
+  },
+  {
+   "tenant_id": 3,
+   "api_orders": 641402,
+   "db_orders": 641402,
+   "match": true,
+   "ms": 321.8,
+   "raw_edges": []
+  },
+  {
+   "tenant_id": 4,
+   "api_orders": 480914,
+   "db_orders": 480914,
+   "match": true,
+   "ms": 221.5,
+   "raw_edges": []
+  },
+  {
+   "tenant_id": 5,
+   "api_orders": 384486,
+   "db_orders": 384486,
+   "match": true,
+   "ms": 209.8,
+   "raw_edges": []
+  },
+  {
+   "tenant_id": 6,
+   "api_orders": 320132,
+   "db_orders": 320132,
+   "match": true,
+   "ms": 153.0,
+   "raw_edges": []
+  },
+  {
+   "tenant_id": 7,
+   "api_orders": 274874,
+   "db_orders": 274874,
+   "match": true,
+   "ms": 143.0,
+   "raw_edges": []
+  },
+  {
+   "tenant_id": 8,
+   "api_orders": 241230,
+   "db_orders": 241230,
+   "match": true,
+   "ms": 118.3,
+   "raw_edges": []
+  },
+  {
+   "tenant_id": 9,
+   "api_orders": 214282,
+   "db_orders": 214282,
+   "match": true,
+   "ms": 102.4,
+   "raw_edges": []
+  },
+  {
+   "tenant_id": 10,
+   "api_orders": 193027,
+   "db_orders": 193027,
+   "match": true,
+   "ms": 93.1,
+   "raw_edges": []
+  },
+  {
+   "tenant_id": 11,
+   "api_orders": 175714,
+   "db_orders": 175714,
+   "match": true,
+   "ms": 82.9,
+   "raw_edges": []
+  },
+  {
+   "tenant_id": 12,
+   "api_orders": 160573,
+   "db_orders": 160573,
+   "match": true,
+   "ms": 78.4,
+   "raw_edges": []
+  },
+  {
+   "tenant_id": 13,
+   "api_orders": 147337,
+   "db_orders": 147337,
+   "match": true,
+   "ms": 73.1,
+   "raw_edges": []
+  },
+  {
+   "tenant_id": 14,
+   "api_orders": 137172,
+   "db_orders": 137172,
+   "match": true,
+   "ms": 65.2,
+   "raw_edges": []
+  },
+  {
+   "tenant_id": 15,
+   "api_orders": 128795,
+   "db_orders": 128795,
+   "match": true,
+   "ms": 65.6,
+   "raw_edges": []
+  },
+  {
+   "tenant_id": 16,
+   "api_orders": 120382,
+   "db_orders": 120382,
+   "match": true,
+   "ms": 60.1,
+   "raw_edges": []
+  },
+  {
+   "tenant_id": 17,
+   "api_orders": 113765,
+   "db_orders": 113765,
+   "match": true,
+   "ms": 61.6,
+   "raw_edges": []
+  },
+  {
+   "tenant_id": 18,
+   "api_orders": 106643,
+   "db_orders": 106643,
+   "match": true,
+   "ms": 55.6,
+   "raw_edges": []
+  },
+  {
+   "tenant_id": 19,
+   "api_orders": 101674,
+   "db_orders": 101674,
+   "match": true,
+   "ms": 51.2,
+   "raw_edges": []
+  },
+  {
+   "tenant_id": 20,
+   "api_orders": 95927,
+   "db_orders": 95927,
+   "match": true,
+   "ms": 54.7,
+   "raw_edges": []
+  },
+  {
+   "tenant_id": 21,
+   "api_orders": 91340,
+   "db_orders": 91340,
+   "match": true,
+   "ms": 60.9,
+   "raw_edges": []
+  },
+  {
+   "tenant_id": 22,
+   "api_orders": 87021,
+   "db_orders": 87021,
+   "match": true,
+   "ms": 68.9,
+   "raw_edges": []
+  },
+  {
+   "tenant_id": 23,
+   "api_orders": 83236,
+   "db_orders": 83236,
+   "match": true,
+   "ms": 60.1,
+   "raw_edges": []
+  },
+  {
+   "tenant_id": 24,
+   "api_orders": 79621,
+   "db_orders": 79621,
+   "match": true,
+   "ms": 55.2,
+   "raw_edges": []
+  },
+  {
+   "tenant_id": 25,
+   "api_orders": 77022,
+   "db_orders": 77022,
+   "match": true,
+   "ms": 63.9,
+   "raw_edges": []
+  },
+  {
+   "tenant_id": 26,
+   "api_orders": 74068,
+   "db_orders": 74068,
+   "match": true,
+   "ms": 55.8,
+   "raw_edges": []
+  },
+  {
+   "tenant_id": 27,
+   "api_orders": 71033,
+   "db_orders": 71033,
+   "match": true,
+   "ms": 60.1,
+   "raw_edges": []
+  },
+  {
+   "tenant_id": 28,
+   "api_orders": 68659,
+   "db_orders": 68659,
+   "match": true,
+   "ms": 53.6,
+   "raw_edges": []
+  },
+  {
+   "tenant_id": 29,
+   "api_orders": 66799,
+   "db_orders": 66799,
+   "match": true,
+   "ms": 50.7,
+   "raw_edges": []
+  },
+  {
+   "tenant_id": 30,
+   "api_orders": 64635,
+   "db_orders": 64635,
+   "match": true,
+   "ms": 63.9,
+   "raw_edges": []
+  },
+  {
+   "tenant_id": 31,
+   "api_orders": 62806,
+   "db_orders": 62806,
+   "match": true,
+   "ms": 54.3,
+   "raw_edges": []
+  },
+  {
+   "tenant_id": 32,
+   "api_orders": 59804,
+   "db_orders": 59804,
+   "match": true,
+   "ms": 61.4,
+   "raw_edges": []
+  },
+  {
+   "tenant_id": 33,
+   "api_orders": 58300,
+   "db_orders": 58300,
+   "match": true,
+   "ms": 84.4,
+   "raw_edges": []
+  },
+  {
+   "tenant_id": 34,
+   "api_orders": 57107,
+   "db_orders": 57107,
+   "match": true,
+   "ms": 132.5,
+   "raw_edges": []
+  },
+  {
+   "tenant_id": 35,
+   "api_orders": 54730,
+   "db_orders": 54730,
+   "match": true,
+   "ms": 97.1,
+   "raw_edges": []
+  },
+  {
+   "tenant_id": 36,
+   "api_orders": 53238,
+   "db_orders": 53238,
+   "match": true,
+   "ms": 85.9,
+   "raw_edges": []
+  },
+  {
+   "tenant_id": 37,
+   "api_orders": 52123,
+   "db_orders": 52123,
+   "match": true,
+   "ms": 90.9,
+   "raw_edges": []
+  },
+  {
+   "tenant_id": 38,
+   "api_orders": 50796,
+   "db_orders": 50796,
+   "match": true,
+   "ms": 62.3,
+   "raw_edges": []
+  },
+  {
+   "tenant_id": 39,
+   "api_orders": 49872,
+   "db_orders": 49872,
+   "match": true,
+   "ms": 66.1,
+   "raw_edges": []
+  },
+  {
+   "tenant_id": 40,
+   "api_orders": 48238,
+   "db_orders": 48238,
+   "match": true,
+   "ms": 55.7,
+   "raw_edges": []
+  },
+  {
+   "tenant_id": 41,
+   "api_orders": 47583,
+   "db_orders": 47583,
+   "match": true,
+   "ms": 52.3,
+   "raw_edges": []
+  },
+  {
+   "tenant_id": 42,
+   "api_orders": 46310,
+   "db_orders": 46310,
+   "match": true,
+   "ms": 53.4,
+   "raw_edges": []
+  },
+  {
+   "tenant_id": 43,
+   "api_orders": 45484,
+   "db_orders": 45484,
+   "match": true,
+   "ms": 56.6,
+   "raw_edges": []
+  },
+  {
+   "tenant_id": 44,
+   "api_orders": 44083,
+   "db_orders": 44083,
+   "match": true,
+   "ms": 54.7,
+   "raw_edges": []
+  },
+  {
+   "tenant_id": 45,
+   "api_orders": 43141,
+   "db_orders": 43141,
+   "match": true,
+   "ms": 48.6,
+   "raw_edges": []
+  },
+  {
+   "tenant_id": 46,
+   "api_orders": 42121,
+   "db_orders": 42121,
+   "match": true,
+   "ms": 66.0,
+   "raw_edges": []
+  },
+  {
+   "tenant_id": 47,
+   "api_orders": 41319,
+   "db_orders": 41319,
+   "match": true,
+   "ms": 70.8,
+   "raw_edges": []
+  },
+  {
+   "tenant_id": 48,
+   "api_orders": 40323,
+   "db_orders": 40323,
+   "match": true,
+   "ms": 68.1,
+   "raw_edges": []
+  },
+  {
+   "tenant_id": 49,
+   "api_orders": 39402,
+   "db_orders": 39402,
+   "match": true,
+   "ms": 44.2,
+   "raw_edges": []
+  },
+  {
+   "tenant_id": 50,
+   "api_orders": 38794,
+   "db_orders": 38794,
+   "match": true,
+   "ms": 47.8,
+   "raw_edges": []
+  },
+  {
+   "tenant_id": 51,
+   "api_orders": 37901,
+   "db_orders": 37901,
+   "match": true,
+   "ms": 41.6,
+   "raw_edges": []
+  },
+  {
+   "tenant_id": 52,
+   "api_orders": 36858,
+   "db_orders": 36858,
+   "match": true,
+   "ms": 40.4,
+   "raw_edges": []
+  },
+  {
+   "tenant_id": 53,
+   "api_orders": 36338,
+   "db_orders": 36338,
+   "match": true,
+   "ms": 33.4,
+   "raw_edges": []
+  },
+  {
+   "tenant_id": 54,
+   "api_orders": 35671,
+   "db_orders": 35671,
+   "match": true,
+   "ms": 39.7,
+   "raw_edges": []
+  },
+  {
+   "tenant_id": 55,
+   "api_orders": 34908,
+   "db_orders": 34908,
+   "match": true,
+   "ms": 40.4,
+   "raw_edges": []
+  },
+  {
+   "tenant_id": 56,
+   "api_orders": 34108,
+   "db_orders": 34108,
+   "match": true,
+   "ms": 36.1,
+   "raw_edges": []
+  },
+  {
+   "tenant_id": 57,
+   "api_orders": 33836,
+   "db_orders": 33836,
+   "match": true,
+   "ms": 36.8,
+   "raw_edges": []
+  },
+  {
+   "tenant_id": 58,
+   "api_orders": 33045,
+   "db_orders": 33045,
+   "match": true,
+   "ms": 44.7,
+   "raw_edges": []
+  },
+  {
+   "tenant_id": 59,
+   "api_orders": 33091,
+   "db_orders": 33091,
+   "match": true,
+   "ms": 41.2,
+   "raw_edges": []
+  },
+  {
+   "tenant_id": 60,
+   "api_orders": 31857,
+   "db_orders": 31857,
+   "match": true,
+   "ms": 32.4,
+   "raw_edges": []
+  },
+  {
+   "tenant_id": 61,
+   "api_orders": 31269,
+   "db_orders": 31269,
+   "match": true,
+   "ms": 30.3,
+   "raw_edges": []
+  },
+  {
+   "tenant_id": 62,
+   "api_orders": 31223,
+   "db_orders": 31223,
+   "match": true,
+   "ms": 29.5,
+   "raw_edges": []
+  },
+  {
+   "tenant_id": 63,
+   "api_orders": 30711,
+   "db_orders": 30711,
+   "match": true,
+   "ms": 36.4,
+   "raw_edges": []
+  },
+  {
+   "tenant_id": 64,
+   "api_orders": 30530,
+   "db_orders": 30530,
+   "match": true,
+   "ms": 40.4,
+   "raw_edges": []
+  },
+  {
+   "tenant_id": 65,
+   "api_orders": 30163,
+   "db_orders": 30163,
+   "match": true,
+   "ms": 37.3,
+   "raw_edges": []
+  },
+  {
+   "tenant_id": 66,
+   "api_orders": 29221,
+   "db_orders": 29221,
+   "match": true,
+   "ms": 31.3,
+   "raw_edges": []
+  },
+  {
+   "tenant_id": 67,
+   "api_orders": 28896,
+   "db_orders": 28896,
+   "match": true,
+   "ms": 37.9,
+   "raw_edges": []
+  },
+  {
+   "tenant_id": 68,
+   "api_orders": 28491,
+   "db_orders": 28491,
+   "match": true,
+   "ms": 33.8,
+   "raw_edges": []
+  },
+  {
+   "tenant_id": 69,
+   "api_orders": 27921,
+   "db_orders": 27921,
+   "match": true,
+   "ms": 28.8,
+   "raw_edges": []
+  },
+  {
+   "tenant_id": 70,
+   "api_orders": 27558,
+   "db_orders": 27558,
+   "match": true,
+   "ms": 38.8,
+   "raw_edges": []
+  },
+  {
+   "tenant_id": 71,
+   "api_orders": 27476,
+   "db_orders": 27476,
+   "match": true,
+   "ms": 38.1,
+   "raw_edges": []
+  },
+  {
+   "tenant_id": 72,
+   "api_orders": 26746,
+   "db_orders": 26746,
+   "match": true,
+   "ms": 29.6,
+   "raw_edges": []
+  },
+  {
+   "tenant_id": 73,
+   "api_orders": 26361,
+   "db_orders": 26361,
+   "match": true,
+   "ms": 29.3,
+   "raw_edges": []
+  },
+  {
+   "tenant_id": 74,
+   "api_orders": 25761,
+   "db_orders": 25761,
+   "match": true,
+   "ms": 26.6,
+   "raw_edges": []
+  },
+  {
+   "tenant_id": 75,
+   "api_orders": 25809,
+   "db_orders": 25809,
+   "match": true,
+   "ms": 24.8,
+   "raw_edges": []
+  },
+  {
+   "tenant_id": 76,
+   "api_orders": 25375,
+   "db_orders": 25375,
+   "match": true,
+   "ms": 26.8,
+   "raw_edges": []
+  },
+  {
+   "tenant_id": 77,
+   "api_orders": 24680,
+   "db_orders": 24680,
+   "match": true,
+   "ms": 28.4,
+   "raw_edges": []
+  },
+  {
+   "tenant_id": 78,
+   "api_orders": 24948,
+   "db_orders": 24948,
+   "match": true,
+   "ms": 23.0,
+   "raw_edges": []
+  },
+  {
+   "tenant_id": 79,
+   "api_orders": 24670,
+   "db_orders": 24670,
+   "match": true,
+   "ms": 22.9,
+   "raw_edges": []
+  },
+  {
+   "tenant_id": 80,
+   "api_orders": 23771,
+   "db_orders": 23771,
+   "match": true,
+   "ms": 22.8,
+   "raw_edges": []
+  },
+  {
+   "tenant_id": 81,
+   "api_orders": 23476,
+   "db_orders": 23476,
+   "match": true,
+   "ms": 23.2,
+   "raw_edges": []
+  },
+  {
+   "tenant_id": 82,
+   "api_orders": 23304,
+   "db_orders": 23304,
+   "match": true,
+   "ms": 21.3,
+   "raw_edges": []
+  },
+  {
+   "tenant_id": 83,
+   "api_orders": 23030,
+   "db_orders": 23030,
+   "match": true,
+   "ms": 20.7,
+   "raw_edges": []
+  },
+  {
+   "tenant_id": 84,
+   "api_orders": 22868,
+   "db_orders": 22868,
+   "match": true,
+   "ms": 20.5,
+   "raw_edges": []
+  },
+  {
+   "tenant_id": 85,
+   "api_orders": 22761,
+   "db_orders": 22761,
+   "match": true,
+   "ms": 21.7,
+   "raw_edges": []
+  },
+  {
+   "tenant_id": 86,
+   "api_orders": 22596,
+   "db_orders": 22596,
+   "match": true,
+   "ms": 21.4,
+   "raw_edges": []
+  },
+  {
+   "tenant_id": 87,
+   "api_orders": 22138,
+   "db_orders": 22138,
+   "match": true,
+   "ms": 23.1,
+   "raw_edges": []
+  },
+  {
+   "tenant_id": 88,
+   "api_orders": 21833,
+   "db_orders": 21833,
+   "match": true,
+   "ms": 30.9,
+   "raw_edges": []
+  },
+  {
+   "tenant_id": 89,
+   "api_orders": 21782,
+   "db_orders": 21782,
+   "match": true,
+   "ms": 22.3,
+   "raw_edges": []
+  },
+  {
+   "tenant_id": 90,
+   "api_orders": 21347,
+   "db_orders": 21347,
+   "match": true,
+   "ms": 24.7,
+   "raw_edges": []
+  },
+  {
+   "tenant_id": 91,
+   "api_orders": 21238,
+   "db_orders": 21238,
+   "match": true,
+   "ms": 25.7,
+   "raw_edges": []
+  },
+  {
+   "tenant_id": 92,
+   "api_orders": 21056,
+   "db_orders": 21056,
+   "match": true,
+   "ms": 23.8,
+   "raw_edges": []
+  },
+  {
+   "tenant_id": 93,
+   "api_orders": 20631,
+   "db_orders": 20631,
+   "match": true,
+   "ms": 21.1,
+   "raw_edges": []
+  },
+  {
+   "tenant_id": 94,
+   "api_orders": 20880,
+   "db_orders": 20880,
+   "match": true,
+   "ms": 19.6,
+   "raw_edges": []
+  },
+  {
+   "tenant_id": 95,
+   "api_orders": 20408,
+   "db_orders": 20408,
+   "match": true,
+   "ms": 24.9,
+   "raw_edges": []
+  },
+  {
+   "tenant_id": 96,
+   "api_orders": 20110,
+   "db_orders": 20110,
+   "match": true,
+   "ms": 19.1,
+   "raw_edges": []
+  },
+  {
+   "tenant_id": 97,
+   "api_orders": 20078,
+   "db_orders": 20078,
+   "match": true,
+   "ms": 22.0,
+   "raw_edges": []
+  },
+  {
+   "tenant_id": 98,
+   "api_orders": 19777,
+   "db_orders": 19777,
+   "match": true,
+   "ms": 20.1,
+   "raw_edges": []
+  },
+  {
+   "tenant_id": 99,
+   "api_orders": 19642,
+   "db_orders": 19642,
+   "match": true,
+   "ms": 23.7,
+   "raw_edges": []
+  },
+  {
+   "tenant_id": 100,
+   "api_orders": 19471,
+   "db_orders": 19471,
+   "match": true,
+   "ms": 26.7,
+   "raw_edges": []
+  }
+ ],
+ "api_total": 10000000,
+ "db_total": 10000000,
+ "all_match": true,
+ "mismatches": [],
+ "ms_p50": 44.7,
+ "ms_max": 987.4
+}
