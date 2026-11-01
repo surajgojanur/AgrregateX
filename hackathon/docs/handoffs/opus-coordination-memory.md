@@ -50,13 +50,13 @@
 | API + dashboard (single DB) | merged #18 (c38cd33) as an integration baseline, **not** a judge-ready approval | #18 review checklist still open |
 | P3 sharding | **PR #22 MERGED** to main as the P3 dev baseline, `b632bd9` (not release qualification) | `docs/handoffs/opus-sharding.md`, `sharding/results/` |
 | Bonus B-1/B-2/B-3 | **PR #24** `feat/opus-bonus-b1-b2-b3` (7/7 unit tests; live DB NOT RUN) | `app/tests/test_bonus.py` |
-| PR #22 review fixes | merged (head `7b19d14`) (fail-closed partition script, image comment, login on) | #12 6543706376; fixture tests 11/11 + 7/7; live run NOT RUN |
+| PR #22 review fixes | merged (head `7b19d14`) (fail-closed partition script, image comment, login on) | #12 6543706376; fixture tests 11/11 + 7/7; live run PASS in PR #53 (`7f004c2c`) |
 | CI | **BLOCKED by billing**: Actions jobs are not started ("recent account payments have failed or spending limit") | check annotations on d79fa55 |
 | Frontend PS conversion + new logo | **staged, uncommitted** on local branch `feat/aggregatex-logo` (worktree `~/Downloads/mitigata/AgrregateX-sharding`); 107 files, Revelio product removed. Waiting for the user's OK to commit/PR | lint OK, 3/3 tests, build OK; no browser QA |
 
 **Latest verified results (M1, n=1, REPRESENTATIVE 10k orders total):**
 - shard_check 18/18; API vs SQL 200/200.
-- Partition (old script revision): A 503 in ~3 s, B 200, no phantom write, recovery ≤ 3 s, A oracle 0/0.
+- Partition (approved live hardened run, `ax-demo42`): A 503 in ~3 s, B reads 200 and committed write visible in 1.8 s, explicit partial shards view, exact restore, recovery ≤ 3 s, both-shard oracle 0/0, tenant1 API=SQL 29=29.
 - Latency p50 3.5–5.5 ms; commit→visible p50 ~1.25 s, max 1.85 s.
 - **OLTP under dashboard load −52% (FAIL G-3).** Single-DB P1: DIFFERENTIAL −28% tps under sustained writes; IMMEDIATE 0.11 tps.
 
