@@ -58,7 +58,12 @@ function contradictory(reason, mode = 'unknown') {
 }
 
 /** Validate the provenance contract for one independent analytics HTTP response. */
-export function normalizeAnalyticsResponse(family, response, { requestedRange } = {}) {
+export function normalizeAnalyticsResponse(family, response, {
+  requestedRange,
+  requestedTenant,
+  requestedGrain,
+  requestedBreakdown,
+} = {}) {
   if (!response || typeof response !== 'object' || Array.isArray(response)) {
     return unknown('Response or provenance metadata is missing.')
   }
@@ -79,6 +84,24 @@ export function normalizeAnalyticsResponse(family, response, { requestedRange } 
     const requested = parseRange([requestedRange.from, requestedRange.to])
     if (!requested || requested.start !== responseRange.start || requested.end !== responseRange.end) {
       return unknown('The response interval does not match the current dashboard filters.')
+    }
+  }
+  if (requestedTenant != null) {
+    if (!Object.hasOwn(response, 'tenant_id')) return unknown('The response tenant ID is missing.')
+    if (response.tenant_id !== requestedTenant) {
+      return contradictory('The response tenant ID does not match the current dashboard tenant.', mode)
+    }
+  }
+  if (family === 'trends' && requestedGrain != null) {
+    if (response.grain == null) return unknown('The response trend grain is missing.')
+    if (response.grain !== requestedGrain) {
+      return contradictory('The response trend grain does not match the current dashboard grain.', mode)
+    }
+  }
+  if (family === 'breakdown' && requestedBreakdown != null) {
+    if (response.by == null) return unknown('The response breakdown selector is missing.')
+    if (response.by !== requestedBreakdown) {
+      return contradictory('The response breakdown selector does not match the current dashboard filter.', mode)
     }
   }
   if (provenance.uses_stream_tables !== (mode === 'rollup')) {
@@ -138,8 +161,10 @@ export function normalizeAnalyticsResponse(family, response, { requestedRange } 
 
 /** Never calls a partial or contradictory four-endpoint set uniformly sourced. */
 export function classifyAnalyticsSet(panels) {
-  const sources = ANALYTICS_FAMILIES.map(([key]) => panels?.[key]?.source)
-  const complete = sources.every((source) => source?.status === 'verified')
+  const responses = ANALYTICS_FAMILIES.map(([key]) => panels?.[key])
+  const sources = responses.map((panel) => panel?.source)
+  const complete = responses.every((panel) => panel?.status === 'success') &&
+    sources.every((source) => source?.status === 'verified')
   const modes = new Set(sources.filter((source) => source?.status === 'verified').map((source) => source.mode))
   if (complete && modes.size === 1) {
     const mode = [...modes][0]
@@ -154,7 +179,11 @@ export function classifyAnalyticsSet(panels) {
 export function describePanelSource(family, panel) {
   const source = panel?.source
   if (panel?.status === 'loading') return `${ANALYTICS_FAMILIES.find(([key]) => key === family)?.[1] || family}: loading.`
-  if (panel?.status === 'error') return `${ANALYTICS_FAMILIES.find(([key]) => key === family)?.[1] || family}: unavailable; ${panel.error}`
+  if (panel?.status === 'error') {
+    const name = ANALYTICS_FAMILIES.find(([key]) => key === family)?.[1] || family
+    const mode = source?.status === 'verified' ? ` Response metadata reports ${source.mode}.` : ''
+    return `${name}: unavailable; ${panel.error}.${mode}`
+  }
   if (source?.status !== 'verified') {
     return `${ANALYTICS_FAMILIES.find(([key]) => key === family)?.[1] || family}: data source not verified. ${source?.reason || ''}`.trim()
   }

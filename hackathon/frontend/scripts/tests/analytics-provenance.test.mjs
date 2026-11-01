@@ -19,6 +19,7 @@ const rawTables = {
 function response(family, mode = 'raw_source') {
   const base = {
     ...interval,
+    tenant_id: 2,
     analytics_mode: mode,
     provenance: {
       source_tables: rawTables[family],
@@ -110,6 +111,17 @@ test('malformed ranges and stale request intervals are not verified', () => {
   assert.equal(normalizeAnalyticsResponse('summary', response('summary'), {
     requestedRange: { from: interval.from, to: '2026-10-09T00:00:00Z' },
   }).status, 'unknown')
+})
+
+test('tenant, trend grain, and breakdown selector must match current filters', () => {
+  const wrongTenant = response('summary'); wrongTenant.tenant_id = 3
+  assert.equal(normalizeAnalyticsResponse('summary', wrongTenant, { requestedTenant: 2 }).status, 'contradictory')
+  const wrongGrain = response('trends'); wrongGrain.grain = 'hour'
+  assert.equal(normalizeAnalyticsResponse('trends', wrongGrain, { requestedGrain: 'day' }).status, 'contradictory')
+  const wrongBy = response('breakdown'); wrongBy.by = 'category'
+  assert.equal(normalizeAnalyticsResponse('breakdown', wrongBy, { requestedBreakdown: 'status' }).status, 'contradictory')
+  const missingTenant = response('summary'); delete missingTenant.tenant_id
+  assert.equal(normalizeAnalyticsResponse('summary', missingTenant, { requestedTenant: 2 }).status, 'unknown')
 })
 
 test('all endpoint families can agree on raw or rollup mode', () => {

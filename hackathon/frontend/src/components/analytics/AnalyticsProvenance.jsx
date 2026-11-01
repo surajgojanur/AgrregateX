@@ -7,6 +7,12 @@ const formatTime = (value) => {
 }
 export function PanelSourceBadge({ family, panel }) {
   const source = panel?.source
+  if (panel?.status === 'error') {
+    const reported = source?.status === 'verified' ? `; metadata reports ${MODE_LABELS[source.mode]}` : ''
+    return <span className="ax-source-badge ax-source-badge--unknown" aria-label={`${family}: response unavailable${reported}`}>
+      Unavailable
+    </span>
+  }
   const mode = source?.status === 'verified' ? source.mode : 'unknown'
   const label = mode === 'raw_source' ? 'Direct source' : mode === 'rollup' ? 'Rollup' : 'Not verified'
   const aria = `${family}: ${MODE_LABELS[mode] || 'data source not verified'}`

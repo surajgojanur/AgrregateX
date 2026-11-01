@@ -30,18 +30,22 @@
 - Raw-source answers do not use stream freshness. The independent engine-health panel is explicitly separated from answer freshness. Null and malformed age/table fields are guarded.
 - Dashboard requests are keyed to tenant, date range, grain, and breakdown. Tenant/filter changes hide prior-query values immediately, abort prior requests, and ignore late completions. Same-query auto-refresh is bounded to one in-flight set. A failed panel does not retain its previous result; other panels report their own status and provenance.
 - The API now labels its snapshot contract `consistency_scope: per_http_response_only`; this does not claim one shared snapshot across four HTTP requests.
+- The classifier requires all four panels to have succeeded and have verified source metadata. Provenance verification also matches the response tenant ID, trend grain, and breakdown selector against the current dashboard request. A failed panel is labeled unavailable even when its source metadata is otherwise valid.
+- The Live mutation panel now calls its result a scoped touched-group visibility sample and explicitly says that a match does not resolve the G4 defect.
 
 ## Offline validation performed
 
 From `hackathon/frontend`:
 
 - `npm ci` — completed; 156 packages installed. npm reported 6 moderate dependency audit findings; dependencies were not upgraded.
-- `npm test` — **20/20 passed**, including provenance classification, malformed/mixed metadata, stale request handling, partial 503s, and server-rendered accessibility labels.
+- `npm test` — **22/22 passed**, including the malformed-summary/valid-provenance regression, request selector mismatches, stale request handling, partial 503s, and server-rendered accessibility labels.
 - `npm run lint` — passed with zero warnings/errors.
 - `npm run build` — passed (Vite production build).
 - From `hackathon/app`, `/tmp/ax-raw-source-venv/bin/python -m unittest discover -s tests -v` — **55/55 passed**, including mocked raw-source route selection, signed auth/tenant checks, API-mode override rejection, restricted tenant transaction setup, unavailable-shard behavior, and rollup response compatibility.
 
 The UI component was rendered through React server rendering as an offline test. **Interactive browser QA and screenshots were not run**: the CUA browser host was unavailable in this session. No browser pointed at the preserved demo.
+
+The new malformed-summary regression was run before the classifier fix and failed as expected: classifyAnalyticsSet returned uniform for three successful raw panels plus an error panel whose provenance was verified. It passes after requiring every panel to have succeeded.
 
 These backend tests use mocks and do not start PostgreSQL. No live database-backed test was run.
 
@@ -50,6 +54,12 @@ These backend tests use mocks and do not start PostgreSQL. No live database-back
 **BLOCKED — NOT TESTED.** There was no separately approved disposable database target. Read-only host observations showed approximately 1.5 GiB available RAM and 6.3 GiB swap in use, below the required live-test headroom; no database/container was started. The preserved 8093/8094 services and `round1-db:25560` were not accessed for analytics, modified, or restarted during this work. No writes, refreshes, migrations, role changes, or RLS changes were performed.
 
 Offline mocks do not prove signed-cookie authentication, cross-tenant denial, forced RLS, restricted-role behavior, shard isolation, query timeout behavior, or PostgreSQL SQL compatibility. The operator-auth bypass is not evidence for tenant isolation.
+
+## GitHub CI provisioning failure
+
+Inspected PR #59's CI run [41256340026](https://github.com/surajgojanur/AgrregateX/actions/runs/41256340026). Both **Unit tests (PR gate, linux-amd64)** and **Integration tests** failed in the Setup pgrx environment step; their Rust test and integration steps were skipped. The composite action's Linux PostgreSQL install block downloads the PGDG signing key with curl and then runs apt-get update/install. The job log ends with **curl: (56) Failure when receiving data from the peer** and exit code 56 during that block.
+
+The only explicit curl command in that setup block downloads the public PGDG signing key, so that transfer is the most likely failure point. However, the command block lacks per-command tracing and does not conclusively identify the failing request. This is a provisioning/network failure, not a failed test assertion. Other independent checks (secret scanning, release evidence, upgrade completeness, and monitoring contract) succeeded; the aggregate PR correctness check failed transitively because the required jobs did not pass. No workflow/setup code was changed and CI was not rerun or represented as green.
 
 ## Correctness and known issue
 

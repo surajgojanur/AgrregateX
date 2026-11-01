@@ -212,8 +212,10 @@ function LiveWrite({ tenant, onDone }) {
       const r = await api.liveWrite(tenant, action === 'cancel' ? { action, order_id: last?.order_id } : { action })
       setLast(r)
       onDone()
-      notify({ kind: r.timed_out ? 'warn' : 'ok', title: `${action === 'cancel' ? 'Cancel' : 'Insert'} visible`,
-        message: r.lag_ms != null ? `Commit → visible in all stream tables: ${r.lag_ms} ms` : 'Not visible within 30 s' })
+      notify({ kind: r.timed_out ? 'warn' : 'ok', title: `${action === 'cancel' ? 'Cancel' : 'Insert'} visibility sample`,
+        message: r.lag_ms != null
+          ? `Affected groups matched source in ${r.lag_ms} ms. One scoped sample; not proof of full stream-table correctness.`
+          : 'Affected groups did not all match source within 30 s.' })
     } catch (err) {
       notify({ kind: 'error', title: 'Live write failed', message: err.message })
     } finally {
@@ -222,7 +224,7 @@ function LiveWrite({ tenant, onDone }) {
   }
   return (
     <div>
-      <p className="muted">Commits a real order on this tenant's shard, then polls until each stream table's affected row equals the same aggregate computed from raw orders.</p>
+      <p className="muted">Demo-only write: commits a real order on this tenant's shard, then checks only the touched product/day/category/hour groups against source rows. A matching sample does not prove overall stream-table correctness or resolve the known G4 ghost-aggregate defect.</p>
       <div className="ax-row">
         <button className="btn btn--primary" disabled={busy} onClick={() => run('insert')}>
           {busy ? <span className="spinner" /> : <Icon name="plus" />} Insert order
@@ -237,7 +239,7 @@ function LiveWrite({ tenant, onDone }) {
           <ul>
             {Object.entries(last.visible_after_ms).map(([k, v]) => <li key={k}><span className="mono">{k}</span> <b className="mono">{v} ms</b></li>)}
           </ul>
-          {last.lag_ms != null && <p>Measured commit → visible (all tables): <b className="mono">{last.lag_ms} ms</b></p>}
+          {last.lag_ms != null && <p>Measured commit → touched groups matched source: <b className="mono">{last.lag_ms} ms</b> <span className="faint">(single sample; G4 remains open)</span></p>}
         </div>
       )}
     </div>
@@ -292,7 +294,12 @@ export default function Dashboard() {
     const settled = await Promise.allSettled(requests.map(([, request]) => timed(request)))
     if (!requestGate.current.isCurrent(ticket)) return
     const settledByFamily = Object.fromEntries(requests.map(([family], index) => [family, settled[index]]))
-    const panels = buildDashboardResults(settledByFamily, { requestedRange: range })
+    const panels = buildDashboardResults(settledByFamily, {
+      requestedRange: range,
+      requestedTenant: tenant,
+      requestedGrain: grain,
+      requestedBreakdown: by,
+    })
     requestGate.current.finish(ticket)
     setState({ requestKey, loading: false, refreshing: false, panels, receivedAt: new Date().toISOString() })
   }, [by, grain, range, requestKey, tenant])
@@ -435,7 +442,7 @@ export default function Dashboard() {
           <Freshness tenant={tenant} mode={classification.mode} />
         </section>
         <section className="panel ax-panel">
-          <div className="panel__head"><span className="panel__title">Live mutation</span></div>
+          <div className="panel__head"><span className="panel__title">Live mutation sample</span></div>
           <LiveWrite tenant={tenant} onDone={() => { void load() }} />
         </section>
       </div>

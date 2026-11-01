@@ -13,7 +13,7 @@ function response(family, mode = 'raw_source') {
     : ({ summary: ['ax.st_day_product_status', 'ax.orders'], trends: ['ax.st_day_category_status', 'ax.orders'],
       products: ['ax.st_day_product_status', 'ax.orders', 'ax.products'], breakdown: ['ax.st_day_product_status', 'ax.orders'] })[family]
   return {
-    ...range, analytics_mode: mode, by: 'status', grain: 'day',
+    ...range, tenant_id: 2, analytics_mode: mode, by: 'status', grain: 'day',
     provenance: { source_tables: tables, uses_stream_tables: mode === 'rollup', consistency: 'single_sql_statement_snapshot', consistency_scope: 'per_http_response_only' },
     source: { stream_table_range: mode === 'raw_source' ? null : [range.from, range.to], raw_edge_ranges: mode === 'raw_source' ? [[range.from, range.to]] : [] },
     freshness: mode === 'raw_source' ? null : { verified_at: range.to, healthy: true },
@@ -58,6 +58,11 @@ test('accessible source and freshness UI labels reflect verified, mixed and unkn
   assert.match(mixedMarkup, /role="alert"/)
   assert.match(mixedMarkup, /Mixed or incomplete sources/)
   assert.match(mixedMarkup, /Top products: Incremental rollups/)
+  const failedPanelBadge = renderToStaticMarkup(React.createElement(components.PanelSourceBadge, {
+    family: 'Summary', panel: { status: 'error', source: panels.summary.source },
+  }))
+  assert.match(failedPanelBadge, /Unavailable/)
+  assert.match(failedPanelBadge, /response unavailable; metadata reports Direct source queries/)
 
   const unknownPanels = Object.fromEntries(ANALYTICS_FAMILIES.map(([family]) => [family, { status: 'success', source: { status: 'unknown' } }]))
   const unknown = classifyAnalyticsSet(unknownPanels)

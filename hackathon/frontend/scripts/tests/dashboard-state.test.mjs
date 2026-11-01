@@ -2,12 +2,13 @@ import test from 'node:test'
 import assert from 'node:assert/strict'
 import { buildDashboardResults, createLoadingPanels } from '../../src/lib/dashboardState.js'
 import { createDashboardRequestGate } from '../../src/lib/dashboardRequestGate.js'
-import { dashboardQueryKey } from '../../src/lib/analyticsProvenance.js'
+import { classifyAnalyticsSet, dashboardQueryKey } from '../../src/lib/analyticsProvenance.js'
 
 const range = { from: '2026-10-01T00:00:00Z', to: '2026-10-08T00:00:00Z' }
 const sourceResponse = (family) => ({
   from: range.from,
   to: range.to,
+  tenant_id: 2,
   analytics_mode: 'raw_source',
   provenance: {
     source_tables: family === 'products' ? ['ax.orders', 'ax.products'] : ['ax.orders'],
@@ -45,6 +46,18 @@ test('malformed successful payload is an explicit error without rendering data',
   assert.equal(panels.summary.status, 'error')
   assert.equal(panels.summary.source.status, 'verified')
   assert.equal(panels.summary.data, undefined)
+})
+
+test('three raw successes plus malformed summary with valid provenance are not uniform', () => {
+  const settled = Object.fromEntries(['summary', 'trends', 'products', 'breakdown'].map((family) => [family, success(family)]))
+  settled.summary = {
+    status: 'fulfilled',
+    value: { data: { ...sourceResponse('summary'), summary: null }, ms: 5, receivedAt: range.to },
+  }
+  const panels = buildDashboardResults(settled, { requestedRange: range })
+  assert.equal(panels.summary.status, 'error')
+  assert.equal(panels.summary.source.status, 'verified')
+  assert.equal(classifyAnalyticsSet(panels).status, 'mixed')
 })
 
 test('loading states do not retain values across a tenant or range key change', () => {
