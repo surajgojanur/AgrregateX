@@ -1,0 +1,7 @@
+date_utc: 2026-11-01T04:21:16Z
+model: Apple M1 / 8 cpu
+ram_bytes: 8589934592
+swap: total = 7168.00M  used = 5884.00M  free = 1284.00M  (encrypted)
+os: macOS 27.2 arm64
+disk_free: 15Gi free of 228Gi
+docker:  mem=0

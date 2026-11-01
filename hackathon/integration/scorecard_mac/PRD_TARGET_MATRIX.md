@@ -1,0 +1,48 @@
+# PRD target matrix: independent Mac qualification (issue #67)
+
+**Phase R0 (read-only).** This matrix was rebuilt on 2026-11-01 from the raw artifacts on `main` @ `04f03b9`, plus offline tests re-run on this commit (`RESULTS.md`).
+- **No new database, load or HTTP measurement was made in R0.** Docker Desktop is stopped on the Mac, and every live phase needs separate approval (`RUNBOOK.md`).
+- All data is **representative synthetic** (`integration/scale/gen_synthetic.sql`, seed 42, Zipf s = 1). The **organizer generator and schema have not been verified**, so **no row below is an official organizer qualification**.
+- Thresholds are copied from the PRD (`ps_documentation.md` §6). The sample counts and percentiles are **team methodology**, not organizer rules.
+- This matrix does not replace the canonical #31 scorecard.
+
+Statuses:
+- **GREAT** / **GOOD**: meets the threshold on the cited synthetic evidence. This is still not official.
+- **FAIL**: measured, and misses the threshold.
+- **NOT QUALIFIED**: the evidence is missing, too small or confounded.
+- **BLOCKED**: needs an approval or a resource that is not available.
+
+## G1–G5 (scored)
+| ID | Threshold (Good / Great) | Actual result (recomputed) | Conditions | Status | Blocker → next action (owner) |
+|---|---|---|---|---|---|
+| **G1** query speed at 10M | < 1 s / < 200 ms per query | **10M/100:** 3,600 requests, 0 errors, 0 non-200. **72/72 scenarios p95 < 1 s; 71/72 p95 < 200 ms.** Worst: `top_products` largest tenant (t1, 1,930,247 orders) 90 d, p50 68.97 / **p95 240.56** / p99 457.32 ms. 1M/10: 72/72 p95 < 200 ms (worst 60.77 ms). | Mac M1 8 GB; Docker; serial (concurrency 1); **n = 50/scenario**; only summary p50/p95/p99/max stored, no raw per-request samples; 3 tenant roles × 6 windows × 4 endpoints | **GOOD on all 72 scenarios; GREAT on 71/72.** NOT QUALIFIED as official: n < 200, no raw samples, no concurrency, synthetic data | Re-run with ≥ 200 samples and raw timings, at concurrency 1/4/8, plus `EXPLAIN (ANALYZE, BUFFERS)` of the worst scenario: RUNBOOK P4, **needs approval** (Opus) |
+| **G2** freshness | < 5 min / < 30 s, commit → exact visible | **1M/10 at 5 writes/s:** 8 probes, 0 timeouts, **median 17.0 s** (lower 15.2 / upper 18.7), **max 24.0 s**. 10k at 200 TPS (G3 run): **18/20 probes > 30 s**, 107 FULL fallbacks. | The 1M probes used the "all 3 stream tables equal source" rule, while G4 drift was present on the product rollup. Only insert and cancel were probed: no update, refund or delete, and no 10M run | **NOT QUALIFIED** (sample n = 8). **FAIL Great at 200 TPS.** No general PASS | Exact-value probes for 5 mutation kinds × 4 rates, ≥ 20 each, 30 s timeout = failure: RUNBOOK P3, **needs approval**. The sustainable rate is unknown (Opus, Codex #31) |
+| **G3** database safety | < 25 % / < 10 % slower normal-app query time | 10k five-pair A/B/C, 200 TPS offered: B vs A OLTP p95 **+117.5 % median**; per-pair range −50 % … +1.1 M %. Two of five B arms contain multi-second **host freezes**. Maintenance cost A vs C: p95 +89 %. | Host-frozen 8 GB laptop, 10k fixture (not 1M/10M) | **NOT QUALIFIED (confounded).** No PASS is claimable; the clean pairs do not show < 25 % either | Rerun 5 randomised AB/BA pairs on a **resourced host** with a fixed dashboard rate: RUNBOOK P6, **BLOCKED on this Mac** (Codex/Fedora per #31) |
+| **G4** correctness | Most / all queries match source SQL | Before writes: 1M API vs source **225/225**; 10M three-table oracle 0/0; API oracle 180/180 (100k) and 744/744 (two-shard demo). **After writes:** 1M product rollup **16 missing / 31 extra paid groups** (+33 paid orders), other streams 0/0; Fedora 0/1 extra paid. An 82-order trace shows `I paid, D paid, I cancelled` in CDC but the D lost after staging. | Fix designed (#54, PR #56) and implemented (**draft PR #58**). Truth table: old rule wrong in 5/12 keyed histories, new rule 12/12. 2,682 crate unit tests pass (2026-11-01, Mac). **No patched runtime, no post-mutation oracle on the fix** | **FAIL** (release blocker). Blocks any global "Great" claim | Build the patched image and run the regression matrix in `TEST_PLAN.md` §A: RUNBOOK P1, **needs approval, and the Mac Docker VM (3.8 GB) is likely too small for the pgrx build** (Opus; operator for approval) |
+| **G5** growth 10M vs 1M | < 5× / < 2× | Recomputed from the stored p95s: 72 matched scenarios (endpoint × role × window). **Median 1.18×, 66/72 < 2×, 71/72 < 5×, worst 5.18×** (`top_products` largest 90 d: 46.43 → 240.56 ms). | Matched by **size rank**, not by tenant. Largest tenant grew **5.67×** (340,560 → 1,930,247). The **median and smallest tenants shrank** (56,965 → 37,901; 34,091 → 19,471), so 48/72 ratios compare a *smaller* tenant at 10M. Stored p95 only | **FAIL Good on 1/72; GOOD on 71/72; GREAT on 66/72.** NOT QUALIFIED overall | Recompute from raw samples after P4, and add a rows-matched tenant pair (e.g. a 10M tenant with ≈ 10× its 1M counterpart): RUNBOOK P5 (Opus) |
+
+## FR1–FR7 (mandatory functional contract)
+| ID | Evidence | Status | Gap / next action |
+|---|---|---|---|
+| **FR1** counts and sales | `/summary` with exact window split. API = source 180/180 (100k), 225/225 (1M, before writes), 744/744 (demo). Integer cents; "sales" = status ∉ {cancelled, refunded} (**our proposal**; organizer definition UNKNOWN). | **PASS before writes; FAIL after writes** (G4 affects the product rollup, which `/summary` reads) | Reruns after the G4 fix (P1). Confirm sales semantics with the organizer |
+| **FR2** hourly / daily trends | `/trends?grain=day\|hour`; UTC buckets; hourly limited to 31 d; oracle covers day and hour windows, including a 2 s window across midnight | **PASS** on the recorded oracles (category rollups were 0/0 even after writes) | Zero-bucket, DST and leap-day cases are not in the recorded oracle: TEST_PLAN §F |
+| **FR3** exact Top-N | Summed over the whole interval **before** LIMIT; tie-break `product_id`; in the oracle | **PASS before writes; FAIL after writes** (reads the product rollup) | After the G4 fix (P1) |
+| **FR4** breakdown by category / status | `/breakdown?by=category\|status` | Category: **PASS**. Status: **FAIL after writes** (product rollup) | After the G4 fix (P1) |
+| **FR5** tenant isolation | Signed-cookie auth; 403 before routing; FORCE RLS on source + stream tables; transaction-local `ax.tenant_id` (no pooled-context reuse); shard-owner routing with 503 fail-closed; #39 security review; HTTP matrix (401/403/404); partition drill 503 with no phantom write | **PASS** (live evidence 2026-10-31) | No re-run on this commit; raw-source mode (#55) not live-validated |
+| **FR6** new data appears | Live write: insert 1.94 s, cancel 2.05 s (100k). 1M probes ≤ 24 s. Partition-time writes reconciled (29 = 29) | **NOT QUALIFIED**: values can be wrong after insert → update in one window (G4) | P1 and P3 |
+| **FR7** simple REST API | Endpoints documented in `app/README.md`; OpenAPI at `/api/docs`; real-data HTTP oracles exist | **PASS** | Organizer endpoint shapes are unknown (ours are a proposal) |
+
+## B1–B5 (optional bonuses)
+| ID | Evidence | Status |
+|---|---|---|
+| **B1** freshness metadata | Every analytics response carries `freshness` (oldest stream table's last completed refresh), and the UI shows "Updated N s ago". This is **refresh age, not commit-to-visible**. Unit tests plus live check 17/17 (2026-10-31) | **PASS** (as refresh-age metadata) |
+| **B2** protected rebuild | CLI, not web. Reinitialises all 3 stream tables, waits for COMPLETED, requires oracle 0/0; wrong credential fails closed. Live 17/17 on disposable `ax-b2test` | **PASS** (disposable stack only). It is also the approved *repair* path for G4 drift, which needs separate approval |
+| **B3** per-tenant heavy-query cap | Semaphore per tenant, 429 + `Retry-After`; other tenants are not starved (unit + live) | **PASS**, with the scope limit: **per process**, not global |
+| **B4** config-driven metric | Draft **PR #66**: config-only registry (derived metrics over existing rollups, no SQL in config, fail-closed). 77/77 API unit tests, frontend lint, tests and build pass | **NOT QUALIFIED**: live `live_b4_check.py` not run (Docker stopped). Approval-gated: RUNBOOK P2 |
+| **B5** monitoring | Monitoring page: latency p50/p95, errors/timeouts, refresh lag. #39: without draft migration 003, `read_health` returns UNKNOWN, so B-5 is **degraded**; 003 is **not applied** | **PARTIAL / degraded**. Do not present it as healthy |
+
+## Reconciliation findings (from this audit)
+1. **G2 median misstated.** The 8 recorded probes (`1m-10t-http-writer5/commit-to-visible.jsonl`) have median **16.96 s**. `REPORT-1m.md`, `README.md` and `docs/fedora-evidence/REQUIREMENTS.md` say **18.7 s**, which is the upper median. The max of 24.0 s and the 0 timeouts are correct. The Great verdict on this sample is unchanged, but the published median should be corrected.
+2. **G5 tenant matching weakens the growth claim.** At 10M the *median* and *smallest* role tenants hold **fewer** orders than at 1M, so most "< 2×" ratios compare a smaller tenant. Only the 24 largest-tenant scenarios grow data (5.67×), and they contain all the ratios above 2× except one (median `top_products` 30 d, 2.07×).
+3. G1/G5 counts (71/72, 72/72, 66/72, 71/72, median 1.18×, worst 5.18×) and the request and error counts **match** the stored JSON exactly. The independent `verify_scale_evidence.py` agrees: artifact arithmetic validated, official qualification insufficient.
+4. Two benchmark test files need different import roots (`test_acceptance` / `test_http_baseline` from `hackathon/benchmark`; `test_g4_protocol` from the repo root). Both pass when run their way; there is no shared runner.

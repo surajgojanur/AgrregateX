@@ -1,0 +1,9 @@
+benchmark/test_acceptance + test_http_baseline (cwd hackathon/benchmark):
+Ran 25 tests in 0.075s
+OK
+benchmark/test_g4_protocol (cwd repo root):
+Ran 16 tests in 0.001s
+OK
+benchmark/evidence_review/test_verify_scale_evidence:
+Ran 15 tests in 0.061s
+OK
