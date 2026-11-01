@@ -1,6 +1,10 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { api } from '../api/client'
 import Icon from '../components/ui/Icon'
+import { DataSourceIndicator, PanelSourceBadge, QueryFreshness } from '../components/analytics/AnalyticsProvenance'
+import { ANALYTICS_FAMILIES, classifyAnalyticsSet, dashboardQueryKey } from '../lib/analyticsProvenance'
+import { createDashboardRequestGate } from '../lib/dashboardRequestGate'
+import { buildDashboardResults, createLoadingPanels } from '../lib/dashboardState'
 import { useApp } from '../state/AppContext'
 
 const money = (cents) =>
@@ -19,37 +23,27 @@ const PRESETS = [
 async function timed(fn) {
   const t0 = performance.now()
   const data = await fn()
-  return { data, ms: Math.round(performance.now() - t0) }
+  return { data, ms: Math.round(performance.now() - t0), receivedAt: new Date().toISOString() }
 }
 
-function Ms({ ms }) {
-  return ms == null ? null : <span className="mono faint ax-ms" title="Measured HTTP round trip from this browser">{ms} ms</span>
+function Ms({ panel }) {
+  if (panel?.status !== 'success') return null
+  const receivedAt = new Date(panel.receivedAt)
+  const receivedText = Number.isFinite(receivedAt.getTime()) ? receivedAt.toLocaleTimeString() : 'unknown time'
+  return <span className="mono faint ax-ms" title={`HTTP round trip from this browser; response received ${receivedText}`}>
+    {panel.ms} ms · {receivedText}
+  </span>
 }
 
-function Pending({ h, down }) {
-  return down
-    ? <p className="muted" style={{ minHeight: h / 3 }}>Unavailable: shard {String(down).toUpperCase()} is unreachable. No data shown rather than stale data.</p>
-    : <div className="skeleton" style={{ height: h }} />
-}
-
-// B-1: "Updated N s ago" from the response's freshness block (oldest stream table's last
-// completed refresh). Ticks every second; amber beyond 30 s (the PRD's great-freshness line).
-function FreshBadge({ fresh }) {
-  const [now, setNow] = useState(() => Date.now())
-  useEffect(() => {
-    const id = setInterval(() => setNow(Date.now()), 1000)
-    return () => clearInterval(id)
-  }, [])
-  if (!fresh) return null
-  if (!fresh.verified_at) return <span className="ax-fresh ax-fresh--warn" role="status">Freshness unknown</span>
-  const age = Math.max(0, Math.round((now - Date.parse(fresh.verified_at)) / 1000))
-  const text = age < 60 ? `${age} s` : `${Math.floor(age / 60)} min ${age % 60} s`
-  return (
-    <span className={`ax-fresh ${age > 30 || !fresh.healthy ? 'ax-fresh--warn' : ''}`} role="status"
-      title={`Every number shown is at least as fresh as ${new Date(fresh.verified_at).toLocaleTimeString()} (${fresh.rule})`}>
-      <span className={`dot ${age > 30 || !fresh.healthy ? 'dot--warn' : 'dot--ok dot--pulse'}`} /> Updated {text} ago
-    </span>
-  )
+function PanelContent({ panel, h, children }) {
+  if (panel?.status === 'success') return children
+  if (panel?.status === 'error') {
+    return <p className="alert ax-panel-error" role="alert">
+      {panel.unavailable ? `Unavailable: owning shard ${String(panel.unavailable).toUpperCase()} is unreachable.` : 'This analytics query failed.'}
+      {' '}{panel.error} No previous result is shown for this panel.
+    </p>
+  }
+  return <div className="skeleton" style={{ height: h }} aria-label="Loading analytics panel" aria-busy="true" />
 }
 
 function Kpi({ label, value, sub }) {
@@ -135,24 +129,62 @@ function Bars({ rows, value, label }) {
   )
 }
 
-function Freshness({ tenant }) {
-  const [f, setF] = useState(null)
+function Freshness({ tenant, mode }) {
+  const [result, setResult] = useState({ tenant: null, data: null })
   useEffect(() => {
-    let live = true
-    const tick = () => api.freshness(tenant).then((d) => live && setF(d)).catch(() => live && setF(null))
-    tick()
-    const id = setInterval(tick, 2000)
-    return () => { live = false; clearInterval(id) }
+    let active = true
+    let pending = false
+    let controller = null
+    const tick = async () => {
+      if (pending) return
+      pending = true
+      controller = new AbortController()
+      try {
+        const data = await api.freshness(tenant, controller.signal)
+        if (active) setResult({ tenant, data })
+      } catch {
+        if (active) setResult({ tenant, data: null })
+      } finally {
+        pending = false
+      }
+    }
+    void tick()
+    const id = setInterval(tick, 5000)
+    return () => { active = false; clearInterval(id); controller?.abort() }
   }, [tenant])
-  if (!f) return <p className="muted">Freshness unavailable.</p>
+  const raw = result.tenant === tenant ? result.data : null
+  if (!raw || typeof raw !== 'object') return <p className="muted">Incremental engine status unavailable.</p>
+  const verifiedAge = typeof raw.verified_age_s === 'number' && Number.isFinite(raw.verified_age_s) && raw.verified_age_s >= 0
+    ? raw.verified_age_s : null
+  const f = {
+    ...raw,
+    healthy: raw.healthy === true,
+    verified_age_s: verifiedAge,
+    stream_tables: Array.isArray(raw.stream_tables)
+      ? raw.stream_tables.filter((table) => table && typeof table === 'object').map((table) => ({
+        ...table,
+        name: typeof table.name === 'string' ? table.name : 'unknown table',
+        refresh_mode: typeof table.refresh_mode === 'string' ? table.refresh_mode : '—',
+        schedule: typeof table.schedule === 'string' ? table.schedule : '—',
+        last_action: typeof table.last_action === 'string' ? table.last_action : '—',
+        age_s: typeof table.age_s === 'number' && Number.isFinite(table.age_s) && table.age_s >= 0 ? table.age_s : null,
+      }))
+      : [],
+  }
+  const explanation = mode === 'raw_source'
+    ? 'Incremental engine health — not the freshness or correctness of current direct-source answers.'
+    : mode === 'rollup'
+      ? 'Last completed refresh age is not exact commit-to-visible delay or proof of stream-table correctness.'
+      : 'Engine status does not verify the source mode, freshness, or correctness of every analytics panel.'
   return (
     <div>
       <p className="ax-fresh__head">
         <span className={`dot ${f.healthy && f.verified_age_s != null && f.verified_age_s < 30 ? 'dot--ok dot--pulse' : 'dot--warn'}`} />
         {f.verified_age_s != null
-          ? <>All stream tables verified within <b className="mono">{f.verified_age_s.toFixed(1)} s</b></>
-          : 'Waiting for first refresh…'}
+          ? <>Oldest completed stream refresh <b className="mono">{f.verified_age_s.toFixed(1)} s</b> ago</>
+          : 'Incremental engine refresh age unavailable.'}
       </p>
+      <p className="faint ax-note" role="note">{explanation}</p>
       <table className="ax-table">
         <thead><tr><th>Stream table</th><th>Mode</th><th>Last refresh</th><th>Verified</th></tr></thead>
         <tbody>
@@ -166,7 +198,6 @@ function Freshness({ tenant }) {
           ))}
         </tbody>
       </table>
-      <p className="faint ax-note">“Verified” = last completed refresh of any kind (including no-change ticks), not pg_trickle's data_timestamp, which does not move while idle.</p>
     </div>
   )
 }
@@ -214,15 +245,17 @@ function LiveWrite({ tenant, onDone }) {
 }
 
 export default function Dashboard() {
-  const { user, notify } = useApp()
+  const { user } = useApp()
   const [tenants, setTenants] = useState([])
   const [tenant, setTenant] = useState(user.tenant_id || 1)
   const [preset, setPreset] = useState(PRESETS[2])
   const [grain, setGrain] = useState(preset.grain)
   const [by, setBy] = useState('category')
   const [auto, setAuto] = useState(true)
-  const [state, setState] = useState({ loading: true })
-  const [tick, setTick] = useState(0)
+  const [minuteBucket, setMinuteBucket] = useState(() => Math.ceil(Date.now() / 60000))
+  const [state, setState] = useState(() => ({ requestKey: null, loading: true, refreshing: false, panels: createLoadingPanels() }))
+  const requestGate = useRef(null)
+  if (requestGate.current === null) requestGate.current = createDashboardRequestGate()
 
   const [dirVersion, setDirVersion] = useState(null)
   useEffect(() => {
@@ -231,48 +264,67 @@ export default function Dashboard() {
   const shardOf = tenants.find((x) => x.tenant_id === tenant)?.shard
 
   const range = useMemo(() => {
-    const to = new Date(Math.ceil(Date.now() / 60000) * 60000) // minute-aligned so auto-refresh is cache-friendly
+    const to = new Date(minuteBucket * 60000) // minute-aligned so auto-refresh is cache-friendly
     return { from: new Date(to.getTime() - preset.ms).toISOString(), to: to.toISOString() }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [preset, tick])
+  }, [preset, minuteBucket])
+  const requestKey = dashboardQueryKey({ tenant, range, grain, by })
 
-  const load = useCallback(async (signal) => {
-    try {
-      const [s, t, p, b] = await Promise.all([
-        timed(() => api.summary(tenant, range, signal)),
-        timed(() => api.trends(tenant, { ...range, grain }, signal)),
-        timed(() => api.topProducts(tenant, { ...range, limit: 10 }, signal)),
-        timed(() => api.breakdown(tenant, { ...range, by }, signal)),
-      ])
-      setState({ loading: false, s, t, p, b, at: new Date() })
-    } catch (err) {
-      if (err.name === 'AbortError') return
-      // Shard outage: drop previous numbers so nothing stale is shown as current.
-      if (err.status === 503) setState({ loading: false, error: err.message, unavailable: err.data?.shard || '?' })
-      else setState((st) => ({ ...st, loading: false, error: err.message }))
-      notify({ kind: 'error', title: 'Could not load dashboard', message: err.message })
-    }
-  }, [tenant, range, grain, by, notify])
+  const load = useCallback(async () => {
+    const ticket = requestGate.current.begin(requestKey)
+    if (!ticket) return
+    setState((previous) => {
+      const sameQuery = previous.requestKey === requestKey
+      const panels = createLoadingPanels(sameQuery ? previous.panels : null)
+      return {
+        requestKey,
+        loading: true,
+        refreshing: sameQuery && Object.values(panels).some((panel) => panel.status === 'success'),
+        panels,
+      }
+    })
+    const signal = ticket.controller.signal
+    const requests = [
+      ['summary', () => api.summary(tenant, range, signal)],
+      ['trends', () => api.trends(tenant, { ...range, grain }, signal)],
+      ['products', () => api.topProducts(tenant, { ...range, limit: 10 }, signal)],
+      ['breakdown', () => api.breakdown(tenant, { ...range, by }, signal)],
+    ]
+    const settled = await Promise.allSettled(requests.map(([, request]) => timed(request)))
+    if (!requestGate.current.isCurrent(ticket)) return
+    const settledByFamily = Object.fromEntries(requests.map(([family], index) => [family, settled[index]]))
+    const panels = buildDashboardResults(settledByFamily, { requestedRange: range })
+    requestGate.current.finish(ticket)
+    setState({ requestKey, loading: false, refreshing: false, panels, receivedAt: new Date().toISOString() })
+  }, [by, grain, range, requestKey, tenant])
 
   useEffect(() => {
-    const ctl = new AbortController()
-    void load(ctl.signal)
-    return () => ctl.abort()
-  }, [load])
+    const id = setTimeout(() => { void load() }, 0)
+    return () => {
+      clearTimeout(id)
+      requestGate.current.cancel(requestKey)
+    }
+  }, [load, requestKey])
 
   useEffect(() => {
     if (!auto) return undefined
-    const id = setInterval(() => setTick((n) => n + 1), 5000)
+    const id = setInterval(() => {
+      setMinuteBucket(Math.ceil(Date.now() / 60000))
+      void load()
+    }, 5000)
     return () => clearInterval(id)
-  }, [auto])
+  }, [auto, load])
 
   const choosePreset = (p) => {
     setPreset(p)
     setGrain(p.ms > 31 * 86400e3 ? 'day' : p.grain)
   }
 
-  const { s, t, p, b } = state
-  const sum = s?.data.summary
+  const current = state.requestKey === requestKey ? state : {
+    requestKey, loading: true, refreshing: false, panels: createLoadingPanels(),
+  }
+  const { summary: s, trends: t, products: p, breakdown: b } = current.panels
+  const sum = s?.status === 'success' ? s.data.summary : null
+  const classification = classifyAnalyticsSet(current.panels)
   return (
     <div className="ax-dash">
       <div className="ax-filters panel">
@@ -308,17 +360,19 @@ export default function Dashboard() {
           <span>Auto-refresh 5 s</span>
         </label>
         <span className="mono faint ax-range">{range.from.slice(0, 16)}Z → {range.to.slice(0, 16)}Z</span>
-        <FreshBadge fresh={state.s?.data.freshness} />
+        <QueryFreshness classification={classification} summaryPanel={s} />
       </div>
 
+      <DataSourceIndicator classification={classification} panels={current.panels} />
+      {current.refreshing && <p className="faint ax-refreshing" role="status">Refreshing this tenant and range. Shown values are the last successful responses for these same filters until each panel finishes.</p>}
+      {ANALYTICS_FAMILIES.some(([family]) => current.panels[family]?.status === 'error') && (
+        <p className="alert ax-outage" role="alert">Some analytics panels are unavailable. Failed panels show no previous values; available panels retain their own response provenance.</p>
+      )}
       {shardOf && <p className="mono faint ax-shardline">Tenant {tenant} lives on shard {shardOf.toUpperCase()} (directory v{dirVersion})</p>}
-      {state.unavailable ? (
-        <div className="alert ax-outage" role="alert">
-          <strong>Shard {String(state.unavailable).toUpperCase()} unavailable.</strong> {state.error}
-          <span className="faint"> Retrying every 5 s. Tenants on other shards are unaffected.</span>
-        </div>
-      ) : state.error && <p className="alert" role="alert">{state.error}</p>}
 
+      <div className="ax-panel-provenance">
+        <span className="faint">Summary panel source</span><PanelSourceBadge family="Summary" panel={s} />
+      </div>
       <div className="stats ax-kpis">
         <Kpi label="Sales" value={sum ? money(sum.sales_cents) : '—'} sub="excl. cancelled & refunded" />
         <Kpi label="Orders" value={sum ? num(sum.sale_orders) : '—'} sub={sum ? `${num(sum.orders)} incl. all statuses` : ''} />
@@ -327,18 +381,18 @@ export default function Dashboard() {
       </div>
 
       <section className="panel ax-panel">
-        <div className="panel__head"><span className="panel__title">Sales by {grain}</span><Ms ms={t?.ms} /></div>
-        {t ? <TrendChart points={t.data.points} grain={grain} /> : <Pending h={220} down={state.unavailable} />}
+        <div className="panel__head"><span className="panel__title">Sales by {grain}</span><PanelSourceBadge family="Trends" panel={t} /><Ms panel={t} /></div>
+        <PanelContent panel={t} h={220}><TrendChart points={t?.data?.points} grain={grain} /></PanelContent>
       </section>
 
       <div className="ax-grid2">
         <section className="panel ax-panel">
-          <div className="panel__head"><span className="panel__title">Top 10 products</span><Ms ms={p?.ms} /></div>
-          {p ? (
+          <div className="panel__head"><span className="panel__title">Top 10 products</span><PanelSourceBadge family="Top products" panel={p} /><Ms panel={p} /></div>
+          <PanelContent panel={p} h={260}>
             <table className="ax-table">
               <thead><tr><th>#</th><th>Product</th><th className="num">Units</th><th className="num">Sales</th></tr></thead>
               <tbody>
-                {p.data.products.map((r) => (
+                {(p?.data?.products || []).map((r) => (
                   <tr key={r.product_id}>
                     <td className="mono">{r.rank}</td>
                     <td>{r.name || `product ${r.product_id}`}<span className="faint"> · cat {r.category_id}</span></td>
@@ -348,45 +402,44 @@ export default function Dashboard() {
                 ))}
               </tbody>
             </table>
-          ) : <Pending h={260} down={state.unavailable} />}
+          </PanelContent>
         </section>
 
         <section className="panel ax-panel">
           <div className="panel__head">
             <span className="panel__title">Breakdown</span>
+            <PanelSourceBadge family="Breakdown" panel={b} />
             <div className="ax-seg">
               {['category', 'status'].map((k) => (
                 <button key={k} className={`btn btn--sm ${by === k ? 'btn--primary' : 'btn--ghost'}`} onClick={() => setBy(k)}>{k}</button>
               ))}
             </div>
-            <Ms ms={b?.ms} />
+            <Ms panel={b} />
           </div>
-          {b ? (
-            b.data.by === 'category'
-              ? <Bars rows={b.data.rows} value={(r) => r.sales_cents} label={(r) => `Category ${r.key}`} />
-              : <Bars rows={b.data.rows} value={(r) => r.gross_cents} label={(r) => r.key} />
-          ) : <Pending h={260} down={state.unavailable} />}
-          {b?.data.by === 'status' && <p className="faint ax-note">Status view shows gross order value per status, including cancelled and refunded.</p>}
+          <PanelContent panel={b} h={260}>
+            {b?.data?.by === 'category'
+              ? <Bars rows={b?.data?.rows || []} value={(r) => r.sales_cents} label={(r) => 'Category ' + r.key} />
+              : <Bars rows={b?.data?.rows || []} value={(r) => r.gross_cents} label={(r) => r.key} />}
+          </PanelContent>
+          {b?.status === 'success' && b.data.by === 'status' && <p className="faint ax-note">Status view shows gross order value per status, including cancelled and refunded.</p>}
         </section>
       </div>
 
       <div className="ax-grid2">
         <section className="panel ax-panel">
-          <div className="panel__head"><span className="panel__title">Freshness</span></div>
-          <Freshness tenant={tenant} />
+          <div className="panel__head">
+            <span className="panel__title">{classification.mode === 'raw_source'
+              ? 'Incremental engine health — not direct-source answer freshness'
+              : 'Incremental engine status'}</span>
+          </div>
+          <Freshness tenant={tenant} mode={classification.mode} />
         </section>
         <section className="panel ax-panel">
           <div className="panel__head"><span className="panel__title">Live mutation</span></div>
-          <LiveWrite tenant={tenant} onDone={() => setTick((n) => n + 1)} />
+          <LiveWrite tenant={tenant} onDone={() => { void load() }} />
         </section>
       </div>
 
-      {s && (
-        <p className="faint ax-note">
-          Source of these numbers: stream tables for complete UTC days{s.data.source.stream_table_range ? ` (${s.data.source.stream_table_range[0].slice(0, 10)} → ${s.data.source.stream_table_range[1].slice(0, 10)})` : ''},
-          raw orders for {s.data.source.raw_edge_ranges.length} partial edge range(s). Updated {state.at?.toLocaleTimeString()}.
-        </p>
-      )}
     </div>
   )
 }

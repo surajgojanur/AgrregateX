@@ -19,6 +19,27 @@
 .ax-row { display: flex; gap: 8px; flex-wrap: wrap; margin: 10px 0; }
 .ax-note { font-size: 11.5px; margin: 8px 0 0; }
 .ax-sub { display: block; margin-top: 14px; }
+.ax-source { display: flex; align-items: flex-start; justify-content: space-between; gap: 14px;
+  padding: 11px 14px; border: 1px solid var(--border); border-radius: var(--r-md); min-width: 0; }
+.ax-source--raw_source { border-color: color-mix(in srgb, var(--cyan) 40%, var(--border)); }
+.ax-source--mixed, .ax-source--unknown { border-color: color-mix(in srgb, var(--amber) 55%, var(--border)); }
+.ax-source__copy { display: flex; flex-direction: column; gap: 3px; min-width: 0; }
+.ax-source__copy > strong { font-size: 13px; }
+.ax-source__copy > span, .ax-source__details li > span { color: var(--text-2); font-size: 12px; line-height: 1.45; }
+.ax-source__details { flex: 0 0 auto; max-width: min(100%, 450px); }
+.ax-source__details summary { color: var(--text-2); font-size: 12px; cursor: pointer; }
+.ax-source__details ul { display: grid; gap: 8px; margin: 8px 0 0; padding-left: 18px; }
+.ax-source__details li { display: grid; gap: 3px; }
+.ax-source__received { color: var(--text-3) !important; font-size: 11px !important; }
+.ax-source-badge { display: inline-flex; align-items: center; flex: 0 0 auto; width: fit-content;
+  border: 1px solid var(--border); border-radius: 999px; padding: 2px 8px; font-size: 10px;
+  line-height: 1.5; color: var(--text-2); white-space: nowrap; }
+.ax-source-badge--raw_source { border-color: color-mix(in srgb, var(--cyan) 50%, var(--border)); }
+.ax-source-badge--rollup { border-color: color-mix(in srgb, var(--green) 45%, var(--border)); }
+.ax-source-badge--unknown, .ax-source-badge--mixed { border-color: color-mix(in srgb, var(--amber) 55%, var(--border)); }
+.ax-panel-provenance { display: flex; justify-content: flex-end; }
+.ax-refreshing { margin: -7px 0 0; }
+.ax-panel-error { white-space: normal; overflow-wrap: anywhere; }
 
 .ax-table { width: 100%; border-collapse: collapse; font-size: 13px; }
 .ax-table th { text-align: left; font-weight: 500; color: var(--text-3); font-size: 11px; text-transform: uppercase;
@@ -58,6 +79,8 @@
   .ax-kpis { grid-template-columns: minmax(0, 1fr); }
   .ax-bars li { grid-template-columns: 80px minmax(0, 1fr) 80px; }
   .ax-range { margin-left: 0; }
+  .ax-source { flex-direction: column; }
+  .ax-source__details { max-width: 100%; }
 }
 
 .ax-fresh { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; padding: 3px 10px;

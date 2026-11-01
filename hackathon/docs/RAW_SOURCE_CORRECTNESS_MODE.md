@@ -21,14 +21,23 @@ The only accepted values are `rollup` and `raw_source`; unset/empty defaults to
 from starting with a clear configuration error. The selector is server-side;
 request parameters cannot choose or override it.
 
-The four existing routes and their response data fields are retained. Responses
-add `analytics_mode` and `provenance`. Raw-source provenance names `ax.orders`,
-sets `uses_stream_tables` to false, and marks the result as a single SQL
-statement snapshot. Existing `source` range fields remain present: raw mode has
-no stream-table range and identifies the full requested source range. The
-`freshness` field is null in raw mode because stream refresh age does not measure
-source-query answers. Rollup mode continues to return the existing stream/raw
-edge range and freshness metadata, with additive mode/provenance fields.
+The four existing routes and their response data fields are retained. Each
+response adds `analytics_mode` and `provenance`, including the source table list,
+whether stream tables were used, and `consistency_scope:
+per_http_response_only`. Each endpoint runs one SQL statement, but the four
+independent requests do not share a PostgreSQL snapshot. Raw-source provenance
+names the tables actually read, sets `uses_stream_tables` to false, and marks
+the full requested source range. The `freshness` field is null in raw mode
+because stream refresh age does not measure source-query answers. Rollup mode
+continues to return its stream/raw edge ranges and refresh metadata.
+
+The dashboard now derives a source indicator from all four responses. It shows
+**Direct source queries** only when all four responses agree and report valid
+raw-source provenance; it shows **Incremental rollups** only when all four
+responses agree on rollup provenance. Mixed, missing, malformed, or
+contradictory metadata is shown as mixed or **Data source not verified**, with
+per-panel details. The mode is never selected by a browser setting. Query
+round-trip time is reported separately from database freshness.
 
 Raw queries retain the existing [from,to) UTC semantics, sale definition
 (`status NOT IN ('cancelled','refunded')`), integer-cent money, hourly range
@@ -63,7 +72,9 @@ and [transaction isolation documentation](https://www.postgresql.org/docs/18/tra
 
 Tests of legitimate signed sessions and forced-RLS behavior do not establish
 security claims from the localhost operator-bypass demonstration. The bypass
-is not evidence of negative tenant isolation.
+is not evidence of negative tenant isolation. Issue #55's offline UI tests do
+not replace the pending live authentication/RLS validation on a separately
+approved disposable PostgreSQL target.
 
 ## Performance and deployment limitations
 
@@ -77,17 +88,51 @@ were the same execution path.
 
 This change is code for review only and is not enabled on the running Fedora
 service. Activation requires a reviewed deployment configuration change, an
-appropriate API restart, and end-to-end verification using a disposable or
-otherwise approved target. It requires no migration, stream refresh, or rebuild.
+appropriate API/frontend rollout, and end-to-end verification using a
+disposable or otherwise approved target. It requires no migration, stream
+refresh, or rebuild. Roll back by restoring/unsetting
+`AX_ANALYTICS_READ_MODE=rollup`, then redeploying/restarting the API and
+frontend together; verify all four endpoints report rollup mode and the UI
+labels the results accordingly. Do not switch modes in production without
+checking query timeouts and the resulting source-query load.
 
-The current React dashboard has a static explanatory caption describing complete
-days as stream-table data and partial ranges as source data. This backend change
-adds authoritative provenance to API responses, but does not make that caption
-mode-aware. Do not activate the setting for dashboard use until the UI renders
-the response's `analytics_mode`/`provenance` (or otherwise clearly identifies
-raw-source results) and that UI change is reviewed. The follow-up UI and authorized disposable
-PostgreSQL/security validation are tracked in [#55](https://github.com/surajgojanur/AgrregateX/issues/55).
-This PR intentionally kept the frontend outside its change scope.
+The dashboard freshness chip reports only the last completed stream refresh
+when all four analytics responses are verified rollups. It explicitly says
+that refresh age does not establish commit-to-visible delay or correctness. In
+raw-source mode, the chip describes the source rows visible to each SQL
+statement and may show when the browser received the summary response. The
+separate engine-health panel remains visible but is labeled as engine status,
+not direct-source answer freshness; malformed/null engine fields are rendered
+as unavailable.
+
+Dashboard requests are independently tracked by tenant, time interval, grain,
+and breakdown. A tenant/filter change aborts superseded requests and hides the
+previous query's values immediately. Same-query auto-refresh does not overlap;
+each panel has its own loading, error, latency, result, and provenance state.
+Partial failures do not keep the failed panel's old values on screen. An
+unavailable shard remains unavailable; there is no raw/rollup fallback.
+
+## Activation and verification checklist
+
+1. Review the code and deployment configuration; keep `rollup` as the default.
+2. On an explicitly approved disposable target, run signed-cookie, cross-tenant,
+   forced-RLS, tenant-routing, timeout, 503/429, and analytics-oracle checks.
+3. Verify all four responses' mode, source tables, ranges, statement-snapshot
+   scope, and freshness fields against the executed SQL.
+4. Compare the cancelled-only incident fixture directly with source SQL and
+   confirm product 116 is absent from paid Top-N.
+5. Measure raw-source performance separately from rollup performance and record
+   dataset size, host resources, sample counts, timeouts, and percentiles.
+6. Confirm the UI shows one uniform mode only when all four valid responses
+   agree; exercise mixed/error states and tenant/filter changes.
+7. Keep Issue #31/G4 marked FAIL until the maintained stream-table defect is
+   independently corrected and validated. Raw-source mode does not pass G4.
+8. For rollback, restore `rollup`, restart/redeploy the API and frontend, then
+   verify the rollup provenance and UI indicator.
+
+The Issue #55 implementation and current validation limits are summarized in
+[`issue55/VALIDATION_REPORT.md`](issue55/VALIDATION_REPORT.md). The exact live
+test gate is in [`issue55/DISPOSABLE_POSTGRESQL_RUNBOOK.md`](issue55/DISPOSABLE_POSTGRESQL_RUNBOOK.md).
 
 ## Judge explanation
 
