@@ -1,0 +1,342 @@
+[
+ {
+  "history": "I",
+  "case": "insert only",
+  "current_staged": [
+   [
+    "I",
+    "paid"
+   ]
+  ],
+  "current_delta": {
+   "paid": 1
+  },
+  "current_correct": true,
+  "proposed_staged": [
+   [
+    "I",
+    "paid"
+   ]
+  ],
+  "proposed_delta": {
+   "paid": 1
+  },
+  "proposed_correct": true,
+  "expected_delta": {
+   "paid": 1
+  }
+ },
+ {
+  "history": "D",
+  "case": "delete only (row existed before)",
+  "current_staged": [
+   [
+    "D",
+    "paid"
+   ]
+  ],
+  "current_delta": {
+   "paid": -1
+  },
+  "current_correct": true,
+  "proposed_staged": [
+   [
+    "D",
+    "paid"
+   ]
+  ],
+  "proposed_delta": {
+   "paid": -1
+  },
+  "proposed_correct": true,
+  "expected_delta": {
+   "paid": -1
+  }
+ },
+ {
+  "history": "I,D",
+  "case": "insert then delete",
+  "current_staged": [],
+  "current_delta": {},
+  "current_correct": true,
+  "proposed_staged": [],
+  "proposed_delta": {},
+  "proposed_correct": true,
+  "expected_delta": {}
+ },
+ {
+  "history": "D,I",
+  "case": "update (existed before)  <- #50 Case B",
+  "current_staged": [
+   [
+    "D",
+    "paid"
+   ],
+   [
+    "I",
+    "cancelled"
+   ]
+  ],
+  "current_delta": {
+   "cancelled": 1,
+   "paid": -1
+  },
+  "current_correct": true,
+  "proposed_staged": [
+   [
+    "D",
+    "paid"
+   ],
+   [
+    "I",
+    "cancelled"
+   ]
+  ],
+  "proposed_delta": {
+   "cancelled": 1,
+   "paid": -1
+  },
+  "proposed_correct": true,
+  "expected_delta": {
+   "cancelled": 1,
+   "paid": -1
+  }
+ },
+ {
+  "history": "I,D,I",
+  "case": "insert then update  <- #50 Case A / Fedora",
+  "current_staged": [
+   [
+    "I",
+    "paid"
+   ],
+   [
+    "I",
+    "cancelled"
+   ]
+  ],
+  "current_delta": {
+   "cancelled": 1,
+   "paid": 1
+  },
+  "current_correct": false,
+  "proposed_staged": [
+   [
+    "I",
+    "cancelled"
+   ]
+  ],
+  "proposed_delta": {
+   "cancelled": 1
+  },
+  "proposed_correct": true,
+  "expected_delta": {
+   "cancelled": 1
+  }
+ },
+ {
+  "history": "D,I,D",
+  "case": "update then delete",
+  "current_staged": [
+   [
+    "D",
+    "paid"
+   ],
+   [
+    "D",
+    "shipped"
+   ]
+  ],
+  "current_delta": {
+   "paid": -1,
+   "shipped": -1
+  },
+  "current_correct": false,
+  "proposed_staged": [
+   [
+    "D",
+    "paid"
+   ]
+  ],
+  "proposed_delta": {
+   "paid": -1
+  },
+  "proposed_correct": true,
+  "expected_delta": {
+   "paid": -1
+  }
+ },
+ {
+  "history": "D,I,D,I",
+  "case": "two status updates",
+  "current_staged": [
+   [
+    "D",
+    "paid"
+   ],
+   [
+    "I",
+    "cancelled"
+   ]
+  ],
+  "current_delta": {
+   "cancelled": 1,
+   "paid": -1
+  },
+  "current_correct": true,
+  "proposed_staged": [
+   [
+    "D",
+    "paid"
+   ],
+   [
+    "I",
+    "cancelled"
+   ]
+  ],
+  "proposed_delta": {
+   "cancelled": 1,
+   "paid": -1
+  },
+  "proposed_correct": true,
+  "expected_delta": {
+   "cancelled": 1,
+   "paid": -1
+  }
+ },
+ {
+  "history": "I,D,I,D,I",
+  "case": "insert, two updates",
+  "current_staged": [
+   [
+    "I",
+    "paid"
+   ],
+   [
+    "I",
+    "cancelled"
+   ]
+  ],
+  "current_delta": {
+   "cancelled": 1,
+   "paid": 1
+  },
+  "current_correct": false,
+  "proposed_staged": [
+   [
+    "I",
+    "cancelled"
+   ]
+  ],
+  "proposed_delta": {
+   "cancelled": 1
+  },
+  "proposed_correct": true,
+  "expected_delta": {
+   "cancelled": 1
+  }
+ },
+ {
+  "history": "I,D,I,D",
+  "case": "insert, update, delete",
+  "current_staged": [],
+  "current_delta": {},
+  "current_correct": true,
+  "proposed_staged": [],
+  "proposed_delta": {},
+  "proposed_correct": true,
+  "expected_delta": {}
+ },
+ {
+  "history": "D,I,D,I,D",
+  "case": "two updates then delete",
+  "current_staged": [
+   [
+    "D",
+    "paid"
+   ],
+   [
+    "D",
+    "cancelled"
+   ]
+  ],
+  "current_delta": {
+   "cancelled": -1,
+   "paid": -1
+  },
+  "current_correct": false,
+  "proposed_staged": [
+   [
+    "D",
+    "paid"
+   ]
+  ],
+  "proposed_delta": {
+   "paid": -1
+  },
+  "proposed_correct": true,
+  "expected_delta": {
+   "paid": -1
+  }
+ },
+ {
+  "history": "D,I (same grp)",
+  "case": "update not changing group (qty change)",
+  "current_staged": [
+   [
+    "D",
+    "paid"
+   ],
+   [
+    "I",
+    "paid"
+   ]
+  ],
+  "current_delta": {},
+  "current_correct": true,
+  "proposed_staged": [
+   [
+    "D",
+    "paid"
+   ],
+   [
+    "I",
+    "paid"
+   ]
+  ],
+  "proposed_delta": {},
+  "proposed_correct": true,
+  "expected_delta": {}
+ },
+ {
+  "history": "I,D,I (same)",
+  "case": "insert then same-group update",
+  "current_staged": [
+   [
+    "I",
+    "paid"
+   ],
+   [
+    "I",
+    "paid"
+   ]
+  ],
+  "current_delta": {
+   "paid": 2
+  },
+  "current_correct": false,
+  "proposed_staged": [
+   [
+    "I",
+    "paid"
+   ]
+  ],
+  "proposed_delta": {
+   "paid": 1
+  },
+  "proposed_correct": true,
+  "expected_delta": {
+   "paid": 1
+  }
+ }
+]
