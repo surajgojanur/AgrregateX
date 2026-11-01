@@ -11,6 +11,8 @@ WORKDIR /srv
 COPY app/requirements.txt ./
 RUN pip install --no-cache-dir -r requirements.txt
 COPY app/axapi ./axapi
+# B-4 metric registry. Compose bind-mounts this directory read-only so the file can be edited live.
+COPY app/config ./config
 COPY --from=ui /ui/dist ./ui
 ENV AX_STATIC_DIR=/srv/ui PYTHONUNBUFFERED=1
 RUN useradd --system --uid 10001 ax

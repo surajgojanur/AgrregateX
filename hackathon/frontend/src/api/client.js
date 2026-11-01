@@ -66,6 +66,9 @@ export const api = {
   breakdown: (t, r, signal) => request(`${T(t)}/breakdown${query(r)}`, { signal }),
   freshness: (t, signal) => request(`${T(t)}/freshness`, { signal }),
   liveWrite: (t, body) => request(`${T(t)}/live-write`, { method: 'POST', body }),
+  // B-4: metric definitions come from the server's config file, not from this client.
+  metrics: (signal) => request('/metrics', { signal }),
+  metric: (t, id, r, signal) => request(`${T(t)}/metrics/${encodeURIComponent(id)}${query(r)}`, { signal }),
 
   engine: (shard, signal) => request(`/engine${query({ shard })}`, { signal }),
   shards: (signal) => request('/shards', { signal }),

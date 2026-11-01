@@ -73,3 +73,29 @@ python3 -I app/tests/live_bonus_check.py ax-b2test 18191 25671 25672      # 17 a
 docker compose -p ax-b2test -f compose.sharded.yaml down -v               # removes ONLY the ax-b2test volumes
 ```
 Result 2026-10-31 (M1): **17/17 PASS**, see `app/tests/results/live-bonus-20261031T132216Z.txt`.
+
+## B-4: config-driven metrics (issue #30)
+To add a metric, edit **one JSON file**, `app/config/metrics.json`. No Python or JS changes and no restart are needed: the API
+re-reads the file when its mtime, size or inode changes, so the next request sees it. Compose mounts `app/config/` read-only at
+`/srv/config`. It mounts the directory rather than the file, so an editor's save-by-replace is also picked up.
+`AX_METRICS_CONFIG` overrides the path.
+
+```json
+{ "id": "pending_share_pct", "label": "Pending order share", "type": "ratio", "unit": "percent",
+  "numerator":   { "measure": "orders", "statuses": ["pending"] },
+  "denominator": { "measure": "orders", "statuses": "all" },
+  "scale": 100, "decimals": 2, "group_by": ["total", "day", "category"] }
+```
+
+| | |
+|---|---|
+| **What it is** | A **derived** metric over the **existing** stream tables. It is not a new materialisation; no stream table is created or changed. |
+| **Allow-lists** | `type` sum\|ratio · `measure` orders\|units\|gross_cents · `statuses` all\|sale\|not_sale\|a list of known statuses · `group_by` total\|status\|product\|category (day rollups) · day · hour (hour rollup) · `unit`, `scale` 1\|100, `decimals` 0–4 |
+| **Rejected** | Unknown keys (`sql`, `expression`, …), unknown fields, groupings that need a rollup that doesn't exist (customer, region, distinct counts), duplicate IDs, NaN, files over 64 KB. **One bad metric rejects the whole file.** The metric endpoints then return **503** with every validation error (fail closed: no stale or partial registry). Other endpoints are unaffected. |
+| **SQL** | One **constant**, parameterised statement per grouping, the same split as the other analytics endpoints: complete buckets come from the stream table and partial edges from raw `ax.orders`. Config text never reaches SQL; it only selects which statuses and measures are summed in Python. |
+| **Endpoints** | `GET /api/metrics` (login required) lists definitions. `GET /api/tenants/{id}/metrics/{metric_id}?from&to&group_by&limit` checks the tenant (403) **before** routing, then runs on the owning shard under RLS and the B-3 slot. The response carries B-1 freshness, `source`/`provenance`, `numerator`/`denominator` per row, and `value: null` + `undefined_reason: "denominator_zero"`. |
+| **UI** | Dashboard → "Config-driven metrics (B-4)" renders whatever the registry lists. |
+
+Offline tests: `python -m unittest discover -s tests -p 'test_*.py'` (`tests/test_metric_registry.py`: validation, fixed SQL,
+evaluation, hot reload, API auth, routing, errors). Live acceptance (disposable project; edits and then restores the config file):
+`python3 -I app/tests/live_b4_check.py ax-b4test 18291 25771 25772`. See the docstring for the compose command.

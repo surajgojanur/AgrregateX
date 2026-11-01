@@ -80,6 +80,8 @@ services:
       AX_AUTH_DISABLED: ${AX_AUTH_DISABLED:-0}
     volumes:
       - ./sharding/directory.v1.json:/ax/directory.v1.json:ro
+      # B-4: directory mount (not a single file) so an edited/replaced metrics.json is picked up without restart.
+      - ./app/config:/srv/config:ro
     ports: ["127.0.0.1:${AX_API_PORT:-8091}:8000"]
     networks:
       edge: { gw_priority: 10 }   # published port + default route never depend on a shard network

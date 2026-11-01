@@ -1,0 +1,38 @@
+{
+  "schema": "aggregatex.metrics/v1",
+  "version": 1,
+  "metrics": [
+    {
+      "id": "average_order_value",
+      "label": "Average order value",
+      "description": "Sales cents per sale order (status not cancelled/refunded).",
+      "type": "ratio",
+      "unit": "cents",
+      "numerator":   { "measure": "gross_cents", "statuses": "sale" },
+      "denominator": { "measure": "orders", "statuses": "sale" },
+      "decimals": 0,
+      "group_by": ["total", "day", "category", "product"]
+    },
+    {
+      "id": "cancel_rate_pct",
+      "label": "Cancel / refund rate",
+      "description": "Cancelled or refunded orders as a percentage of all orders.",
+      "type": "ratio",
+      "unit": "percent",
+      "numerator":   { "measure": "orders", "statuses": "not_sale" },
+      "denominator": { "measure": "orders", "statuses": "all" },
+      "scale": 100,
+      "decimals": 2,
+      "group_by": ["total", "day", "hour", "category"]
+    },
+    {
+      "id": "units_sold",
+      "label": "Units sold",
+      "description": "Quantity across sale orders.",
+      "type": "sum",
+      "unit": "units",
+      "numerator": { "measure": "units", "statuses": "sale" },
+      "group_by": ["total", "day", "hour", "category", "product", "status"]
+    }
+  ]
+}
