@@ -1,0 +1,665 @@
+{
+  "/": {
+    "status": 200,
+    "elapsed_ms": 7.61
+  },
+  "/app": {
+    "status": 200,
+    "elapsed_ms": 1.23
+  },
+  "/api/tenants/1/summary": {
+    "status": 200,
+    "elapsed_ms": 4.25,
+    "body": {
+      "tenant_id": 1,
+      "shard": "default",
+      "from": "2026-10-02T03:05:06.823025+00:00",
+      "to": "2026-11-01T03:05:06.823025+00:00",
+      "source": {
+        "stream_table_range": [
+          "2026-10-03T00:00:00+00:00",
+          "2026-11-01T00:00:00+00:00"
+        ],
+        "raw_edge_ranges": [
+          [
+            "2026-10-02T03:05:06.823025+00:00",
+            "2026-10-03T00:00:00+00:00"
+          ],
+          [
+            "2026-11-01T00:00:00+00:00",
+            "2026-11-01T03:05:06.823025+00:00"
+          ]
+        ]
+      },
+      "freshness": {
+        "verified_at": "2026-11-01T03:05:05.826621+00:00",
+        "age_s": 1.0,
+        "healthy": true,
+        "stream_tables": 3,
+        "rule": "oldest stream table's last completed refresh"
+      },
+      "summary": {
+        "orders": 136,
+        "sale_orders": 100,
+        "units_sold": 306,
+        "sales_cents": 17213023,
+        "avg_order_cents": 172130,
+        "cancelled_or_refunded": 36,
+        "cancel_rate": 0.2647,
+        "by_status": {
+          "cancelled": {
+            "orders": 18,
+            "units": 55,
+            "gross_cents": 3118500
+          },
+          "paid": {
+            "orders": 32,
+            "units": 98,
+            "gross_cents": 5872469
+          },
+          "pending": {
+            "orders": 17,
+            "units": 52,
+            "gross_cents": 2924073
+          },
+          "refunded": {
+            "orders": 18,
+            "units": 50,
+            "gross_cents": 2414023
+          },
+          "shipped": {
+            "orders": 51,
+            "units": 156,
+            "gross_cents": 8416481
+          }
+        }
+      }
+    }
+  },
+  "/api/tenants/2/summary": {
+    "status": 200,
+    "elapsed_ms": 3.06,
+    "body": {
+      "tenant_id": 2,
+      "shard": "default",
+      "from": "2026-10-02T03:05:06.827475+00:00",
+      "to": "2026-11-01T03:05:06.827475+00:00",
+      "source": {
+        "stream_table_range": [
+          "2026-10-03T00:00:00+00:00",
+          "2026-11-01T00:00:00+00:00"
+        ],
+        "raw_edge_ranges": [
+          [
+            "2026-10-02T03:05:06.827475+00:00",
+            "2026-10-03T00:00:00+00:00"
+          ],
+          [
+            "2026-11-01T00:00:00+00:00",
+            "2026-11-01T03:05:06.827475+00:00"
+          ]
+        ]
+      },
+      "freshness": {
+        "verified_at": "2026-11-01T03:05:05.826621+00:00",
+        "age_s": 1.0,
+        "healthy": true,
+        "stream_tables": 3,
+        "rule": "oldest stream table's last completed refresh"
+      },
+      "summary": {
+        "orders": 76,
+        "sale_orders": 60,
+        "units_sold": 159,
+        "sales_cents": 6929178,
+        "avg_order_cents": 115486,
+        "cancelled_or_refunded": 16,
+        "cancel_rate": 0.2105,
+        "by_status": {
+          "cancelled": {
+            "orders": 5,
+            "units": 11,
+            "gross_cents": 740116
+          },
+          "paid": {
+            "orders": 19,
+            "units": 46,
+            "gross_cents": 1475206
+          },
+          "pending": {
+            "orders": 13,
+            "units": 31,
+            "gross_cents": 1508369
+          },
+          "refunded": {
+            "orders": 11,
+            "units": 33,
+            "gross_cents": 1167708
+          },
+          "shipped": {
+            "orders": 28,
+            "units": 82,
+            "gross_cents": 3945603
+          }
+        }
+      }
+    }
+  },
+  "/api/monitoring": {
+    "status": 200,
+    "elapsed_ms": 1.49,
+    "body": {
+      "observed_at": "2026-11-01T03:04:55.275776+00:00",
+      "shards": [
+        {
+          "shard": "default",
+          "state": "degraded",
+          "engine": {
+            "shard": "default",
+            "pg_trickle_version": "0.108.3",
+            "scheduler_running": true,
+            "stream_tables": [
+              {
+                "name": "st_day_category_status",
+                "refresh_mode": "DIFFERENTIAL",
+                "effective_refresh_mode": "NO_DATA",
+                "status": "ACTIVE",
+                "cdc_mode": "trigger",
+                "schedule": "1s",
+                "consecutive_errors": 0,
+                "last_refresh_at": "2026-11-01T03:04:53.984166+00:00",
+                "approx_rows": 968,
+                "bytes": 425984
+              },
+              {
+                "name": "st_day_product_status",
+                "refresh_mode": "DIFFERENTIAL",
+                "effective_refresh_mode": "NO_DATA",
+                "status": "ACTIVE",
+                "cdc_mode": "trigger",
+                "schedule": "1s",
+                "consecutive_errors": 0,
+                "last_refresh_at": "2026-11-01T03:04:53.773894+00:00",
+                "approx_rows": 997,
+                "bytes": 458752
+              },
+              {
+                "name": "st_hour_category_status",
+                "refresh_mode": "DIFFERENTIAL",
+                "effective_refresh_mode": "NO_DATA",
+                "status": "ACTIVE",
+                "cdc_mode": "trigger",
+                "schedule": "1s",
+                "consecutive_errors": 0,
+                "last_refresh_at": "2026-11-01T03:04:54.526272+00:00",
+                "approx_rows": 999,
+                "bytes": 458752
+              }
+            ],
+            "refresh_stats_5m": [
+              {
+                "name": "st_day_category_status",
+                "refreshes": 11,
+                "differential": 0,
+                "full": 0,
+                "no_data": 11,
+                "fallbacks": 0,
+                "failed": 0,
+                "delta_rows": 0,
+                "p50_ms": null,
+                "p95_ms": null,
+                "max_ms": 1.8
+              },
+              {
+                "name": "st_day_product_status",
+                "refreshes": 11,
+                "differential": 0,
+                "full": 0,
+                "no_data": 11,
+                "fallbacks": 0,
+                "failed": 0,
+                "delta_rows": 0,
+                "p50_ms": null,
+                "p95_ms": null,
+                "max_ms": 2.7
+              },
+              {
+                "name": "st_hour_category_status",
+                "refreshes": 11,
+                "differential": 0,
+                "full": 0,
+                "no_data": 11,
+                "fallbacks": 0,
+                "failed": 0,
+                "delta_rows": 0,
+                "p50_ms": null,
+                "p95_ms": null,
+                "max_ms": 1.6
+              }
+            ],
+            "recent_refreshes": [
+              {
+                "name": "st_day_product_status",
+                "action": "DIFFERENTIAL",
+                "status": "COMPLETED",
+                "start_time": "2026-11-01T00:10:56.188824+00:00",
+                "ms": 7.6,
+                "delta_rows": 0,
+                "rows_changed": 0,
+                "fallback": false,
+                "reason": null
+              },
+              {
+                "name": "st_hour_category_status",
+                "action": "DIFFERENTIAL",
+                "status": "COMPLETED",
+                "start_time": "2026-11-01T00:10:55.975448+00:00",
+                "ms": 33.4,
+                "delta_rows": 1,
+                "rows_changed": 1,
+                "fallback": false,
+                "reason": null
+              },
+              {
+                "name": "st_day_product_status",
+                "action": "DIFFERENTIAL",
+                "status": "COMPLETED",
+                "start_time": "2026-11-01T00:09:55.975177+00:00",
+                "ms": 44.4,
+                "delta_rows": 1,
+                "rows_changed": 1,
+                "fallback": false,
+                "reason": null
+              },
+              {
+                "name": "st_day_category_status",
+                "action": "DIFFERENTIAL",
+                "status": "COMPLETED",
+                "start_time": "2026-11-01T00:09:55.753229+00:00",
+                "ms": 50.4,
+                "delta_rows": 1,
+                "rows_changed": 1,
+                "fallback": false,
+                "reason": null
+              },
+              {
+                "name": "st_day_product_status",
+                "action": "DIFFERENTIAL",
+                "status": "COMPLETED",
+                "start_time": "2026-10-31T11:11:58.076224+00:00",
+                "ms": 6.2,
+                "delta_rows": 0,
+                "rows_changed": 0,
+                "fallback": false,
+                "reason": null
+              },
+              {
+                "name": "st_day_category_status",
+                "action": "DIFFERENTIAL",
+                "status": "COMPLETED",
+                "start_time": "2026-10-31T11:11:57.491386+00:00",
+                "ms": 27.4,
+                "delta_rows": 1,
+                "rows_changed": 1,
+                "fallback": false,
+                "reason": null
+              },
+              {
+                "name": "st_hour_category_status",
+                "action": "DIFFERENTIAL",
+                "status": "COMPLETED",
+                "start_time": "2026-10-31T11:11:57.282060+00:00",
+                "ms": 7.2,
+                "delta_rows": 0,
+                "rows_changed": 0,
+                "fallback": false,
+                "reason": null
+              },
+              {
+                "name": "st_hour_category_status",
+                "action": "DIFFERENTIAL",
+                "status": "COMPLETED",
+                "start_time": "2026-10-31T11:11:51.653957+00:00",
+                "ms": 29.0,
+                "delta_rows": 1,
+                "rows_changed": 1,
+                "fallback": false,
+                "reason": null
+              },
+              {
+                "name": "st_day_product_status",
+                "action": "DIFFERENTIAL",
+                "status": "COMPLETED",
+                "start_time": "2026-10-31T11:11:51.441832+00:00",
+                "ms": 21.8,
+                "delta_rows": 1,
+                "rows_changed": 1,
+                "fallback": false,
+                "reason": null
+              },
+              {
+                "name": "st_day_product_status",
+                "action": "DIFFERENTIAL",
+                "status": "COMPLETED",
+                "start_time": "2026-10-31T10:39:58.937014+00:00",
+                "ms": 6.6,
+                "delta_rows": 0,
+                "rows_changed": 0,
+                "fallback": false,
+                "reason": null
+              },
+              {
+                "name": "st_hour_category_status",
+                "action": "DIFFERENTIAL",
+                "status": "COMPLETED",
+                "start_time": "2026-10-31T10:39:58.214771+00:00",
+                "ms": 31.4,
+                "delta_rows": 1,
+                "rows_changed": 1,
+                "fallback": false,
+                "reason": null
+              },
+              {
+                "name": "st_day_category_status",
+                "action": "DIFFERENTIAL",
+                "status": "COMPLETED",
+                "start_time": "2026-10-31T10:39:57.606287+00:00",
+                "ms": 46.5,
+                "delta_rows": 1,
+                "rows_changed": 1,
+                "fallback": false,
+                "reason": null
+              },
+              {
+                "name": "st_day_product_status",
+                "action": "DIFFERENTIAL",
+                "status": "COMPLETED",
+                "start_time": "2026-10-31T10:39:57.391993+00:00",
+                "ms": 39.4,
+                "delta_rows": 2,
+                "rows_changed": 2,
+                "fallback": false,
+                "reason": null
+              },
+              {
+                "name": "st_hour_category_status",
+                "action": "REINITIALIZE",
+                "status": "COMPLETED",
+                "start_time": "2026-10-31T10:38:17.107569+00:00",
+                "ms": 34.3,
+                "delta_rows": 999,
+                "rows_changed": 999,
+                "fallback": false,
+                "reason": "SCHEMA_CHANGED"
+              },
+              {
+                "name": "st_day_product_status",
+                "action": "REINITIALIZE",
+                "status": "COMPLETED",
+                "start_time": "2026-10-31T10:38:17.007507+00:00",
+                "ms": 44.5,
+                "delta_rows": 997,
+                "rows_changed": 997,
+                "fallback": false,
+                "reason": "SCHEMA_CHANGED"
+              },
+              {
+                "name": "st_day_category_status",
+                "action": "REINITIALIZE",
+                "status": "COMPLETED",
+                "start_time": "2026-10-31T10:38:15.312366+00:00",
+                "ms": 46.0,
+                "delta_rows": 968,
+                "rows_changed": 968,
+                "fallback": false,
+                "reason": "SCHEMA_CHANGED"
+              },
+              {
+                "name": "st_hour_category_status",
+                "action": "FULL",
+                "status": "COMPLETED",
+                "start_time": "2026-10-31T10:38:14.848777+00:00",
+                "ms": 0.2,
+                "delta_rows": 0,
+                "rows_changed": 0,
+                "fallback": false,
+                "reason": null
+              },
+              {
+                "name": "st_day_category_status",
+                "action": "FULL",
+                "status": "COMPLETED",
+                "start_time": "2026-10-31T10:38:14.802157+00:00",
+                "ms": 0.2,
+                "delta_rows": 0,
+                "rows_changed": 0,
+                "fallback": false,
+                "reason": null
+              },
+              {
+                "name": "st_day_product_status",
+                "action": "FULL",
+                "status": "COMPLETED",
+                "start_time": "2026-10-31T10:38:14.747106+00:00",
+                "ms": 0.3,
+                "delta_rows": 0,
+                "rows_changed": 0,
+                "fallback": false,
+                "reason": null
+              }
+            ],
+            "change_buffers": [
+              {
+                "buffer": "changes_1d8a10d0e8bcdd15",
+                "pending_rows": 1,
+                "bytes": 32768
+              },
+              {
+                "buffer": "changes_daaaeeb1fdc57e97",
+                "pending_rows": 1,
+                "bytes": 32768
+              }
+            ],
+            "settings": {
+              "pg_trickle.cdc_mode": "auto",
+              "pg_trickle.differential_max_change_ratio": "0.15",
+              "pg_trickle.enabled": "on",
+              "pg_trickle.max_dynamic_refresh_workers": "4",
+              "pg_trickle.min_schedule_seconds": "1",
+              "pg_trickle.scheduler_interval_ms": "500",
+              "wal_level": "logical"
+            },
+            "health": [
+              {
+                "check_name": "monitor_contract",
+                "severity": "UNKNOWN",
+                "detail": "Operator health diagnostics unavailable (SQLSTATE 42883); verification required."
+              }
+            ]
+          },
+          "freshness": [
+            {
+              "name": "st_day_category_status",
+              "refresh_mode": "DIFFERENTIAL",
+              "effective_refresh_mode": "NO_DATA",
+              "status": "ACTIVE",
+              "schedule": "1s",
+              "consecutive_errors": 0,
+              "verified_at": "2026-11-01T03:04:53.994089+00:00",
+              "last_action": "NO_DATA",
+              "age_s": 1.281519
+            },
+            {
+              "name": "st_day_product_status",
+              "refresh_mode": "DIFFERENTIAL",
+              "effective_refresh_mode": "NO_DATA",
+              "status": "ACTIVE",
+              "schedule": "1s",
+              "consecutive_errors": 0,
+              "verified_at": "2026-11-01T03:04:53.783011+00:00",
+              "last_action": "NO_DATA",
+              "age_s": 1.492608
+            },
+            {
+              "name": "st_hour_category_status",
+              "refresh_mode": "DIFFERENTIAL",
+              "effective_refresh_mode": "NO_DATA",
+              "status": "ACTIVE",
+              "schedule": "1s",
+              "consecutive_errors": 0,
+              "verified_at": "2026-11-01T03:04:54.535776+00:00",
+              "last_action": "NO_DATA",
+              "age_s": 0.739846
+            }
+          ]
+        }
+      ],
+      "api": {
+        "success": 15,
+        "errors": 0,
+        "timeouts": 0,
+        "p50_ms": 4.71,
+        "p95_ms": 25.8,
+        "window_s": 300,
+        "sample_capacity": 4096
+      },
+      "query_limits": {
+        "max_concurrent_per_tenant": 4,
+        "queue_wait_s": 0.25,
+        "scope": "per API process",
+        "tenants": [
+          {
+            "tenant_id": 1,
+            "in_flight": 0,
+            "peak": 1,
+            "admitted": 6,
+            "rejected_429": 0
+          },
+          {
+            "tenant_id": 2,
+            "in_flight": 0,
+            "peak": 1,
+            "admitted": 1,
+            "rejected_429": 0
+          }
+        ]
+      },
+      "cache_ttl_s": 15,
+      "scope": "Process-local bounded 5-minute sample; resets on restart. Successful request latency only. Client-side timeouts cannot be observed."
+    }
+  },
+  "/api/shards": {
+    "status": 200,
+    "elapsed_ms": 2.64,
+    "body": {
+      "directory_version": null,
+      "complete": true,
+      "missing_shards": [],
+      "metadata_error_shards": [],
+      "total_orders": 1003,
+      "partial_total_orders": null,
+      "shards": [
+        {
+          "shard": "default",
+          "host": "127.0.0.1",
+          "tenants": null,
+          "available": true,
+          "probe_ms": 0.3,
+          "stream_tables": [
+            {
+              "name": "st_day_category_status",
+              "refresh_mode": "DIFFERENTIAL",
+              "effective_refresh_mode": "NO_DATA",
+              "status": "ACTIVE",
+              "schedule": "1s",
+              "consecutive_errors": 0,
+              "verified_at": "2026-11-01T03:05:05.826621+00:00",
+              "last_action": "NO_DATA",
+              "age_s": 1.01
+            },
+            {
+              "name": "st_day_product_status",
+              "refresh_mode": "DIFFERENTIAL",
+              "effective_refresh_mode": "NO_DATA",
+              "status": "ACTIVE",
+              "schedule": "1s",
+              "consecutive_errors": 0,
+              "verified_at": "2026-11-01T03:05:06.039368+00:00",
+              "last_action": "NO_DATA",
+              "age_s": 0.79
+            },
+            {
+              "name": "st_hour_category_status",
+              "refresh_mode": "DIFFERENTIAL",
+              "effective_refresh_mode": "NO_DATA",
+              "status": "ACTIVE",
+              "schedule": "1s",
+              "consecutive_errors": 0,
+              "verified_at": "2026-11-01T03:05:06.581607+00:00",
+              "last_action": "NO_DATA",
+              "age_s": 0.25
+            }
+          ],
+          "pending_cdc_rows": 2,
+          "orders_by_tenant": [
+            {
+              "tenant_id": 1,
+              "orders": 407,
+              "seed_orders": 405
+            },
+            {
+              "tenant_id": 2,
+              "orders": 201,
+              "seed_orders": 200
+            },
+            {
+              "tenant_id": 3,
+              "orders": 47,
+              "seed_orders": 47
+            },
+            {
+              "tenant_id": 4,
+              "orders": 47,
+              "seed_orders": 47
+            },
+            {
+              "tenant_id": 5,
+              "orders": 62,
+              "seed_orders": 62
+            },
+            {
+              "tenant_id": 6,
+              "orders": 43,
+              "seed_orders": 43
+            },
+            {
+              "tenant_id": 7,
+              "orders": 49,
+              "seed_orders": 49
+            },
+            {
+              "tenant_id": 8,
+              "orders": 46,
+              "seed_orders": 46
+            },
+            {
+              "tenant_id": 9,
+              "orders": 51,
+              "seed_orders": 51
+            },
+            {
+              "tenant_id": 10,
+              "orders": 50,
+              "seed_orders": 50
+            }
+          ],
+          "orders": 1003,
+          "seed_orders": 1000,
+          "directory_violations": [],
+          "metadata_ok": true,
+          "healthy": true
+        }
+      ]
+    }
+  }
+}
