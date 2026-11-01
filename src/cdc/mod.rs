@@ -4352,9 +4352,20 @@ mod tests {
     #[test]
     fn test_net_change_reduction_sql_scopes_target_and_window() {
         let sql = net_change_reduction_sql("pg_temp.\"__pgt_cdc_1_2\"", " AND lsn > '0/1'::pg_lsn");
-        assert!(sql.starts_with("DELETE FROM pg_temp.\"__pgt_cdc_1_2\" "), "got: {sql}");
-        assert!(sql.contains("FROM pg_temp.\"__pgt_cdc_1_2\" WHERE action IN ('I', 'D') AND lsn > '0/1'::pg_lsn"), "got: {sql}");
-        assert!(sql.contains("PARTITION BY __pgt_row_id ORDER BY change_id)"), "got: {sql}");
+        assert!(
+            sql.starts_with("DELETE FROM pg_temp.\"__pgt_cdc_1_2\" "),
+            "got: {sql}"
+        );
+        assert!(
+            sql.contains(
+                "FROM pg_temp.\"__pgt_cdc_1_2\" WHERE action IN ('I', 'D') AND lsn > '0/1'::pg_lsn"
+            ),
+            "got: {sql}"
+        );
+        assert!(
+            sql.contains("PARTITION BY __pgt_row_id ORDER BY change_id)"),
+            "got: {sql}"
+        );
     }
 
     /// Signed group images that survive the reduction for one keyed history.
@@ -4377,18 +4388,40 @@ mod tests {
             (vec![('I', "paid")], vec![(1, "paid")]),
             (vec![('D', "paid")], vec![(-1, "paid")]),
             (vec![('I', "paid"), ('D', "paid")], vec![]),
-            (vec![('D', "paid"), ('I', "cancelled")], vec![(-1, "paid"), (1, "cancelled")]),
-            // #50 Case A / Fedora: insert then update in one window -> no ghost "paid".
-            (vec![('I', "paid"), ('D', "paid"), ('I', "cancelled")], vec![(1, "cancelled")]),
-            (vec![('I', "paid"), ('D', "paid"), ('I', "paid")], vec![(1, "paid")]),
-            // update then delete -> exactly one decrement of the original group.
-            (vec![('D', "paid"), ('I', "shipped"), ('D', "shipped")], vec![(-1, "paid")]),
             (
-                vec![('D', "paid"), ('I', "shipped"), ('D', "shipped"), ('I', "cancelled")],
+                vec![('D', "paid"), ('I', "cancelled")],
+                vec![(-1, "paid"), (1, "cancelled")],
+            ),
+            // #50 Case A / Fedora: insert then update in one window -> no ghost "paid".
+            (
+                vec![('I', "paid"), ('D', "paid"), ('I', "cancelled")],
+                vec![(1, "cancelled")],
+            ),
+            (
+                vec![('I', "paid"), ('D', "paid"), ('I', "paid")],
+                vec![(1, "paid")],
+            ),
+            // update then delete -> exactly one decrement of the original group.
+            (
+                vec![('D', "paid"), ('I', "shipped"), ('D', "shipped")],
+                vec![(-1, "paid")],
+            ),
+            (
+                vec![
+                    ('D', "paid"),
+                    ('I', "shipped"),
+                    ('D', "shipped"),
+                    ('I', "cancelled"),
+                ],
                 vec![(-1, "paid"), (1, "cancelled")],
             ),
             (
-                vec![('I', "paid"), ('D', "paid"), ('I', "shipped"), ('D', "shipped")],
+                vec![
+                    ('I', "paid"),
+                    ('D', "paid"),
+                    ('I', "shipped"),
+                    ('D', "shipped"),
+                ],
                 vec![],
             ),
         ];
@@ -4407,7 +4440,11 @@ mod tests {
             for start in ['I', 'D'] {
                 let hist: Vec<(char, &'static str)> = (0..len)
                     .map(|i| {
-                        let a = if (i % 2 == 0) == (start == 'I') { 'I' } else { 'D' };
+                        let a = if (i % 2 == 0) == (start == 'I') {
+                            'I'
+                        } else {
+                            'D'
+                        };
                         // a D carries the image the previous I created; a fresh I starts a new image
                         (a, labels[if a == 'D' && i > 0 { i - 1 } else { i }])
                     })
