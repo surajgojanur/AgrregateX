@@ -44,7 +44,7 @@ From `hackathon/frontend`:
 - `npm run build` — passed (Vite production build).
 - From `hackathon/app`, `/tmp/ax-raw-source-venv/bin/python -m unittest discover -s tests -v` — **55/55 passed**, including mocked raw-source route selection, signed auth/tenant checks, API-mode override rejection, restricted tenant transaction setup, unavailable-shard behavior, and rollup response compatibility.
 
-Mocked interactive Chromium QA was run against a local-only Vite server using deterministic `/api/**` route fixtures. Results and screenshots are recorded in [`BROWSER_QA.md`](BROWSER_QA.md). All tested viewports had no horizontal overflow; raw, rollup, mixed, unknown, malformed-panel, 503, reload and light-theme scenarios rendered without uncaught page exceptions. The expected mock 503 console error was observed. The browser never contacted the preserved demo.
+Mocked interactive Chromium QA was run against a local-only Vite server using deterministic `/api/**` route fixtures. Results and screenshots are recorded in [`BROWSER_QA.md`](BROWSER_QA.md). All tested viewports had no horizontal overflow; raw, rollup, mixed, unknown, malformed-panel, 503, reload, and accessible light/dark theme-toggle scenarios rendered without uncaught page exceptions. The expected mock 503 console error was observed. The browser never contacted the preserved demo.
 
 The new malformed-summary regression was run before the classifier fix and failed as expected: classifyAnalyticsSet returned uniform for three successful raw panels plus an error panel whose provenance was verified. It passes after requiring every panel to have succeeded.
 
