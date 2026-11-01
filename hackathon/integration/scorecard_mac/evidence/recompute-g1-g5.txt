@@ -1,0 +1,13 @@
+1M scenarios 72 10M scenarios 72 matched keys 72
+1M: requests=3600 errors=0 non200=0 p95<200=72/72 p95<1000=72/72 worst p95=60.77 worst p99=173.52 worst max=173.52 min n/scenario=50
+10M: requests=3600 errors=0 non200=0 p95<200=71/72 p95<1000=72/72 worst p95=240.56 worst p99=457.32 worst max=457.32 min n/scenario=50
+  10M p95>=200: ('top_products', 'largest', '90d') 1 1930247 p50 68.97 p95 240.56 p99 457.32
+G5 recomputed: n=72 median=1.18 min=0.41 max=5.18 <2x=66 <5x=71
+  ratio 2.07 ('top_products', 'median', '30d') p95 1M 12.28 -> 10M 25.4  tenant orders 56965 -> 37901
+  ratio 2.12 ('trends', 'largest', '90d') p95 1M 7.34 -> 10M 15.54  tenant orders 340560 -> 1930247
+  ratio 2.27 ('top_products', 'largest', 'partial_7d') p95 1M 15.49 -> 10M 35.14  tenant orders 340560 -> 1930247
+  ratio 3.37 ('summary', 'largest', 'partial_7d') p95 1M 11.39 -> 10M 38.35  tenant orders 340560 -> 1930247
+  ratio 3.62 ('breakdown', 'largest', 'partial_7d') p95 1M 10.12 -> 10M 36.65  tenant orders 340560 -> 1930247
+  ratio 5.18 ('top_products', 'largest', '90d') p95 1M 46.43 -> 10M 240.56  tenant orders 340560 -> 1930247
+stored growth file: {'median': 1.18, 'min': 0.41, 'max': 5.18, 'n': 72, 'under_2x': 66, 'under_5x': 71}
+tenant roles (id, orders) across 1M+10M: {'largest': [(1, 340560), (1, 1930247)], 'median': [(6, 56965), (51, 37901)], 'smallest': [(10, 34091), (100, 19471)]}

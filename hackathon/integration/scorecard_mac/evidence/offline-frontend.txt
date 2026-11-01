@@ -1,0 +1,4 @@
+lint OK
+# pass 24
+# fail 0
+build OK
