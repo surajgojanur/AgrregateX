@@ -43,3 +43,10 @@
 AX_SCRATCH=<private scratch dir> ./run.sh <label> <pg_trickle source checkout>
 ```
 This builds pg_trickle and installs it into Homebrew `postgresql@18`. Output goes to `results/<label>/`: `summary.txt`, `results.json` and the logs.
+
+## Run log
+| Run | Binary sha256 | Result |
+|---|---|---|
+| `baseline-4bddde7` (unpatched) | `54f40ad3…f6a3` | **15/22 cases correct. 7 leave wrong rows, all in the product summary.** The failures: insert→cancel, update→delete, same-group mix, failed refresh then retry, I-D-I-D-I, the 5-order mix, two tenants. All refreshes were DIFFERENTIAL, so nothing masked the bug. Category and hour summaries matched in every case. Tenant isolation (`rls.sql`) passed 4/4. Each failed case was repaired before the next one (`repaired_clean=t` ×7). |
+| first "patched" attempt | `54f40ad3…f6a3` (**same as baseline**) | **INVALID, discarded.** The two runs shared one cargo build folder, so the baseline binary was reused instead of compiling the fix. `run.sh` now uses a separate build folder per run, and `AX_FORBID_SHA` refuses a binary that was already tested under another label. |
+| `patched-a448094` (the fix) | pending | rebuilding from the fixed source; results will be added here |
