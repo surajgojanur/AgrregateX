@@ -1,0 +1,2 @@
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/sql/05_bucket_columns.sql:40: NOTICE:  trigger "orders_derive_buckets" for relation "ax.orders" does not exist, skipping
+[04:49:31]   took 0s

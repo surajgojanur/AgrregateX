@@ -1,0 +1,7 @@
+[04:37:44] source a4480945265dbaf5faf6cf8c5526353e47b15c69 #54/#67: add a runtime test harness for the G4 fix (results to follow)
+[04:37:44] swap: total = 8192.00M  used = 7159.44M  free = 1032.56M  (encrypted)
+[04:40:21] installed pg_trickle.dylib sha256 6867f6bc9a09c55e00f85f5d15c11f3a6bc41e1b12d872d3013ae1ad46d02460
+PostgreSQL 18.6 (Homebrew) on aarch64-apple-darwin27.0.0, compiled by Apple clang version 21.0.0 (clang-2100.3.34.2), 64-bit
+off
+extversion 0.108.4
+[04:40:25] cases ok: 22/22

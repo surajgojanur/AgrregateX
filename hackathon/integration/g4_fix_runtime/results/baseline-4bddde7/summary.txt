@@ -1,0 +1,30 @@
+                 case_id                 | product | category | hour | non_differential | ok 
+-----------------------------------------+---------+----------+------+------------------+----
+ A0_baseline                             | 0/0     | 0/0      | 0/0  |                0 | t
+ A1_insert                               | 0/0     | 0/0      | 0/0  |                0 | t
+ A2_insert_then_cancel_same_window       | 0/1     | 0/0      | 0/0  |                0 | f
+ A2x_insert_then_cancel_across_windows   | 0/0     | 0/0      | 0/0  |                0 | t
+ A2x_insert_then_cancel_across_windows_b | 0/0     | 0/0      | 0/0  |                0 | t
+ A3_update_then_delete_same_window       | 1/1     | 0/0      | 0/0  |                0 | f
+ A4_paid_cancelled_refunded              | 0/0     | 0/0      | 0/0  |                0 | t
+ A5_delete                               | 0/0     | 0/0      | 0/0  |                0 | t
+ A6_insert_then_delete                   | 0/0     | 0/0      | 0/0  |                0 | t
+ A7_quantity_and_price                   | 0/0     | 0/0      | 0/0  |                0 | t
+ A8a_product_move                        | 0/0     | 0/0      | 0/0  |                0 | t
+ A8b_category_move_via_products          | 0/0     | 0/0      | 0/0  |                0 | t
+ A9_created_at_across_day_and_hour       | 0/0     | 0/0      | 0/0  |                0 | t
+ A10_same_group_mixed                    | 1/1     | 0/0      | 0/0  |                0 | f
+ A11_rollback                            | 0/0     | 0/0      | 0/0  |                0 | t
+ A12_failed_refresh_then_retry           | 0/1     | 0/0      | 0/0  |                0 | f
+ A13_pk_change                           | 0/0     | 0/0      | 0/0  |                0 | t
+ A14a_I_D_I_D_I_same_window              | 1/1     | 0/0      | 0/0  |                0 | f
+ A14b_D_I_D_existing_same_window         | 0/0     | 0/0      | 0/0  |                0 | t
+ A14c_five_orders_mixed_same_window      | 1/1     | 0/0      | 0/0  |                0 | f
+ A14d_long_history_existing              | 0/0     | 0/0      | 0/0  |                0 | t
+ A14e_two_tenants_same_window            | 0/1     | 0/0      | 0/0  |                0 | f
+(22 rows)
+
+ tenant1 | t
+ tenant2 | t
+ no_tenant_setting | t
+ setting_is_transaction_local | t

@@ -1,0 +1,62 @@
+CREATE SCHEMA
+REVOKE
+CREATE TABLE
+CREATE TABLE
+INSERT 0 1
+CREATE FUNCTION
+CREATE FUNCTION
+INSERT 0 10
+INSERT 0 2000
+INSERT 0 10000
+CREATE PROCEDURE
+DROP INDEX
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/integration/scale/gen_synthetic.sql:157: NOTICE:  ax_gen: orders 1 .. 250000 of 10000000 (250000 rows, 0.8 s)
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/integration/scale/gen_synthetic.sql:157: NOTICE:  ax_gen: orders 250001 .. 500000 of 10000000 (250000 rows, 0.8 s)
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/integration/scale/gen_synthetic.sql:157: NOTICE:  ax_gen: orders 500001 .. 750000 of 10000000 (250000 rows, 0.9 s)
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/integration/scale/gen_synthetic.sql:157: NOTICE:  ax_gen: orders 750001 .. 1000000 of 10000000 (250000 rows, 0.8 s)
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/integration/scale/gen_synthetic.sql:157: NOTICE:  ax_gen: orders 1000001 .. 1250000 of 10000000 (250000 rows, 0.8 s)
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/integration/scale/gen_synthetic.sql:157: NOTICE:  ax_gen: orders 1250001 .. 1500000 of 10000000 (250000 rows, 0.8 s)
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/integration/scale/gen_synthetic.sql:157: NOTICE:  ax_gen: orders 1500001 .. 1750000 of 10000000 (250000 rows, 0.8 s)
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/integration/scale/gen_synthetic.sql:157: NOTICE:  ax_gen: orders 1750001 .. 2000000 of 10000000 (250000 rows, 1.1 s)
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/integration/scale/gen_synthetic.sql:157: NOTICE:  ax_gen: orders 2000001 .. 2250000 of 10000000 (250000 rows, 3.6 s)
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/integration/scale/gen_synthetic.sql:157: NOTICE:  ax_gen: orders 2250001 .. 2500000 of 10000000 (250000 rows, 1.2 s)
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/integration/scale/gen_synthetic.sql:157: NOTICE:  ax_gen: orders 2500001 .. 2750000 of 10000000 (250000 rows, 1.2 s)
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/integration/scale/gen_synthetic.sql:157: NOTICE:  ax_gen: orders 2750001 .. 3000000 of 10000000 (250000 rows, 1.1 s)
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/integration/scale/gen_synthetic.sql:157: NOTICE:  ax_gen: orders 3000001 .. 3250000 of 10000000 (250000 rows, 1.1 s)
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/integration/scale/gen_synthetic.sql:157: NOTICE:  ax_gen: orders 3250001 .. 3500000 of 10000000 (250000 rows, 1.1 s)
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/integration/scale/gen_synthetic.sql:157: NOTICE:  ax_gen: orders 3500001 .. 3750000 of 10000000 (250000 rows, 1.0 s)
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/integration/scale/gen_synthetic.sql:157: NOTICE:  ax_gen: orders 3750001 .. 4000000 of 10000000 (250000 rows, 1.0 s)
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/integration/scale/gen_synthetic.sql:157: NOTICE:  ax_gen: orders 4000001 .. 4250000 of 10000000 (250000 rows, 0.9 s)
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/integration/scale/gen_synthetic.sql:157: NOTICE:  ax_gen: orders 4250001 .. 4500000 of 10000000 (250000 rows, 1.1 s)
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/integration/scale/gen_synthetic.sql:157: NOTICE:  ax_gen: orders 4500001 .. 4750000 of 10000000 (250000 rows, 2.0 s)
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/integration/scale/gen_synthetic.sql:157: NOTICE:  ax_gen: orders 4750001 .. 5000000 of 10000000 (250000 rows, 1.3 s)
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/integration/scale/gen_synthetic.sql:157: NOTICE:  ax_gen: orders 5000001 .. 5250000 of 10000000 (250000 rows, 1.4 s)
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/integration/scale/gen_synthetic.sql:157: NOTICE:  ax_gen: orders 5250001 .. 5500000 of 10000000 (250000 rows, 1.1 s)
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/integration/scale/gen_synthetic.sql:157: NOTICE:  ax_gen: orders 5500001 .. 5750000 of 10000000 (250000 rows, 1.1 s)
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/integration/scale/gen_synthetic.sql:157: NOTICE:  ax_gen: orders 5750001 .. 6000000 of 10000000 (250000 rows, 1.3 s)
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/integration/scale/gen_synthetic.sql:157: NOTICE:  ax_gen: orders 6000001 .. 6250000 of 10000000 (250000 rows, 1.2 s)
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/integration/scale/gen_synthetic.sql:157: NOTICE:  ax_gen: orders 6250001 .. 6500000 of 10000000 (250000 rows, 1.3 s)
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/integration/scale/gen_synthetic.sql:157: NOTICE:  ax_gen: orders 6500001 .. 6750000 of 10000000 (250000 rows, 1.2 s)
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/integration/scale/gen_synthetic.sql:157: NOTICE:  ax_gen: orders 6750001 .. 7000000 of 10000000 (250000 rows, 1.5 s)
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/integration/scale/gen_synthetic.sql:157: NOTICE:  ax_gen: orders 7000001 .. 7250000 of 10000000 (250000 rows, 1.8 s)
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/integration/scale/gen_synthetic.sql:157: NOTICE:  ax_gen: orders 7250001 .. 7500000 of 10000000 (250000 rows, 1.3 s)
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/integration/scale/gen_synthetic.sql:157: NOTICE:  ax_gen: orders 7500001 .. 7750000 of 10000000 (250000 rows, 1.7 s)
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/integration/scale/gen_synthetic.sql:157: NOTICE:  ax_gen: orders 7750001 .. 8000000 of 10000000 (250000 rows, 1.7 s)
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/integration/scale/gen_synthetic.sql:157: NOTICE:  ax_gen: orders 8000001 .. 8250000 of 10000000 (250000 rows, 1.3 s)
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/integration/scale/gen_synthetic.sql:157: NOTICE:  ax_gen: orders 8250001 .. 8500000 of 10000000 (250000 rows, 1.2 s)
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/integration/scale/gen_synthetic.sql:157: NOTICE:  ax_gen: orders 8500001 .. 8750000 of 10000000 (250000 rows, 2.3 s)
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/integration/scale/gen_synthetic.sql:157: NOTICE:  ax_gen: orders 8750001 .. 9000000 of 10000000 (250000 rows, 2.3 s)
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/integration/scale/gen_synthetic.sql:157: NOTICE:  ax_gen: orders 9000001 .. 9250000 of 10000000 (250000 rows, 3.6 s)
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/integration/scale/gen_synthetic.sql:157: NOTICE:  ax_gen: orders 9250001 .. 9500000 of 10000000 (250000 rows, 1.5 s)
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/integration/scale/gen_synthetic.sql:157: NOTICE:  ax_gen: orders 9500001 .. 9750000 of 10000000 (250000 rows, 1.5 s)
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/integration/scale/gen_synthetic.sql:157: NOTICE:  ax_gen: orders 9750001 .. 10000000 of 10000000 (250000 rows, 1.2 s)
+CALL
+CREATE INDEX
+DO
+VACUUM
+ generated_ids | tenants | seed | zipf_s | shard_tenants | orders_rows | load_s 
+---------------+---------+------+--------+---------------+-------------+--------
+      10000000 |      10 |   42 |      1 |               |    10000000 |   55.0
+(1 row)
+
+[04:51:34]   took 96s

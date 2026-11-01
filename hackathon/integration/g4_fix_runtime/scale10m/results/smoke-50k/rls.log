@@ -1,0 +1,47 @@
+SELECT 2
+GRANT
+SET
+BEGIN
+ set_config 
+------------
+ 1
+(1 row)
+
+   who   | ok 
+---------+----
+ tenant1 | t
+(1 row)
+
+COMMIT
+BEGIN
+ set_config 
+------------
+ 2
+(1 row)
+
+   who   | ok 
+---------+----
+ tenant2 | t
+(1 row)
+
+COMMIT
+BEGIN
+        who        | ok 
+-------------------+----
+ no_tenant_setting | t
+(1 row)
+
+COMMIT
+BEGIN
+ set_config 
+------------
+ 1
+(1 row)
+
+COMMIT
+             who              | ok 
+------------------------------+----
+ setting_is_transaction_local | t
+(1 row)
+
+RESET

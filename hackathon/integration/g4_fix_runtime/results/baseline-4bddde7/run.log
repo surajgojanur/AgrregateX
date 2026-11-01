@@ -1,0 +1,7 @@
+[04:36:36] source 4bddde77f3c9f55d45945ce35e40a94e331399c8 docs(raw-mode): explain confirmed staging loss and follow-up verification gates
+[04:36:36] swap: total = 8192.00M  used = 7231.44M  free = 960.56M  (encrypted)
+54f40ad33fcd80ffb3ffe03d3a261fb7fc0f7072859dc9254d28b2a21d35f6a3  /opt/homebrew/lib/postgresql@18/pg_trickle.dylib
+PostgreSQL 18.6 (Homebrew) on aarch64-apple-darwin27.0.0, compiled by Apple clang version 21.0.0 (clang-2100.3.34.2), 64-bit
+off
+extversion 0.108.4
+[04:36:41] cases ok: 15/22

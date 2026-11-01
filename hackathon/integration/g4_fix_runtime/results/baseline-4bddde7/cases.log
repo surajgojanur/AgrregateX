@@ -1,0 +1,937 @@
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/integration/g4_fix_runtime/check.sql:3: INFO:  Stream table ax.st_day_product_status refreshed (DIFFERENTIAL: +0 -0)
+ refresh_stream_table 
+----------------------
+ 
+(1 row)
+
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/integration/g4_fix_runtime/check.sql:4: INFO:  Stream table ax.st_day_category_status refreshed (DIFFERENTIAL: +0 -0)
+ refresh_stream_table 
+----------------------
+ 
+(1 row)
+
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/integration/g4_fix_runtime/check.sql:5: INFO:  Stream table ax.st_hour_category_status refreshed (DIFFERENTIAL: +0 -0)
+ refresh_stream_table 
+----------------------
+ 
+(1 row)
+
+INSERT 0 1
+UPDATE 1
+   case_id   | product | category | hour | non_differential | ok 
+-------------+---------+----------+------+------------------+----
+ A0_baseline | 0/0     | 0/0      | 0/0  |                0 | t
+(1 row)
+
+INSERT 0 1
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/integration/g4_fix_runtime/check.sql:3: NOTICE:  schema "pg_temp" does not exist, skipping
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/integration/g4_fix_runtime/check.sql:3: INFO:  [PGS_PROFILE] decision=1.44ms generate+build=1.93ms merge_exec=1.73ms cleanup_enqueue=0.00ms total=5.10ms affected=1 phantom_cleanup=0 delta_est=1 mode=INCR path=cache_miss hints=none strategy=merge
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/integration/g4_fix_runtime/check.sql:3: INFO:  Stream table ax.st_day_product_status refreshed (DIFFERENTIAL: +1 -0)
+ refresh_stream_table 
+----------------------
+ 
+(1 row)
+
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/integration/g4_fix_runtime/check.sql:4: NOTICE:  table "__pgt_cdc_2_17443" does not exist, skipping
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/integration/g4_fix_runtime/check.sql:4: NOTICE:  table "__pgt_cdc_2_17474" does not exist, skipping
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/integration/g4_fix_runtime/check.sql:4: INFO:  [PGS_PROFILE] decision=1.79ms generate+build=3.14ms merge_exec=4.13ms cleanup_enqueue=0.00ms total=9.05ms affected=1 phantom_cleanup=0 delta_est=1 mode=INCR path=cache_miss hints=none strategy=merge
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/integration/g4_fix_runtime/check.sql:4: INFO:  Stream table ax.st_day_category_status refreshed (DIFFERENTIAL: +1 -0)
+ refresh_stream_table 
+----------------------
+ 
+(1 row)
+
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/integration/g4_fix_runtime/check.sql:5: NOTICE:  table "__pgt_cdc_3_17474" does not exist, skipping
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/integration/g4_fix_runtime/check.sql:5: NOTICE:  table "__pgt_cdc_3_17443" does not exist, skipping
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/integration/g4_fix_runtime/check.sql:5: NOTICE:  table "__pgt_delta_3" does not exist, skipping
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/integration/g4_fix_runtime/check.sql:5: INFO:  [PGS_PROFILE] delete_insert: materialize=3.32ms delete=0.34ms(0) update=0.13ms(0) insert=0.21ms(1) for ax.st_hour_category_status
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/integration/g4_fix_runtime/check.sql:5: INFO:  [PGS_PROFILE] decision=1.62ms generate+build=3.15ms merge_exec=5.99ms cleanup_enqueue=0.00ms total=10.76ms affected=1 phantom_cleanup=0 delta_est=1 mode=INCR path=cache_miss hints=none strategy=delete_insert
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/integration/g4_fix_runtime/check.sql:5: INFO:  Stream table ax.st_hour_category_status refreshed (DIFFERENTIAL: +1 -0)
+ refresh_stream_table 
+----------------------
+ 
+(1 row)
+
+INSERT 0 1
+UPDATE 1
+  case_id  | product | category | hour | non_differential | ok 
+-----------+---------+----------+------+------------------+----
+ A1_insert | 0/0     | 0/0      | 0/0  |                0 | t
+(1 row)
+
+INSERT 0 1
+UPDATE 1
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/integration/g4_fix_runtime/check.sql:3: NOTICE:  table "__pgt_cdc_1_17474" does not exist, skipping
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/integration/g4_fix_runtime/check.sql:3: INFO:  [PGS_PROFILE] decision=1.02ms generate+build=0.26ms merge_exec=1.31ms cleanup_enqueue=0.00ms total=2.58ms affected=2 phantom_cleanup=0 delta_est=3 mode=INCR path=cache_hit hints=none strategy=merge
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/integration/g4_fix_runtime/check.sql:3: INFO:  Stream table ax.st_day_product_status refreshed (DIFFERENTIAL: +2 -0)
+ refresh_stream_table 
+----------------------
+ 
+(1 row)
+
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/integration/g4_fix_runtime/check.sql:4: NOTICE:  table "__pgt_cdc_2_17443" does not exist, skipping
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/integration/g4_fix_runtime/check.sql:4: NOTICE:  table "__pgt_cdc_2_17474" does not exist, skipping
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/integration/g4_fix_runtime/check.sql:4: INFO:  [PGS_PROFILE] decision=1.66ms generate+build=0.87ms merge_exec=3.36ms cleanup_enqueue=0.00ms total=5.89ms affected=1 phantom_cleanup=0 delta_est=3 mode=INCR path=cache_hit hints=none strategy=merge
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/integration/g4_fix_runtime/check.sql:4: INFO:  Stream table ax.st_day_category_status refreshed (DIFFERENTIAL: +1 -0)
+ refresh_stream_table 
+----------------------
+ 
+(1 row)
+
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/integration/g4_fix_runtime/check.sql:5: NOTICE:  table "__pgt_cdc_3_17474" does not exist, skipping
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/integration/g4_fix_runtime/check.sql:5: NOTICE:  table "__pgt_cdc_3_17443" does not exist, skipping
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/integration/g4_fix_runtime/check.sql:5: INFO:  [PGS_PROFILE] decision=1.59ms generate+build=0.94ms merge_exec=3.56ms cleanup_enqueue=0.00ms total=6.08ms affected=1 phantom_cleanup=0 delta_est=3 mode=INCR path=cache_hit hints=none strategy=merge
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/integration/g4_fix_runtime/check.sql:5: INFO:  Stream table ax.st_hour_category_status refreshed (DIFFERENTIAL: +1 -0)
+ refresh_stream_table 
+----------------------
+ 
+(1 row)
+
+INSERT 0 1
+UPDATE 1
+              case_id              | product | category | hour | non_differential | ok 
+-----------------------------------+---------+----------+------+------------------+----
+ A2_insert_then_cancel_same_window | 0/1     | 0/0      | 0/0  |                0 | f
+(1 row)
+
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/integration/g4_fix_runtime/check.sql:27: INFO:  repair_stream_table(ax.st_day_product_status): window state reset: scheduled protected rebuild; frontier reset: scheduled full refresh on next cycle; cdc_infrastructure: verified OK; status reset: ACTIVE, errors cleared
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/integration/g4_fix_runtime/check.sql:27: INFO:  repair_stream_table(ax.st_day_category_status): window state reset: scheduled protected rebuild; frontier reset: scheduled full refresh on next cycle; cdc_infrastructure: verified OK; status reset: ACTIVE, errors cleared
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/integration/g4_fix_runtime/check.sql:27: INFO:  repair_stream_table(ax.st_hour_category_status): window state reset: scheduled protected rebuild; frontier reset: scheduled full refresh on next cycle; cdc_infrastructure: verified OK; status reset: ACTIVE, errors cleared
+                                                                                                   reinitialize_stream_table                                                                                                   
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ repair_stream_table(ax.st_day_product_status): window state reset: scheduled protected rebuild; frontier reset: scheduled full refresh on next cycle; cdc_infrastructure: verified OK; status reset: ACTIVE, errors cleared
+ repair_stream_table(ax.st_day_category_status): window state reset: scheduled protected rebuild; frontier reset: scheduled full refresh on next cycle; cdc_infrastructure: verified OK; status reset: ACTIVE, errors cleared
+ repair_stream_table(ax.st_hour_category_status): window state reset: scheduled protected rebuild; frontier reset: scheduled full refresh on next cycle; cdc_infrastructure: verified OK; status reset: ACTIVE, errors cleared
+(3 rows)
+
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/integration/g4_fix_runtime/check.sql:29: INFO:  Stream table ax.st_day_product_status: needs_reinit is set, performing FULL reinitialization
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/integration/g4_fix_runtime/check.sql:29: INFO:  Stream table ax.st_day_product_status refreshed (FULL)
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/integration/g4_fix_runtime/check.sql:29: INFO:  Stream table ax.st_day_category_status: needs_reinit is set, performing FULL reinitialization
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/integration/g4_fix_runtime/check.sql:29: INFO:  Stream table ax.st_day_category_status refreshed (FULL)
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/integration/g4_fix_runtime/check.sql:29: INFO:  Stream table ax.st_hour_category_status: needs_reinit is set, performing FULL reinitialization
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/integration/g4_fix_runtime/check.sql:29: INFO:  Stream table ax.st_hour_category_status refreshed (FULL)
+ refresh_stream_table 
+----------------------
+ 
+ 
+ 
+(3 rows)
+
+UPDATE 1
+UPDATE 1
+INSERT 0 1
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/integration/g4_fix_runtime/check.sql:3: NOTICE:  table "__pgt_cdc_1_17474" does not exist, skipping
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/integration/g4_fix_runtime/check.sql:3: INFO:  [PGS_PROFILE] decision=0.98ms generate+build=1.22ms merge_exec=1.29ms cleanup_enqueue=0.00ms total=3.50ms affected=1 phantom_cleanup=0 delta_est=1 mode=INCR path=cache_miss hints=none strategy=merge
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/integration/g4_fix_runtime/check.sql:3: INFO:  Stream table ax.st_day_product_status refreshed (DIFFERENTIAL: +1 -0)
+ refresh_stream_table 
+----------------------
+ 
+(1 row)
+
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/integration/g4_fix_runtime/check.sql:4: NOTICE:  table "__pgt_cdc_2_17443" does not exist, skipping
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/integration/g4_fix_runtime/check.sql:4: NOTICE:  table "__pgt_cdc_2_17474" does not exist, skipping
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/integration/g4_fix_runtime/check.sql:4: INFO:  [PGS_PROFILE] decision=1.62ms generate+build=2.81ms merge_exec=3.47ms cleanup_enqueue=0.00ms total=7.90ms affected=1 phantom_cleanup=0 delta_est=1 mode=INCR path=cache_miss hints=none strategy=merge
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/integration/g4_fix_runtime/check.sql:4: INFO:  Stream table ax.st_day_category_status refreshed (DIFFERENTIAL: +1 -0)
+ refresh_stream_table 
+----------------------
+ 
+(1 row)
+
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/integration/g4_fix_runtime/check.sql:5: NOTICE:  table "__pgt_cdc_3_17474" does not exist, skipping
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/integration/g4_fix_runtime/check.sql:5: NOTICE:  table "__pgt_cdc_3_17443" does not exist, skipping
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/integration/g4_fix_runtime/check.sql:5: NOTICE:  table "__pgt_delta_3" does not exist, skipping
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/integration/g4_fix_runtime/check.sql:5: INFO:  [PGS_PROFILE] delete_insert: materialize=2.82ms delete=0.19ms(0) update=0.10ms(0) insert=0.15ms(1) for ax.st_hour_category_status
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/integration/g4_fix_runtime/check.sql:5: INFO:  [PGS_PROFILE] decision=1.68ms generate+build=2.77ms merge_exec=4.95ms cleanup_enqueue=0.00ms total=9.39ms affected=1 phantom_cleanup=0 delta_est=1 mode=INCR path=cache_miss hints=none strategy=delete_insert
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/integration/g4_fix_runtime/check.sql:5: INFO:  Stream table ax.st_hour_category_status refreshed (DIFFERENTIAL: +1 -0)
+ refresh_stream_table 
+----------------------
+ 
+(1 row)
+
+INSERT 0 1
+UPDATE 1
+                case_id                | product | category | hour | non_differential | ok 
+---------------------------------------+---------+----------+------+------------------+----
+ A2x_insert_then_cancel_across_windows | 0/0     | 0/0      | 0/0  |                0 | t
+(1 row)
+
+UPDATE 1
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/integration/g4_fix_runtime/check.sql:3: NOTICE:  table "__pgt_cdc_1_17474" does not exist, skipping
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/integration/g4_fix_runtime/check.sql:3: INFO:  [PGS_PROFILE] decision=1.01ms generate+build=0.28ms merge_exec=1.40ms cleanup_enqueue=0.00ms total=2.69ms affected=2 phantom_cleanup=0 delta_est=2 mode=INCR path=cache_hit hints=none strategy=merge
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/integration/g4_fix_runtime/check.sql:3: INFO:  Stream table ax.st_day_product_status refreshed (DIFFERENTIAL: +2 -0)
+ refresh_stream_table 
+----------------------
+ 
+(1 row)
+
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/integration/g4_fix_runtime/check.sql:4: NOTICE:  table "__pgt_cdc_2_17443" does not exist, skipping
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/integration/g4_fix_runtime/check.sql:4: NOTICE:  table "__pgt_cdc_2_17474" does not exist, skipping
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/integration/g4_fix_runtime/check.sql:4: INFO:  [PGS_PROFILE] decision=1.61ms generate+build=0.88ms merge_exec=3.28ms cleanup_enqueue=0.00ms total=5.78ms affected=2 phantom_cleanup=0 delta_est=2 mode=INCR path=cache_hit hints=none strategy=merge
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/integration/g4_fix_runtime/check.sql:4: INFO:  Stream table ax.st_day_category_status refreshed (DIFFERENTIAL: +2 -0)
+ refresh_stream_table 
+----------------------
+ 
+(1 row)
+
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/integration/g4_fix_runtime/check.sql:5: NOTICE:  table "__pgt_cdc_3_17474" does not exist, skipping
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/integration/g4_fix_runtime/check.sql:5: NOTICE:  table "__pgt_cdc_3_17443" does not exist, skipping
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/integration/g4_fix_runtime/check.sql:5: INFO:  [PGS_PROFILE] decision=1.69ms generate+build=0.88ms merge_exec=3.37ms cleanup_enqueue=0.00ms total=5.94ms affected=2 phantom_cleanup=0 delta_est=2 mode=INCR path=cache_hit hints=none strategy=merge
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/integration/g4_fix_runtime/check.sql:5: INFO:  Stream table ax.st_hour_category_status refreshed (DIFFERENTIAL: +2 -0)
+ refresh_stream_table 
+----------------------
+ 
+(1 row)
+
+INSERT 0 1
+UPDATE 1
+                 case_id                 | product | category | hour | non_differential | ok 
+-----------------------------------------+---------+----------+------+------------------+----
+ A2x_insert_then_cancel_across_windows_b | 0/0     | 0/0      | 0/0  |                0 | t
+(1 row)
+
+UPDATE 1
+DELETE 1
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/integration/g4_fix_runtime/check.sql:3: NOTICE:  table "__pgt_cdc_1_17474" does not exist, skipping
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/integration/g4_fix_runtime/check.sql:3: INFO:  [PGS_PROFILE] decision=1.01ms generate+build=0.25ms merge_exec=1.28ms cleanup_enqueue=0.00ms total=2.54ms affected=1 phantom_cleanup=0 delta_est=3 mode=INCR path=cache_hit hints=none strategy=merge
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/integration/g4_fix_runtime/check.sql:3: INFO:  Stream table ax.st_day_product_status refreshed (DIFFERENTIAL: +1 -0)
+ refresh_stream_table 
+----------------------
+ 
+(1 row)
+
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/integration/g4_fix_runtime/check.sql:4: NOTICE:  table "__pgt_cdc_2_17443" does not exist, skipping
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/integration/g4_fix_runtime/check.sql:4: NOTICE:  table "__pgt_cdc_2_17474" does not exist, skipping
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/integration/g4_fix_runtime/check.sql:4: INFO:  [PGS_PROFILE] decision=1.69ms generate+build=0.87ms merge_exec=3.54ms cleanup_enqueue=0.00ms total=6.10ms affected=1 phantom_cleanup=0 delta_est=3 mode=INCR path=cache_hit hints=none strategy=merge
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/integration/g4_fix_runtime/check.sql:4: INFO:  Stream table ax.st_day_category_status refreshed (DIFFERENTIAL: +1 -0)
+ refresh_stream_table 
+----------------------
+ 
+(1 row)
+
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/integration/g4_fix_runtime/check.sql:5: NOTICE:  table "__pgt_cdc_3_17474" does not exist, skipping
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/integration/g4_fix_runtime/check.sql:5: NOTICE:  table "__pgt_cdc_3_17443" does not exist, skipping
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/integration/g4_fix_runtime/check.sql:5: INFO:  [PGS_PROFILE] decision=1.69ms generate+build=0.88ms merge_exec=3.27ms cleanup_enqueue=0.00ms total=5.84ms affected=1 phantom_cleanup=0 delta_est=3 mode=INCR path=cache_hit hints=none strategy=merge
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/integration/g4_fix_runtime/check.sql:5: INFO:  Stream table ax.st_hour_category_status refreshed (DIFFERENTIAL: +1 -0)
+ refresh_stream_table 
+----------------------
+ 
+(1 row)
+
+INSERT 0 1
+UPDATE 1
+              case_id              | product | category | hour | non_differential | ok 
+-----------------------------------+---------+----------+------+------------------+----
+ A3_update_then_delete_same_window | 1/1     | 0/0      | 0/0  |                0 | f
+(1 row)
+
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/integration/g4_fix_runtime/check.sql:27: INFO:  repair_stream_table(ax.st_day_product_status): window state reset: scheduled protected rebuild; frontier reset: scheduled full refresh on next cycle; cdc_infrastructure: verified OK; status reset: ACTIVE, errors cleared
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/integration/g4_fix_runtime/check.sql:27: INFO:  repair_stream_table(ax.st_day_category_status): window state reset: scheduled protected rebuild; frontier reset: scheduled full refresh on next cycle; cdc_infrastructure: verified OK; status reset: ACTIVE, errors cleared
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/integration/g4_fix_runtime/check.sql:27: INFO:  repair_stream_table(ax.st_hour_category_status): window state reset: scheduled protected rebuild; frontier reset: scheduled full refresh on next cycle; cdc_infrastructure: verified OK; status reset: ACTIVE, errors cleared
+                                                                                                   reinitialize_stream_table                                                                                                   
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ repair_stream_table(ax.st_day_product_status): window state reset: scheduled protected rebuild; frontier reset: scheduled full refresh on next cycle; cdc_infrastructure: verified OK; status reset: ACTIVE, errors cleared
+ repair_stream_table(ax.st_day_category_status): window state reset: scheduled protected rebuild; frontier reset: scheduled full refresh on next cycle; cdc_infrastructure: verified OK; status reset: ACTIVE, errors cleared
+ repair_stream_table(ax.st_hour_category_status): window state reset: scheduled protected rebuild; frontier reset: scheduled full refresh on next cycle; cdc_infrastructure: verified OK; status reset: ACTIVE, errors cleared
+(3 rows)
+
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/integration/g4_fix_runtime/check.sql:29: INFO:  Stream table ax.st_day_product_status: needs_reinit is set, performing FULL reinitialization
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/integration/g4_fix_runtime/check.sql:29: INFO:  Stream table ax.st_day_product_status refreshed (FULL)
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/integration/g4_fix_runtime/check.sql:29: INFO:  Stream table ax.st_day_category_status: needs_reinit is set, performing FULL reinitialization
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/integration/g4_fix_runtime/check.sql:29: INFO:  Stream table ax.st_day_category_status refreshed (FULL)
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/integration/g4_fix_runtime/check.sql:29: INFO:  Stream table ax.st_hour_category_status: needs_reinit is set, performing FULL reinitialization
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/integration/g4_fix_runtime/check.sql:29: INFO:  Stream table ax.st_hour_category_status refreshed (FULL)
+ refresh_stream_table 
+----------------------
+ 
+ 
+ 
+(3 rows)
+
+UPDATE 1
+UPDATE 1
+UPDATE 1
+UPDATE 1
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/integration/g4_fix_runtime/check.sql:3: NOTICE:  table "__pgt_cdc_1_17474" does not exist, skipping
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/integration/g4_fix_runtime/check.sql:3: INFO:  [PGS_PROFILE] decision=1.04ms generate+build=1.20ms merge_exec=1.33ms cleanup_enqueue=0.00ms total=3.57ms affected=2 phantom_cleanup=0 delta_est=4 mode=INCR path=cache_miss hints=none strategy=merge
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/integration/g4_fix_runtime/check.sql:3: INFO:  Stream table ax.st_day_product_status refreshed (DIFFERENTIAL: +2 -0)
+ refresh_stream_table 
+----------------------
+ 
+(1 row)
+
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/integration/g4_fix_runtime/check.sql:4: NOTICE:  table "__pgt_cdc_2_17443" does not exist, skipping
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/integration/g4_fix_runtime/check.sql:4: NOTICE:  table "__pgt_cdc_2_17474" does not exist, skipping
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/integration/g4_fix_runtime/check.sql:4: INFO:  [PGS_PROFILE] decision=1.69ms generate+build=2.75ms merge_exec=3.37ms cleanup_enqueue=0.00ms total=7.82ms affected=2 phantom_cleanup=0 delta_est=4 mode=INCR path=cache_miss hints=none strategy=merge
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/integration/g4_fix_runtime/check.sql:4: INFO:  Stream table ax.st_day_category_status refreshed (DIFFERENTIAL: +2 -0)
+ refresh_stream_table 
+----------------------
+ 
+(1 row)
+
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/integration/g4_fix_runtime/check.sql:5: NOTICE:  table "__pgt_cdc_3_17474" does not exist, skipping
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/integration/g4_fix_runtime/check.sql:5: NOTICE:  table "__pgt_cdc_3_17443" does not exist, skipping
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/integration/g4_fix_runtime/check.sql:5: INFO:  [PGS_PROFILE] decision=1.67ms generate+build=2.74ms merge_exec=3.46ms cleanup_enqueue=0.00ms total=7.86ms affected=2 phantom_cleanup=0 delta_est=4 mode=INCR path=cache_miss hints=none strategy=merge
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/integration/g4_fix_runtime/check.sql:5: INFO:  Stream table ax.st_hour_category_status refreshed (DIFFERENTIAL: +2 -0)
+ refresh_stream_table 
+----------------------
+ 
+(1 row)
+
+INSERT 0 1
+UPDATE 1
+          case_id           | product | category | hour | non_differential | ok 
+----------------------------+---------+----------+------+------------------+----
+ A4_paid_cancelled_refunded | 0/0     | 0/0      | 0/0  |                0 | t
+(1 row)
+
+DELETE 1
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/integration/g4_fix_runtime/check.sql:3: NOTICE:  table "__pgt_cdc_1_17474" does not exist, skipping
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/integration/g4_fix_runtime/check.sql:3: INFO:  [PGS_PROFILE] decision=1.02ms generate+build=0.26ms merge_exec=1.26ms cleanup_enqueue=0.00ms total=2.54ms affected=1 phantom_cleanup=0 delta_est=1 mode=INCR path=cache_hit hints=none strategy=merge
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/integration/g4_fix_runtime/check.sql:3: INFO:  Stream table ax.st_day_product_status refreshed (DIFFERENTIAL: +1 -0)
+ refresh_stream_table 
+----------------------
+ 
+(1 row)
+
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/integration/g4_fix_runtime/check.sql:4: NOTICE:  table "__pgt_cdc_2_17443" does not exist, skipping
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/integration/g4_fix_runtime/check.sql:4: NOTICE:  table "__pgt_cdc_2_17474" does not exist, skipping
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/integration/g4_fix_runtime/check.sql:4: INFO:  [PGS_PROFILE] decision=1.64ms generate+build=0.85ms merge_exec=3.17ms cleanup_enqueue=0.00ms total=5.66ms affected=1 phantom_cleanup=0 delta_est=1 mode=INCR path=cache_hit hints=none strategy=merge
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/integration/g4_fix_runtime/check.sql:4: INFO:  Stream table ax.st_day_category_status refreshed (DIFFERENTIAL: +1 -0)
+ refresh_stream_table 
+----------------------
+ 
+(1 row)
+
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/integration/g4_fix_runtime/check.sql:5: NOTICE:  table "__pgt_cdc_3_17474" does not exist, skipping
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/integration/g4_fix_runtime/check.sql:5: NOTICE:  table "__pgt_cdc_3_17443" does not exist, skipping
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/integration/g4_fix_runtime/check.sql:5: NOTICE:  table "__pgt_delta_3" does not exist, skipping
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/integration/g4_fix_runtime/check.sql:5: INFO:  [PGS_PROFILE] delete_insert: materialize=2.98ms delete=0.20ms(0) update=0.13ms(1) insert=0.09ms(0) for ax.st_hour_category_status
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/integration/g4_fix_runtime/check.sql:5: INFO:  [PGS_PROFILE] decision=1.68ms generate+build=0.87ms merge_exec=5.09ms cleanup_enqueue=0.00ms total=7.64ms affected=1 phantom_cleanup=0 delta_est=1 mode=INCR path=cache_hit hints=none strategy=delete_insert
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/integration/g4_fix_runtime/check.sql:5: INFO:  Stream table ax.st_hour_category_status refreshed (DIFFERENTIAL: +1 -0)
+ refresh_stream_table 
+----------------------
+ 
+(1 row)
+
+INSERT 0 1
+UPDATE 1
+  case_id  | product | category | hour | non_differential | ok 
+-----------+---------+----------+------+------------------+----
+ A5_delete | 0/0     | 0/0      | 0/0  |                0 | t
+(1 row)
+
+INSERT 0 1
+DELETE 1
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/integration/g4_fix_runtime/check.sql:3: NOTICE:  table "__pgt_cdc_1_17474" does not exist, skipping
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/integration/g4_fix_runtime/check.sql:3: INFO:  [PGS_PROFILE] decision=1.04ms generate+build=0.26ms merge_exec=1.17ms cleanup_enqueue=0.00ms total=2.46ms affected=0 phantom_cleanup=0 delta_est=2 mode=INCR path=cache_hit hints=none strategy=merge
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/integration/g4_fix_runtime/check.sql:3: INFO:  Stream table ax.st_day_product_status refreshed (DIFFERENTIAL: +1 -0)
+ refresh_stream_table 
+----------------------
+ 
+(1 row)
+
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/integration/g4_fix_runtime/check.sql:4: NOTICE:  table "__pgt_cdc_2_17443" does not exist, skipping
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/integration/g4_fix_runtime/check.sql:4: NOTICE:  table "__pgt_cdc_2_17474" does not exist, skipping
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/integration/g4_fix_runtime/check.sql:4: INFO:  [PGS_PROFILE] decision=1.67ms generate+build=0.87ms merge_exec=3.18ms cleanup_enqueue=0.00ms total=5.72ms affected=0 phantom_cleanup=0 delta_est=2 mode=INCR path=cache_hit hints=none strategy=merge
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/integration/g4_fix_runtime/check.sql:4: INFO:  Stream table ax.st_day_category_status refreshed (DIFFERENTIAL: +1 -0)
+ refresh_stream_table 
+----------------------
+ 
+(1 row)
+
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/integration/g4_fix_runtime/check.sql:5: NOTICE:  table "__pgt_cdc_3_17474" does not exist, skipping
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/integration/g4_fix_runtime/check.sql:5: NOTICE:  table "__pgt_cdc_3_17443" does not exist, skipping
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/integration/g4_fix_runtime/check.sql:5: INFO:  [PGS_PROFILE] decision=1.65ms generate+build=0.87ms merge_exec=3.20ms cleanup_enqueue=0.00ms total=5.72ms affected=0 phantom_cleanup=0 delta_est=2 mode=INCR path=cache_hit hints=none strategy=merge
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/integration/g4_fix_runtime/check.sql:5: INFO:  Stream table ax.st_hour_category_status refreshed (DIFFERENTIAL: +1 -0)
+ refresh_stream_table 
+----------------------
+ 
+(1 row)
+
+INSERT 0 1
+UPDATE 1
+        case_id        | product | category | hour | non_differential | ok 
+-----------------------+---------+----------+------+------------------+----
+ A6_insert_then_delete | 0/0     | 0/0      | 0/0  |                0 | t
+(1 row)
+
+UPDATE 1
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/integration/g4_fix_runtime/check.sql:3: NOTICE:  table "__pgt_cdc_1_17474" does not exist, skipping
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/integration/g4_fix_runtime/check.sql:3: INFO:  [PGS_PROFILE] decision=1.01ms generate+build=0.27ms merge_exec=1.31ms cleanup_enqueue=0.00ms total=2.59ms affected=1 phantom_cleanup=0 delta_est=2 mode=INCR path=cache_hit hints=none strategy=merge
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/integration/g4_fix_runtime/check.sql:3: INFO:  Stream table ax.st_day_product_status refreshed (DIFFERENTIAL: +1 -0)
+ refresh_stream_table 
+----------------------
+ 
+(1 row)
+
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/integration/g4_fix_runtime/check.sql:4: NOTICE:  table "__pgt_cdc_2_17443" does not exist, skipping
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/integration/g4_fix_runtime/check.sql:4: NOTICE:  table "__pgt_cdc_2_17474" does not exist, skipping
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/integration/g4_fix_runtime/check.sql:4: INFO:  [PGS_PROFILE] decision=1.71ms generate+build=0.90ms merge_exec=3.26ms cleanup_enqueue=0.00ms total=5.88ms affected=1 phantom_cleanup=0 delta_est=2 mode=INCR path=cache_hit hints=none strategy=merge
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/integration/g4_fix_runtime/check.sql:4: INFO:  Stream table ax.st_day_category_status refreshed (DIFFERENTIAL: +1 -0)
+ refresh_stream_table 
+----------------------
+ 
+(1 row)
+
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/integration/g4_fix_runtime/check.sql:5: NOTICE:  table "__pgt_cdc_3_17474" does not exist, skipping
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/integration/g4_fix_runtime/check.sql:5: NOTICE:  table "__pgt_cdc_3_17443" does not exist, skipping
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/integration/g4_fix_runtime/check.sql:5: INFO:  [PGS_PROFILE] decision=1.68ms generate+build=0.86ms merge_exec=3.24ms cleanup_enqueue=0.00ms total=5.77ms affected=1 phantom_cleanup=0 delta_est=2 mode=INCR path=cache_hit hints=none strategy=merge
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/integration/g4_fix_runtime/check.sql:5: INFO:  Stream table ax.st_hour_category_status refreshed (DIFFERENTIAL: +1 -0)
+ refresh_stream_table 
+----------------------
+ 
+(1 row)
+
+INSERT 0 1
+UPDATE 1
+        case_id        | product | category | hour | non_differential | ok 
+-----------------------+---------+----------+------+------------------+----
+ A7_quantity_and_price | 0/0     | 0/0      | 0/0  |                0 | t
+(1 row)
+
+UPDATE 1
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/integration/g4_fix_runtime/check.sql:3: NOTICE:  table "__pgt_cdc_1_17474" does not exist, skipping
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/integration/g4_fix_runtime/check.sql:3: INFO:  [PGS_PROFILE] decision=1.01ms generate+build=0.26ms merge_exec=1.22ms cleanup_enqueue=0.00ms total=2.49ms affected=0 phantom_cleanup=0 delta_est=2 mode=INCR path=cache_hit hints=none strategy=merge
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/integration/g4_fix_runtime/check.sql:3: INFO:  Stream table ax.st_day_product_status refreshed (DIFFERENTIAL: +1 -0)
+ refresh_stream_table 
+----------------------
+ 
+(1 row)
+
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/integration/g4_fix_runtime/check.sql:4: NOTICE:  table "__pgt_cdc_2_17443" does not exist, skipping
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/integration/g4_fix_runtime/check.sql:4: NOTICE:  table "__pgt_cdc_2_17474" does not exist, skipping
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/integration/g4_fix_runtime/check.sql:4: INFO:  [PGS_PROFILE] decision=1.65ms generate+build=0.93ms merge_exec=3.73ms cleanup_enqueue=0.00ms total=6.31ms affected=0 phantom_cleanup=0 delta_est=2 mode=INCR path=cache_hit hints=none strategy=merge
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/integration/g4_fix_runtime/check.sql:4: INFO:  Stream table ax.st_day_category_status refreshed (DIFFERENTIAL: +1 -0)
+ refresh_stream_table 
+----------------------
+ 
+(1 row)
+
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/integration/g4_fix_runtime/check.sql:5: NOTICE:  table "__pgt_cdc_3_17474" does not exist, skipping
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/integration/g4_fix_runtime/check.sql:5: NOTICE:  table "__pgt_cdc_3_17443" does not exist, skipping
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/integration/g4_fix_runtime/check.sql:5: INFO:  [PGS_PROFILE] decision=1.72ms generate+build=0.92ms merge_exec=3.35ms cleanup_enqueue=0.00ms total=5.99ms affected=0 phantom_cleanup=0 delta_est=2 mode=INCR path=cache_hit hints=none strategy=merge
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/integration/g4_fix_runtime/check.sql:5: INFO:  Stream table ax.st_hour_category_status refreshed (DIFFERENTIAL: +1 -0)
+ refresh_stream_table 
+----------------------
+ 
+(1 row)
+
+INSERT 0 1
+UPDATE 1
+     case_id      | product | category | hour | non_differential | ok 
+------------------+---------+----------+------+------------------+----
+ A8a_product_move | 0/0     | 0/0      | 0/0  |                0 | t
+(1 row)
+
+UPDATE 1
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/integration/g4_fix_runtime/check.sql:3: INFO:  Stream table ax.st_day_product_status refreshed (DIFFERENTIAL: +0 -0)
+ refresh_stream_table 
+----------------------
+ 
+(1 row)
+
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/integration/g4_fix_runtime/check.sql:4: NOTICE:  table "__pgt_cdc_2_17443" does not exist, skipping
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/integration/g4_fix_runtime/check.sql:4: NOTICE:  table "__pgt_cdc_2_17474" does not exist, skipping
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/integration/g4_fix_runtime/check.sql:4: INFO:  [PGS_PROFILE] decision=1.63ms generate+build=0.85ms merge_exec=3.59ms cleanup_enqueue=0.00ms total=6.07ms affected=2 phantom_cleanup=0 delta_est=2 mode=INCR path=cache_hit hints=none strategy=merge
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/integration/g4_fix_runtime/check.sql:4: INFO:  Stream table ax.st_day_category_status refreshed (DIFFERENTIAL: +2 -0)
+ refresh_stream_table 
+----------------------
+ 
+(1 row)
+
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/integration/g4_fix_runtime/check.sql:5: NOTICE:  table "__pgt_cdc_3_17474" does not exist, skipping
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/integration/g4_fix_runtime/check.sql:5: NOTICE:  table "__pgt_cdc_3_17443" does not exist, skipping
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/integration/g4_fix_runtime/check.sql:5: INFO:  [PGS_PROFILE] decision=1.65ms generate+build=0.89ms merge_exec=3.80ms cleanup_enqueue=0.00ms total=6.35ms affected=6 phantom_cleanup=0 delta_est=2 mode=INCR path=cache_hit hints=none strategy=merge
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/integration/g4_fix_runtime/check.sql:5: INFO:  Stream table ax.st_hour_category_status refreshed (DIFFERENTIAL: +6 -0)
+ refresh_stream_table 
+----------------------
+ 
+(1 row)
+
+INSERT 0 1
+UPDATE 1
+            case_id             | product | category | hour | non_differential | ok 
+--------------------------------+---------+----------+------+------------------+----
+ A8b_category_move_via_products | 0/0     | 0/0      | 0/0  |                0 | t
+(1 row)
+
+UPDATE 1
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/integration/g4_fix_runtime/check.sql:3: NOTICE:  table "__pgt_cdc_1_17474" does not exist, skipping
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/integration/g4_fix_runtime/check.sql:3: INFO:  [PGS_PROFILE] decision=1.00ms generate+build=0.28ms merge_exec=1.33ms cleanup_enqueue=0.00ms total=2.61ms affected=2 phantom_cleanup=0 delta_est=2 mode=INCR path=cache_hit hints=none strategy=merge
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/integration/g4_fix_runtime/check.sql:3: INFO:  Stream table ax.st_day_product_status refreshed (DIFFERENTIAL: +2 -0)
+ refresh_stream_table 
+----------------------
+ 
+(1 row)
+
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/integration/g4_fix_runtime/check.sql:4: NOTICE:  table "__pgt_cdc_2_17443" does not exist, skipping
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/integration/g4_fix_runtime/check.sql:4: NOTICE:  table "__pgt_cdc_2_17474" does not exist, skipping
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/integration/g4_fix_runtime/check.sql:4: INFO:  [PGS_PROFILE] decision=1.70ms generate+build=0.90ms merge_exec=3.36ms cleanup_enqueue=0.00ms total=5.96ms affected=2 phantom_cleanup=0 delta_est=2 mode=INCR path=cache_hit hints=none strategy=merge
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/integration/g4_fix_runtime/check.sql:4: INFO:  Stream table ax.st_day_category_status refreshed (DIFFERENTIAL: +2 -0)
+ refresh_stream_table 
+----------------------
+ 
+(1 row)
+
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/integration/g4_fix_runtime/check.sql:5: NOTICE:  table "__pgt_cdc_3_17474" does not exist, skipping
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/integration/g4_fix_runtime/check.sql:5: NOTICE:  table "__pgt_cdc_3_17443" does not exist, skipping
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/integration/g4_fix_runtime/check.sql:5: INFO:  [PGS_PROFILE] decision=1.75ms generate+build=0.85ms merge_exec=3.25ms cleanup_enqueue=0.00ms total=5.86ms affected=2 phantom_cleanup=0 delta_est=2 mode=INCR path=cache_hit hints=none strategy=merge
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/integration/g4_fix_runtime/check.sql:5: INFO:  Stream table ax.st_hour_category_status refreshed (DIFFERENTIAL: +2 -0)
+ refresh_stream_table 
+----------------------
+ 
+(1 row)
+
+INSERT 0 1
+UPDATE 1
+              case_id              | product | category | hour | non_differential | ok 
+-----------------------------------+---------+----------+------+------------------+----
+ A9_created_at_across_day_and_hour | 0/0     | 0/0      | 0/0  |                0 | t
+(1 row)
+
+INSERT 0 3
+UPDATE 1
+DELETE 1
+UPDATE 1
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/integration/g4_fix_runtime/check.sql:3: NOTICE:  table "__pgt_cdc_1_17474" does not exist, skipping
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/integration/g4_fix_runtime/check.sql:3: INFO:  [PGS_PROFILE] decision=1.08ms generate+build=0.27ms merge_exec=1.36ms cleanup_enqueue=0.00ms total=2.71ms affected=2 phantom_cleanup=0 delta_est=8 mode=INCR path=cache_hit hints=none strategy=merge
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/integration/g4_fix_runtime/check.sql:3: INFO:  Stream table ax.st_day_product_status refreshed (DIFFERENTIAL: +2 -0)
+ refresh_stream_table 
+----------------------
+ 
+(1 row)
+
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/integration/g4_fix_runtime/check.sql:4: NOTICE:  table "__pgt_cdc_2_17443" does not exist, skipping
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/integration/g4_fix_runtime/check.sql:4: NOTICE:  table "__pgt_cdc_2_17474" does not exist, skipping
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/integration/g4_fix_runtime/check.sql:4: INFO:  [PGS_PROFILE] decision=1.67ms generate+build=0.87ms merge_exec=3.40ms cleanup_enqueue=0.00ms total=5.94ms affected=2 phantom_cleanup=0 delta_est=8 mode=INCR path=cache_hit hints=none strategy=merge
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/integration/g4_fix_runtime/check.sql:4: INFO:  Stream table ax.st_day_category_status refreshed (DIFFERENTIAL: +2 -0)
+ refresh_stream_table 
+----------------------
+ 
+(1 row)
+
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/integration/g4_fix_runtime/check.sql:5: NOTICE:  table "__pgt_cdc_3_17474" does not exist, skipping
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/integration/g4_fix_runtime/check.sql:5: NOTICE:  table "__pgt_cdc_3_17443" does not exist, skipping
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/integration/g4_fix_runtime/check.sql:5: INFO:  [PGS_PROFILE] decision=1.70ms generate+build=0.94ms merge_exec=3.32ms cleanup_enqueue=0.00ms total=5.96ms affected=2 phantom_cleanup=0 delta_est=8 mode=INCR path=cache_hit hints=none strategy=merge
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/integration/g4_fix_runtime/check.sql:5: INFO:  Stream table ax.st_hour_category_status refreshed (DIFFERENTIAL: +2 -0)
+ refresh_stream_table 
+----------------------
+ 
+(1 row)
+
+INSERT 0 1
+UPDATE 1
+       case_id        | product | category | hour | non_differential | ok 
+----------------------+---------+----------+------+------------------+----
+ A10_same_group_mixed | 1/1     | 0/0      | 0/0  |                0 | f
+(1 row)
+
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/integration/g4_fix_runtime/check.sql:27: INFO:  repair_stream_table(ax.st_day_product_status): window state reset: scheduled protected rebuild; frontier reset: scheduled full refresh on next cycle; cdc_infrastructure: verified OK; status reset: ACTIVE, errors cleared
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/integration/g4_fix_runtime/check.sql:27: INFO:  repair_stream_table(ax.st_day_category_status): window state reset: scheduled protected rebuild; frontier reset: scheduled full refresh on next cycle; cdc_infrastructure: verified OK; status reset: ACTIVE, errors cleared
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/integration/g4_fix_runtime/check.sql:27: INFO:  repair_stream_table(ax.st_hour_category_status): window state reset: scheduled protected rebuild; frontier reset: scheduled full refresh on next cycle; cdc_infrastructure: verified OK; status reset: ACTIVE, errors cleared
+                                                                                                   reinitialize_stream_table                                                                                                   
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ repair_stream_table(ax.st_day_product_status): window state reset: scheduled protected rebuild; frontier reset: scheduled full refresh on next cycle; cdc_infrastructure: verified OK; status reset: ACTIVE, errors cleared
+ repair_stream_table(ax.st_day_category_status): window state reset: scheduled protected rebuild; frontier reset: scheduled full refresh on next cycle; cdc_infrastructure: verified OK; status reset: ACTIVE, errors cleared
+ repair_stream_table(ax.st_hour_category_status): window state reset: scheduled protected rebuild; frontier reset: scheduled full refresh on next cycle; cdc_infrastructure: verified OK; status reset: ACTIVE, errors cleared
+(3 rows)
+
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/integration/g4_fix_runtime/check.sql:29: INFO:  Stream table ax.st_day_product_status: needs_reinit is set, performing FULL reinitialization
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/integration/g4_fix_runtime/check.sql:29: INFO:  Stream table ax.st_day_product_status refreshed (FULL)
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/integration/g4_fix_runtime/check.sql:29: INFO:  Stream table ax.st_day_category_status: needs_reinit is set, performing FULL reinitialization
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/integration/g4_fix_runtime/check.sql:29: INFO:  Stream table ax.st_day_category_status refreshed (FULL)
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/integration/g4_fix_runtime/check.sql:29: INFO:  Stream table ax.st_hour_category_status: needs_reinit is set, performing FULL reinitialization
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/integration/g4_fix_runtime/check.sql:29: INFO:  Stream table ax.st_hour_category_status refreshed (FULL)
+ refresh_stream_table 
+----------------------
+ 
+ 
+ 
+(3 rows)
+
+UPDATE 1
+UPDATE 1
+BEGIN
+INSERT 0 1
+UPDATE 1
+ROLLBACK
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/integration/g4_fix_runtime/check.sql:3: INFO:  Stream table ax.st_day_product_status refreshed (DIFFERENTIAL: +0 -0)
+ refresh_stream_table 
+----------------------
+ 
+(1 row)
+
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/integration/g4_fix_runtime/check.sql:4: INFO:  Stream table ax.st_day_category_status refreshed (DIFFERENTIAL: +0 -0)
+ refresh_stream_table 
+----------------------
+ 
+(1 row)
+
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/integration/g4_fix_runtime/check.sql:5: INFO:  Stream table ax.st_hour_category_status refreshed (DIFFERENTIAL: +0 -0)
+ refresh_stream_table 
+----------------------
+ 
+(1 row)
+
+INSERT 0 1
+UPDATE 1
+   case_id    | product | category | hour | non_differential | ok 
+--------------+---------+----------+------+------------------+----
+ A11_rollback | 0/0     | 0/0      | 0/0  |                0 | t
+(1 row)
+
+INSERT 0 1
+UPDATE 1
+SET
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/integration/g4_fix_runtime/cases.sql:79: ERROR:  canceling statement due to statement timeout
+RESET
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/integration/g4_fix_runtime/check.sql:3: NOTICE:  table "__pgt_cdc_1_17474" does not exist, skipping
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/integration/g4_fix_runtime/check.sql:3: INFO:  [PGS_PROFILE] decision=1.00ms generate+build=1.19ms merge_exec=1.34ms cleanup_enqueue=0.00ms total=3.52ms affected=2 phantom_cleanup=0 delta_est=3 mode=INCR path=cache_miss hints=none strategy=merge
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/integration/g4_fix_runtime/check.sql:3: INFO:  Stream table ax.st_day_product_status refreshed (DIFFERENTIAL: +2 -0)
+ refresh_stream_table 
+----------------------
+ 
+(1 row)
+
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/integration/g4_fix_runtime/check.sql:4: NOTICE:  table "__pgt_cdc_2_17443" does not exist, skipping
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/integration/g4_fix_runtime/check.sql:4: NOTICE:  table "__pgt_cdc_2_17474" does not exist, skipping
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/integration/g4_fix_runtime/check.sql:4: INFO:  [PGS_PROFILE] decision=1.63ms generate+build=2.72ms merge_exec=3.27ms cleanup_enqueue=0.00ms total=7.63ms affected=1 phantom_cleanup=0 delta_est=3 mode=INCR path=cache_miss hints=none strategy=merge
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/integration/g4_fix_runtime/check.sql:4: INFO:  Stream table ax.st_day_category_status refreshed (DIFFERENTIAL: +1 -0)
+ refresh_stream_table 
+----------------------
+ 
+(1 row)
+
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/integration/g4_fix_runtime/check.sql:5: NOTICE:  table "__pgt_cdc_3_17474" does not exist, skipping
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/integration/g4_fix_runtime/check.sql:5: NOTICE:  table "__pgt_cdc_3_17443" does not exist, skipping
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/integration/g4_fix_runtime/check.sql:5: INFO:  [PGS_PROFILE] decision=1.68ms generate+build=2.79ms merge_exec=3.29ms cleanup_enqueue=0.00ms total=7.75ms affected=1 phantom_cleanup=0 delta_est=3 mode=INCR path=cache_miss hints=none strategy=merge
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/integration/g4_fix_runtime/check.sql:5: INFO:  Stream table ax.st_hour_category_status refreshed (DIFFERENTIAL: +1 -0)
+ refresh_stream_table 
+----------------------
+ 
+(1 row)
+
+INSERT 0 1
+UPDATE 1
+            case_id            | product | category | hour | non_differential | ok 
+-------------------------------+---------+----------+------+------------------+----
+ A12_failed_refresh_then_retry | 0/1     | 0/0      | 0/0  |                0 | f
+(1 row)
+
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/integration/g4_fix_runtime/check.sql:27: INFO:  repair_stream_table(ax.st_day_product_status): window state reset: scheduled protected rebuild; frontier reset: scheduled full refresh on next cycle; cdc_infrastructure: verified OK; status reset: ACTIVE, errors cleared
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/integration/g4_fix_runtime/check.sql:27: INFO:  repair_stream_table(ax.st_day_category_status): window state reset: scheduled protected rebuild; frontier reset: scheduled full refresh on next cycle; cdc_infrastructure: verified OK; status reset: ACTIVE, errors cleared
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/integration/g4_fix_runtime/check.sql:27: INFO:  repair_stream_table(ax.st_hour_category_status): window state reset: scheduled protected rebuild; frontier reset: scheduled full refresh on next cycle; cdc_infrastructure: verified OK; status reset: ACTIVE, errors cleared
+                                                                                                   reinitialize_stream_table                                                                                                   
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ repair_stream_table(ax.st_day_product_status): window state reset: scheduled protected rebuild; frontier reset: scheduled full refresh on next cycle; cdc_infrastructure: verified OK; status reset: ACTIVE, errors cleared
+ repair_stream_table(ax.st_day_category_status): window state reset: scheduled protected rebuild; frontier reset: scheduled full refresh on next cycle; cdc_infrastructure: verified OK; status reset: ACTIVE, errors cleared
+ repair_stream_table(ax.st_hour_category_status): window state reset: scheduled protected rebuild; frontier reset: scheduled full refresh on next cycle; cdc_infrastructure: verified OK; status reset: ACTIVE, errors cleared
+(3 rows)
+
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/integration/g4_fix_runtime/check.sql:29: INFO:  Stream table ax.st_day_product_status: needs_reinit is set, performing FULL reinitialization
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/integration/g4_fix_runtime/check.sql:29: INFO:  Stream table ax.st_day_product_status refreshed (FULL)
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/integration/g4_fix_runtime/check.sql:29: INFO:  Stream table ax.st_day_category_status: needs_reinit is set, performing FULL reinitialization
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/integration/g4_fix_runtime/check.sql:29: INFO:  Stream table ax.st_day_category_status refreshed (FULL)
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/integration/g4_fix_runtime/check.sql:29: INFO:  Stream table ax.st_hour_category_status: needs_reinit is set, performing FULL reinitialization
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/integration/g4_fix_runtime/check.sql:29: INFO:  Stream table ax.st_hour_category_status refreshed (FULL)
+ refresh_stream_table 
+----------------------
+ 
+ 
+ 
+(3 rows)
+
+UPDATE 1
+UPDATE 1
+UPDATE 1
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/integration/g4_fix_runtime/check.sql:3: NOTICE:  table "__pgt_cdc_1_17474" does not exist, skipping
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/integration/g4_fix_runtime/check.sql:3: INFO:  [PGS_PROFILE] decision=1.16ms generate+build=1.35ms merge_exec=1.42ms cleanup_enqueue=0.00ms total=3.93ms affected=0 phantom_cleanup=0 delta_est=2 mode=INCR path=cache_miss hints=none strategy=merge
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/integration/g4_fix_runtime/check.sql:3: INFO:  Stream table ax.st_day_product_status refreshed (DIFFERENTIAL: +1 -0)
+ refresh_stream_table 
+----------------------
+ 
+(1 row)
+
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/integration/g4_fix_runtime/check.sql:4: NOTICE:  table "__pgt_cdc_2_17443" does not exist, skipping
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/integration/g4_fix_runtime/check.sql:4: NOTICE:  table "__pgt_cdc_2_17474" does not exist, skipping
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/integration/g4_fix_runtime/check.sql:4: INFO:  [PGS_PROFILE] decision=1.85ms generate+build=3.03ms merge_exec=3.43ms cleanup_enqueue=0.00ms total=8.32ms affected=0 phantom_cleanup=0 delta_est=2 mode=INCR path=cache_miss hints=none strategy=merge
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/integration/g4_fix_runtime/check.sql:4: INFO:  Stream table ax.st_day_category_status refreshed (DIFFERENTIAL: +1 -0)
+ refresh_stream_table 
+----------------------
+ 
+(1 row)
+
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/integration/g4_fix_runtime/check.sql:5: NOTICE:  table "__pgt_cdc_3_17474" does not exist, skipping
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/integration/g4_fix_runtime/check.sql:5: NOTICE:  table "__pgt_cdc_3_17443" does not exist, skipping
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/integration/g4_fix_runtime/check.sql:5: INFO:  [PGS_PROFILE] decision=1.71ms generate+build=3.22ms merge_exec=3.40ms cleanup_enqueue=0.00ms total=8.34ms affected=0 phantom_cleanup=0 delta_est=2 mode=INCR path=cache_miss hints=none strategy=merge
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/integration/g4_fix_runtime/check.sql:5: INFO:  Stream table ax.st_hour_category_status refreshed (DIFFERENTIAL: +1 -0)
+ refresh_stream_table 
+----------------------
+ 
+(1 row)
+
+INSERT 0 1
+UPDATE 1
+    case_id    | product | category | hour | non_differential | ok 
+---------------+---------+----------+------+------------------+----
+ A13_pk_change | 0/0     | 0/0      | 0/0  |                0 | t
+(1 row)
+
+INSERT 0 1
+UPDATE 1
+UPDATE 1
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/integration/g4_fix_runtime/check.sql:3: NOTICE:  table "__pgt_cdc_1_17474" does not exist, skipping
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/integration/g4_fix_runtime/check.sql:3: INFO:  [PGS_PROFILE] decision=0.99ms generate+build=0.28ms merge_exec=1.35ms cleanup_enqueue=0.00ms total=2.62ms affected=1 phantom_cleanup=0 delta_est=5 mode=INCR path=cache_hit hints=none strategy=merge
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/integration/g4_fix_runtime/check.sql:3: INFO:  Stream table ax.st_day_product_status refreshed (DIFFERENTIAL: +1 -0)
+ refresh_stream_table 
+----------------------
+ 
+(1 row)
+
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/integration/g4_fix_runtime/check.sql:4: NOTICE:  table "__pgt_cdc_2_17443" does not exist, skipping
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/integration/g4_fix_runtime/check.sql:4: NOTICE:  table "__pgt_cdc_2_17474" does not exist, skipping
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/integration/g4_fix_runtime/check.sql:4: INFO:  [PGS_PROFILE] decision=1.69ms generate+build=0.93ms merge_exec=3.54ms cleanup_enqueue=0.00ms total=6.16ms affected=1 phantom_cleanup=0 delta_est=5 mode=INCR path=cache_hit hints=none strategy=merge
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/integration/g4_fix_runtime/check.sql:4: INFO:  Stream table ax.st_day_category_status refreshed (DIFFERENTIAL: +1 -0)
+ refresh_stream_table 
+----------------------
+ 
+(1 row)
+
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/integration/g4_fix_runtime/check.sql:5: NOTICE:  table "__pgt_cdc_3_17474" does not exist, skipping
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/integration/g4_fix_runtime/check.sql:5: NOTICE:  table "__pgt_cdc_3_17443" does not exist, skipping
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/integration/g4_fix_runtime/check.sql:5: INFO:  [PGS_PROFILE] decision=1.73ms generate+build=0.87ms merge_exec=3.37ms cleanup_enqueue=0.00ms total=5.96ms affected=1 phantom_cleanup=0 delta_est=5 mode=INCR path=cache_hit hints=none strategy=merge
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/integration/g4_fix_runtime/check.sql:5: INFO:  Stream table ax.st_hour_category_status refreshed (DIFFERENTIAL: +1 -0)
+ refresh_stream_table 
+----------------------
+ 
+(1 row)
+
+INSERT 0 1
+UPDATE 1
+          case_id           | product | category | hour | non_differential | ok 
+----------------------------+---------+----------+------+------------------+----
+ A14a_I_D_I_D_I_same_window | 1/1     | 0/0      | 0/0  |                0 | f
+(1 row)
+
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/integration/g4_fix_runtime/check.sql:27: INFO:  repair_stream_table(ax.st_day_product_status): window state reset: scheduled protected rebuild; frontier reset: scheduled full refresh on next cycle; cdc_infrastructure: verified OK; status reset: ACTIVE, errors cleared
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/integration/g4_fix_runtime/check.sql:27: INFO:  repair_stream_table(ax.st_day_category_status): window state reset: scheduled protected rebuild; frontier reset: scheduled full refresh on next cycle; cdc_infrastructure: verified OK; status reset: ACTIVE, errors cleared
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/integration/g4_fix_runtime/check.sql:27: INFO:  repair_stream_table(ax.st_hour_category_status): window state reset: scheduled protected rebuild; frontier reset: scheduled full refresh on next cycle; cdc_infrastructure: verified OK; status reset: ACTIVE, errors cleared
+                                                                                                   reinitialize_stream_table                                                                                                   
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ repair_stream_table(ax.st_day_product_status): window state reset: scheduled protected rebuild; frontier reset: scheduled full refresh on next cycle; cdc_infrastructure: verified OK; status reset: ACTIVE, errors cleared
+ repair_stream_table(ax.st_day_category_status): window state reset: scheduled protected rebuild; frontier reset: scheduled full refresh on next cycle; cdc_infrastructure: verified OK; status reset: ACTIVE, errors cleared
+ repair_stream_table(ax.st_hour_category_status): window state reset: scheduled protected rebuild; frontier reset: scheduled full refresh on next cycle; cdc_infrastructure: verified OK; status reset: ACTIVE, errors cleared
+(3 rows)
+
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/integration/g4_fix_runtime/check.sql:29: INFO:  Stream table ax.st_day_product_status: needs_reinit is set, performing FULL reinitialization
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/integration/g4_fix_runtime/check.sql:29: INFO:  Stream table ax.st_day_product_status refreshed (FULL)
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/integration/g4_fix_runtime/check.sql:29: INFO:  Stream table ax.st_day_category_status: needs_reinit is set, performing FULL reinitialization
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/integration/g4_fix_runtime/check.sql:29: INFO:  Stream table ax.st_day_category_status refreshed (FULL)
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/integration/g4_fix_runtime/check.sql:29: INFO:  Stream table ax.st_hour_category_status: needs_reinit is set, performing FULL reinitialization
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/integration/g4_fix_runtime/check.sql:29: INFO:  Stream table ax.st_hour_category_status refreshed (FULL)
+ refresh_stream_table 
+----------------------
+ 
+ 
+ 
+(3 rows)
+
+UPDATE 1
+UPDATE 1
+UPDATE 1
+UPDATE 1
+DELETE 1
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/integration/g4_fix_runtime/check.sql:3: NOTICE:  table "__pgt_cdc_1_17474" does not exist, skipping
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/integration/g4_fix_runtime/check.sql:3: INFO:  [PGS_PROFILE] decision=1.09ms generate+build=1.35ms merge_exec=1.42ms cleanup_enqueue=0.00ms total=3.87ms affected=1 phantom_cleanup=0 delta_est=5 mode=INCR path=cache_miss hints=none strategy=merge
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/integration/g4_fix_runtime/check.sql:3: INFO:  Stream table ax.st_day_product_status refreshed (DIFFERENTIAL: +1 -0)
+ refresh_stream_table 
+----------------------
+ 
+(1 row)
+
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/integration/g4_fix_runtime/check.sql:4: NOTICE:  table "__pgt_cdc_2_17443" does not exist, skipping
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/integration/g4_fix_runtime/check.sql:4: NOTICE:  table "__pgt_cdc_2_17474" does not exist, skipping
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/integration/g4_fix_runtime/check.sql:4: INFO:  [PGS_PROFILE] decision=1.62ms generate+build=2.72ms merge_exec=3.38ms cleanup_enqueue=0.00ms total=7.73ms affected=1 phantom_cleanup=0 delta_est=5 mode=INCR path=cache_miss hints=none strategy=merge
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/integration/g4_fix_runtime/check.sql:4: INFO:  Stream table ax.st_day_category_status refreshed (DIFFERENTIAL: +1 -0)
+ refresh_stream_table 
+----------------------
+ 
+(1 row)
+
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/integration/g4_fix_runtime/check.sql:5: NOTICE:  table "__pgt_cdc_3_17474" does not exist, skipping
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/integration/g4_fix_runtime/check.sql:5: NOTICE:  table "__pgt_cdc_3_17443" does not exist, skipping
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/integration/g4_fix_runtime/check.sql:5: INFO:  [PGS_PROFILE] decision=1.64ms generate+build=2.74ms merge_exec=3.38ms cleanup_enqueue=0.00ms total=7.76ms affected=1 phantom_cleanup=0 delta_est=5 mode=INCR path=cache_miss hints=none strategy=merge
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/integration/g4_fix_runtime/check.sql:5: INFO:  Stream table ax.st_hour_category_status refreshed (DIFFERENTIAL: +1 -0)
+ refresh_stream_table 
+----------------------
+ 
+(1 row)
+
+INSERT 0 1
+UPDATE 1
+             case_id             | product | category | hour | non_differential | ok 
+---------------------------------+---------+----------+------+------------------+----
+ A14b_D_I_D_existing_same_window | 0/0     | 0/0      | 0/0  |                0 | t
+(1 row)
+
+INSERT 0 5
+UPDATE 3
+UPDATE 1
+DELETE 1
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/integration/g4_fix_runtime/check.sql:3: NOTICE:  table "__pgt_cdc_1_17474" does not exist, skipping
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/integration/g4_fix_runtime/check.sql:3: INFO:  [PGS_PROFILE] decision=1.19ms generate+build=0.27ms merge_exec=1.35ms cleanup_enqueue=0.00ms total=2.81ms affected=3 phantom_cleanup=0 delta_est=14 mode=INCR path=cache_hit hints=none strategy=merge
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/integration/g4_fix_runtime/check.sql:3: INFO:  Stream table ax.st_day_product_status refreshed (DIFFERENTIAL: +3 -0)
+ refresh_stream_table 
+----------------------
+ 
+(1 row)
+
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/integration/g4_fix_runtime/check.sql:4: NOTICE:  table "__pgt_cdc_2_17443" does not exist, skipping
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/integration/g4_fix_runtime/check.sql:4: NOTICE:  table "__pgt_cdc_2_17474" does not exist, skipping
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/integration/g4_fix_runtime/check.sql:4: INFO:  [PGS_PROFILE] decision=1.73ms generate+build=0.88ms merge_exec=3.49ms cleanup_enqueue=0.00ms total=6.10ms affected=3 phantom_cleanup=0 delta_est=14 mode=INCR path=cache_hit hints=none strategy=merge
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/integration/g4_fix_runtime/check.sql:4: INFO:  Stream table ax.st_day_category_status refreshed (DIFFERENTIAL: +3 -0)
+ refresh_stream_table 
+----------------------
+ 
+(1 row)
+
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/integration/g4_fix_runtime/check.sql:5: NOTICE:  table "__pgt_cdc_3_17474" does not exist, skipping
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/integration/g4_fix_runtime/check.sql:5: NOTICE:  table "__pgt_cdc_3_17443" does not exist, skipping
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/integration/g4_fix_runtime/check.sql:5: INFO:  [PGS_PROFILE] decision=1.73ms generate+build=0.88ms merge_exec=3.63ms cleanup_enqueue=0.00ms total=6.24ms affected=3 phantom_cleanup=0 delta_est=14 mode=INCR path=cache_hit hints=none strategy=merge
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/integration/g4_fix_runtime/check.sql:5: INFO:  Stream table ax.st_hour_category_status refreshed (DIFFERENTIAL: +3 -0)
+ refresh_stream_table 
+----------------------
+ 
+(1 row)
+
+INSERT 0 1
+UPDATE 1
+              case_id               | product | category | hour | non_differential | ok 
+------------------------------------+---------+----------+------+------------------+----
+ A14c_five_orders_mixed_same_window | 1/1     | 0/0      | 0/0  |                0 | f
+(1 row)
+
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/integration/g4_fix_runtime/check.sql:27: INFO:  repair_stream_table(ax.st_day_product_status): window state reset: scheduled protected rebuild; frontier reset: scheduled full refresh on next cycle; cdc_infrastructure: verified OK; status reset: ACTIVE, errors cleared
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/integration/g4_fix_runtime/check.sql:27: INFO:  repair_stream_table(ax.st_day_category_status): window state reset: scheduled protected rebuild; frontier reset: scheduled full refresh on next cycle; cdc_infrastructure: verified OK; status reset: ACTIVE, errors cleared
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/integration/g4_fix_runtime/check.sql:27: INFO:  repair_stream_table(ax.st_hour_category_status): window state reset: scheduled protected rebuild; frontier reset: scheduled full refresh on next cycle; cdc_infrastructure: verified OK; status reset: ACTIVE, errors cleared
+                                                                                                   reinitialize_stream_table                                                                                                   
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ repair_stream_table(ax.st_day_product_status): window state reset: scheduled protected rebuild; frontier reset: scheduled full refresh on next cycle; cdc_infrastructure: verified OK; status reset: ACTIVE, errors cleared
+ repair_stream_table(ax.st_day_category_status): window state reset: scheduled protected rebuild; frontier reset: scheduled full refresh on next cycle; cdc_infrastructure: verified OK; status reset: ACTIVE, errors cleared
+ repair_stream_table(ax.st_hour_category_status): window state reset: scheduled protected rebuild; frontier reset: scheduled full refresh on next cycle; cdc_infrastructure: verified OK; status reset: ACTIVE, errors cleared
+(3 rows)
+
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/integration/g4_fix_runtime/check.sql:29: INFO:  Stream table ax.st_day_product_status: needs_reinit is set, performing FULL reinitialization
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/integration/g4_fix_runtime/check.sql:29: INFO:  Stream table ax.st_day_product_status refreshed (FULL)
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/integration/g4_fix_runtime/check.sql:29: INFO:  Stream table ax.st_day_category_status: needs_reinit is set, performing FULL reinitialization
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/integration/g4_fix_runtime/check.sql:29: INFO:  Stream table ax.st_day_category_status refreshed (FULL)
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/integration/g4_fix_runtime/check.sql:29: INFO:  Stream table ax.st_hour_category_status: needs_reinit is set, performing FULL reinitialization
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/integration/g4_fix_runtime/check.sql:29: INFO:  Stream table ax.st_hour_category_status refreshed (FULL)
+ refresh_stream_table 
+----------------------
+ 
+ 
+ 
+(3 rows)
+
+UPDATE 1
+UPDATE 1
+UPDATE 1
+UPDATE 1
+UPDATE 1
+UPDATE 1
+UPDATE 1
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/integration/g4_fix_runtime/check.sql:3: NOTICE:  table "__pgt_cdc_1_17474" does not exist, skipping
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/integration/g4_fix_runtime/check.sql:3: INFO:  [PGS_PROFILE] decision=1.05ms generate+build=1.14ms merge_exec=1.34ms cleanup_enqueue=0.00ms total=3.53ms affected=2 phantom_cleanup=0 delta_est=10 mode=INCR path=cache_miss hints=none strategy=merge
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/integration/g4_fix_runtime/check.sql:3: INFO:  Stream table ax.st_day_product_status refreshed (DIFFERENTIAL: +2 -0)
+ refresh_stream_table 
+----------------------
+ 
+(1 row)
+
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/integration/g4_fix_runtime/check.sql:4: NOTICE:  table "__pgt_cdc_2_17443" does not exist, skipping
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/integration/g4_fix_runtime/check.sql:4: NOTICE:  table "__pgt_cdc_2_17474" does not exist, skipping
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/integration/g4_fix_runtime/check.sql:4: INFO:  [PGS_PROFILE] decision=1.64ms generate+build=2.79ms merge_exec=3.57ms cleanup_enqueue=0.00ms total=8.00ms affected=2 phantom_cleanup=0 delta_est=10 mode=INCR path=cache_miss hints=none strategy=merge
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/integration/g4_fix_runtime/check.sql:4: INFO:  Stream table ax.st_day_category_status refreshed (DIFFERENTIAL: +2 -0)
+ refresh_stream_table 
+----------------------
+ 
+(1 row)
+
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/integration/g4_fix_runtime/check.sql:5: NOTICE:  table "__pgt_cdc_3_17474" does not exist, skipping
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/integration/g4_fix_runtime/check.sql:5: NOTICE:  table "__pgt_cdc_3_17443" does not exist, skipping
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/integration/g4_fix_runtime/check.sql:5: INFO:  [PGS_PROFILE] decision=1.68ms generate+build=3.02ms merge_exec=3.51ms cleanup_enqueue=0.00ms total=8.21ms affected=2 phantom_cleanup=0 delta_est=10 mode=INCR path=cache_miss hints=none strategy=merge
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/integration/g4_fix_runtime/check.sql:5: INFO:  Stream table ax.st_hour_category_status refreshed (DIFFERENTIAL: +2 -0)
+ refresh_stream_table 
+----------------------
+ 
+(1 row)
+
+INSERT 0 1
+UPDATE 1
+          case_id           | product | category | hour | non_differential | ok 
+----------------------------+---------+----------+------+------------------+----
+ A14d_long_history_existing | 0/0     | 0/0      | 0/0  |                0 | t
+(1 row)
+
+INSERT 0 1
+UPDATE 1
+UPDATE 1
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/integration/g4_fix_runtime/check.sql:3: NOTICE:  table "__pgt_cdc_1_17474" does not exist, skipping
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/integration/g4_fix_runtime/check.sql:3: INFO:  [PGS_PROFILE] decision=1.04ms generate+build=0.26ms merge_exec=1.37ms cleanup_enqueue=0.00ms total=2.67ms affected=4 phantom_cleanup=0 delta_est=5 mode=INCR path=cache_hit hints=none strategy=merge
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/integration/g4_fix_runtime/check.sql:3: INFO:  Stream table ax.st_day_product_status refreshed (DIFFERENTIAL: +4 -0)
+ refresh_stream_table 
+----------------------
+ 
+(1 row)
+
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/integration/g4_fix_runtime/check.sql:4: NOTICE:  table "__pgt_cdc_2_17443" does not exist, skipping
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/integration/g4_fix_runtime/check.sql:4: NOTICE:  table "__pgt_cdc_2_17474" does not exist, skipping
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/integration/g4_fix_runtime/check.sql:4: INFO:  [PGS_PROFILE] decision=1.65ms generate+build=0.85ms merge_exec=3.25ms cleanup_enqueue=0.00ms total=5.75ms affected=3 phantom_cleanup=0 delta_est=5 mode=INCR path=cache_hit hints=none strategy=merge
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/integration/g4_fix_runtime/check.sql:4: INFO:  Stream table ax.st_day_category_status refreshed (DIFFERENTIAL: +3 -0)
+ refresh_stream_table 
+----------------------
+ 
+(1 row)
+
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/integration/g4_fix_runtime/check.sql:5: NOTICE:  table "__pgt_cdc_3_17474" does not exist, skipping
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/integration/g4_fix_runtime/check.sql:5: NOTICE:  table "__pgt_cdc_3_17443" does not exist, skipping
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/integration/g4_fix_runtime/check.sql:5: INFO:  [PGS_PROFILE] decision=1.74ms generate+build=0.88ms merge_exec=3.42ms cleanup_enqueue=0.00ms total=6.03ms affected=3 phantom_cleanup=0 delta_est=5 mode=INCR path=cache_hit hints=none strategy=merge
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/integration/g4_fix_runtime/check.sql:5: INFO:  Stream table ax.st_hour_category_status refreshed (DIFFERENTIAL: +3 -0)
+ refresh_stream_table 
+----------------------
+ 
+(1 row)
+
+INSERT 0 1
+UPDATE 1
+           case_id            | product | category | hour | non_differential | ok 
+------------------------------+---------+----------+------+------------------+----
+ A14e_two_tenants_same_window | 0/1     | 0/0      | 0/0  |                0 | f
+(1 row)
+
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/integration/g4_fix_runtime/check.sql:27: INFO:  repair_stream_table(ax.st_day_product_status): window state reset: scheduled protected rebuild; frontier reset: scheduled full refresh on next cycle; cdc_infrastructure: verified OK; status reset: ACTIVE, errors cleared
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/integration/g4_fix_runtime/check.sql:27: INFO:  repair_stream_table(ax.st_day_category_status): window state reset: scheduled protected rebuild; frontier reset: scheduled full refresh on next cycle; cdc_infrastructure: verified OK; status reset: ACTIVE, errors cleared
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/integration/g4_fix_runtime/check.sql:27: INFO:  repair_stream_table(ax.st_hour_category_status): window state reset: scheduled protected rebuild; frontier reset: scheduled full refresh on next cycle; cdc_infrastructure: verified OK; status reset: ACTIVE, errors cleared
+                                                                                                   reinitialize_stream_table                                                                                                   
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ repair_stream_table(ax.st_day_product_status): window state reset: scheduled protected rebuild; frontier reset: scheduled full refresh on next cycle; cdc_infrastructure: verified OK; status reset: ACTIVE, errors cleared
+ repair_stream_table(ax.st_day_category_status): window state reset: scheduled protected rebuild; frontier reset: scheduled full refresh on next cycle; cdc_infrastructure: verified OK; status reset: ACTIVE, errors cleared
+ repair_stream_table(ax.st_hour_category_status): window state reset: scheduled protected rebuild; frontier reset: scheduled full refresh on next cycle; cdc_infrastructure: verified OK; status reset: ACTIVE, errors cleared
+(3 rows)
+
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/integration/g4_fix_runtime/check.sql:29: INFO:  Stream table ax.st_day_product_status: needs_reinit is set, performing FULL reinitialization
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/integration/g4_fix_runtime/check.sql:29: INFO:  Stream table ax.st_day_product_status refreshed (FULL)
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/integration/g4_fix_runtime/check.sql:29: INFO:  Stream table ax.st_day_category_status: needs_reinit is set, performing FULL reinitialization
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/integration/g4_fix_runtime/check.sql:29: INFO:  Stream table ax.st_day_category_status refreshed (FULL)
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/integration/g4_fix_runtime/check.sql:29: INFO:  Stream table ax.st_hour_category_status: needs_reinit is set, performing FULL reinitialization
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/integration/g4_fix_runtime/check.sql:29: INFO:  Stream table ax.st_hour_category_status refreshed (FULL)
+ refresh_stream_table 
+----------------------
+ 
+ 
+ 
+(3 rows)
+
+UPDATE 1
+UPDATE 1

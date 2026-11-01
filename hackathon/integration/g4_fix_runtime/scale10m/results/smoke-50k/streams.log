@@ -1,0 +1,88 @@
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/sql/10_stream_tables.sql:41: NOTICE:  publication "pgtrickle_cdc_daaaeeb1fdc57e97" does not exist, skipping
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/sql/10_stream_tables.sql:41: INFO:  Stream table ax.st_day_product_status created (pgt_id=1, mode=DIFFERENTIAL, initialized=true)
+ create_stream_table 
+---------------------
+ 
+(1 row)
+
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/sql/10_stream_tables.sql:58: NOTICE:  publication "pgtrickle_cdc_daaaeeb1fdc57e97" does not exist, skipping
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/sql/10_stream_tables.sql:58: NOTICE:  publication "pgtrickle_cdc_1d8a10d0e8bcdd15" does not exist, skipping
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/sql/10_stream_tables.sql:58: INFO:  Stream table ax.st_day_category_status created (pgt_id=2, mode=DIFFERENTIAL, initialized=true)
+ create_stream_table 
+---------------------
+ 
+(1 row)
+
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/sql/10_stream_tables.sql:75: NOTICE:  publication "pgtrickle_cdc_daaaeeb1fdc57e97" does not exist, skipping
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/sql/10_stream_tables.sql:75: NOTICE:  publication "pgtrickle_cdc_1d8a10d0e8bcdd15" does not exist, skipping
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/sql/10_stream_tables.sql:75: INFO:  Stream table ax.st_hour_category_status created (pgt_id=3, mode=DIFFERENTIAL, initialized=true)
+ create_stream_table 
+---------------------
+ 
+(1 row)
+
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/sql/20_security.sql:40: NOTICE:  policy "tenant_read" for relation "ax.st_day_product_status" does not exist, skipping
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/sql/20_security.sql:40: NOTICE:  policy "tenant_read" for relation "ax.st_day_category_status" does not exist, skipping
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/sql/20_security.sql:40: NOTICE:  policy "tenant_read" for relation "ax.st_hour_category_status" does not exist, skipping
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/sql/20_security.sql:40: INFO:  pg_trickle: RLS state changed on ax.orders — stream table 2 marked for reinit
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/sql/20_security.sql:40: WARNING:  pg_trickle_ddl_tracker: ST 2 suspended (SOURCE_DEPENDENCY_AMBIGUOUS) after source DDL on ax.orders
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/sql/20_security.sql:40: INFO:  pg_trickle: RLS state changed on ax.orders — stream table 3 marked for reinit
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/sql/20_security.sql:40: WARNING:  pg_trickle_ddl_tracker: ST 3 suspended (SOURCE_DEPENDENCY_AMBIGUOUS) after source DDL on ax.orders
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/sql/20_security.sql:40: INFO:  pg_trickle: RLS state changed on ax.orders — stream table 1 marked for reinit
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/sql/20_security.sql:40: WARNING:  pg_trickle_ddl_tracker: ST 1 suspended (SOURCE_DEPENDENCY_AMBIGUOUS) after source DDL on ax.orders
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/sql/20_security.sql:40: WARNING:  pg_trickle_ddl_tracker: ALTER TABLE on ax.orders → 3 ST(s) suspended
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/sql/20_security.sql:40: INFO:  pg_trickle: RLS state changed on ax.orders — stream table 2 marked for reinit
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/sql/20_security.sql:40: WARNING:  pg_trickle_ddl_tracker: ST 2 suspended (SOURCE_DEPENDENCY_AMBIGUOUS) after source DDL on ax.orders
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/sql/20_security.sql:40: INFO:  pg_trickle: RLS state changed on ax.orders — stream table 3 marked for reinit
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/sql/20_security.sql:40: WARNING:  pg_trickle_ddl_tracker: ST 3 suspended (SOURCE_DEPENDENCY_AMBIGUOUS) after source DDL on ax.orders
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/sql/20_security.sql:40: INFO:  pg_trickle: RLS state changed on ax.orders — stream table 1 marked for reinit
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/sql/20_security.sql:40: WARNING:  pg_trickle_ddl_tracker: ST 1 suspended (SOURCE_DEPENDENCY_AMBIGUOUS) after source DDL on ax.orders
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/sql/20_security.sql:40: WARNING:  pg_trickle_ddl_tracker: ALTER TABLE on ax.orders → 3 ST(s) suspended
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/sql/20_security.sql:40: NOTICE:  policy "tenant_read" for relation "ax.orders" does not exist, skipping
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/sql/20_security.sql:40: INFO:  pg_trickle: RLS policy tenant_read on ax.orders changed, suspending 3 stream table(s)
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/sql/20_security.sql:40: WARNING:  pg_trickle_ddl_tracker: ST 2 suspended (SOURCE_DEPENDENCY_AMBIGUOUS) after source DDL on tenant_read on ax.orders
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/sql/20_security.sql:40: WARNING:  pg_trickle_ddl_tracker: ST 3 suspended (SOURCE_DEPENDENCY_AMBIGUOUS) after source DDL on tenant_read on ax.orders
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/sql/20_security.sql:40: WARNING:  pg_trickle_ddl_tracker: ST 1 suspended (SOURCE_DEPENDENCY_AMBIGUOUS) after source DDL on tenant_read on ax.orders
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/sql/20_security.sql:40: INFO:  pg_trickle: RLS state changed on ax.products — stream table 2 marked for reinit
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/sql/20_security.sql:40: WARNING:  pg_trickle_ddl_tracker: ST 2 suspended (SOURCE_DEPENDENCY_AMBIGUOUS) after source DDL on ax.products
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/sql/20_security.sql:40: INFO:  pg_trickle: RLS state changed on ax.products — stream table 3 marked for reinit
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/sql/20_security.sql:40: WARNING:  pg_trickle_ddl_tracker: ST 3 suspended (SOURCE_DEPENDENCY_AMBIGUOUS) after source DDL on ax.products
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/sql/20_security.sql:40: WARNING:  pg_trickle_ddl_tracker: ALTER TABLE on ax.products → 2 ST(s) suspended
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/sql/20_security.sql:40: INFO:  pg_trickle: RLS state changed on ax.products — stream table 2 marked for reinit
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/sql/20_security.sql:40: WARNING:  pg_trickle_ddl_tracker: ST 2 suspended (SOURCE_DEPENDENCY_AMBIGUOUS) after source DDL on ax.products
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/sql/20_security.sql:40: INFO:  pg_trickle: RLS state changed on ax.products — stream table 3 marked for reinit
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/sql/20_security.sql:40: WARNING:  pg_trickle_ddl_tracker: ST 3 suspended (SOURCE_DEPENDENCY_AMBIGUOUS) after source DDL on ax.products
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/sql/20_security.sql:40: WARNING:  pg_trickle_ddl_tracker: ALTER TABLE on ax.products → 2 ST(s) suspended
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/sql/20_security.sql:40: NOTICE:  policy "tenant_read" for relation "ax.products" does not exist, skipping
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/sql/20_security.sql:40: INFO:  pg_trickle: RLS policy tenant_read on ax.products changed, suspending 2 stream table(s)
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/sql/20_security.sql:40: WARNING:  pg_trickle_ddl_tracker: ST 2 suspended (SOURCE_DEPENDENCY_AMBIGUOUS) after source DDL on tenant_read on ax.products
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/sql/20_security.sql:40: WARNING:  pg_trickle_ddl_tracker: ST 3 suspended (SOURCE_DEPENDENCY_AMBIGUOUS) after source DDL on tenant_read on ax.products
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/sql/25_app_roles.sql:22: NOTICE:  policy "tenant_write" for relation "ax.orders" does not exist, skipping
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/sql/25_app_roles.sql:24: INFO:  pg_trickle: RLS policy tenant_write on ax.orders changed, suspending 3 stream table(s)
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/sql/25_app_roles.sql:24: WARNING:  pg_trickle_ddl_tracker: ST 2 suspended (SOURCE_DEPENDENCY_AMBIGUOUS) after source DDL on tenant_write on ax.orders
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/sql/25_app_roles.sql:24: WARNING:  pg_trickle_ddl_tracker: ST 3 suspended (SOURCE_DEPENDENCY_AMBIGUOUS) after source DDL on tenant_write on ax.orders
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/sql/25_app_roles.sql:24: WARNING:  pg_trickle_ddl_tracker: ST 1 suspended (SOURCE_DEPENDENCY_AMBIGUOUS) after source DDL on tenant_write on ax.orders
+INFO:  repair_stream_table(ax.st_day_product_status): window state reset: scheduled protected rebuild; frontier reset: scheduled full refresh on next cycle; cdc_infrastructure: verified OK; status reset: ACTIVE, errors cleared
+INFO:  repair_stream_table(ax.st_day_category_status): window state reset: scheduled protected rebuild; frontier reset: scheduled full refresh on next cycle; cdc_infrastructure: verified OK; status reset: ACTIVE, errors cleared
+INFO:  repair_stream_table(ax.st_hour_category_status): window state reset: scheduled protected rebuild; frontier reset: scheduled full refresh on next cycle; cdc_infrastructure: verified OK; status reset: ACTIVE, errors cleared
+                                                                                                   reinitialize_stream_table                                                                                                   
+-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+ repair_stream_table(ax.st_day_product_status): window state reset: scheduled protected rebuild; frontier reset: scheduled full refresh on next cycle; cdc_infrastructure: verified OK; status reset: ACTIVE, errors cleared
+ repair_stream_table(ax.st_day_category_status): window state reset: scheduled protected rebuild; frontier reset: scheduled full refresh on next cycle; cdc_infrastructure: verified OK; status reset: ACTIVE, errors cleared
+ repair_stream_table(ax.st_hour_category_status): window state reset: scheduled protected rebuild; frontier reset: scheduled full refresh on next cycle; cdc_infrastructure: verified OK; status reset: ACTIVE, errors cleared
+(3 rows)
+
+INFO:  Stream table ax.st_day_product_status: needs_reinit is set, performing FULL reinitialization
+INFO:  Stream table ax.st_day_product_status refreshed (FULL)
+INFO:  Stream table ax.st_day_category_status: needs_reinit is set, performing FULL reinitialization
+INFO:  Stream table ax.st_day_category_status refreshed (FULL)
+INFO:  Stream table ax.st_hour_category_status: needs_reinit is set, performing FULL reinitialization
+INFO:  Stream table ax.st_hour_category_status refreshed (FULL)
+ refresh_stream_table 
+----------------------
+ 
+ 
+ 
+(3 rows)
+
+[04:49:34]   took 2s

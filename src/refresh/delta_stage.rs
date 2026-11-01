@@ -143,29 +143,51 @@ impl DeltaStage {
             // Reduce each key to its net change before checking the current
             // owner-visible source row. Without this, an insert followed by a
             // delete in one refresh window loses only its insert image and
-            // leaves an unmatched delete. This is the same first/last
-            // compaction used by persistent CDC buffers.
-            // nosemgrep: rust.spi.run.dynamic-format — qualified_name is a quoted internal identifier.
-            Spi::run(&format!(
-                "DELETE FROM {qualified_name} WHERE change_id IN (\
-                   SELECT change_id FROM (\
-                     SELECT change_id, \
-                            ROW_NUMBER() OVER (PARTITION BY __pgt_row_id ORDER BY change_id) AS rn_asc, \
-                            ROW_NUMBER() OVER (PARTITION BY __pgt_row_id ORDER BY change_id DESC) AS rn_desc, \
-                            FIRST_VALUE(action) OVER (\
-                              PARTITION BY __pgt_row_id ORDER BY change_id\
-                            ) AS first_act, \
-                            LAST_VALUE(action) OVER (\
-                              PARTITION BY __pgt_row_id ORDER BY change_id \
-                              ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING\
-                            ) AS last_act \
-                     FROM {qualified_name} WHERE action IN ('I', 'D')\
-                   ) __pgt_ranked \
-                   WHERE (first_act = 'I' AND last_act = 'D') \
-                      OR (rn_asc > 1 AND rn_desc > 1)\
-                 )"
-            ))
-            .map_err(|e| PgTrickleError::SpiError(e.to_string()))?;
+            // leaves an unmatched delete.
+            //
+            // #54: keyed sources (non-deferrable primary key) use the net-change
+            // rule shared with buffer compaction: keep the earliest D only if the
+            // row existed before the window and the latest I only if it exists
+            // after. The previous first/last rule kept I(old) and I(new) for an
+            // insert-then-update, which direct aggregates counted twice.
+            // Keyless or deferrable-key identities are multisets/transiently
+            // non-unique and keep the previous rule until a count-based reducer
+            // is designed and tested.
+            let keyed = identity_domain == "SCAN_KEY"
+                && Spi::get_one_with_args::<bool>(
+                    "SELECT EXISTS (SELECT 1 FROM pg_catalog.pg_constraint \
+                     WHERE conrelid = $1 AND contype = 'p' AND NOT condeferrable)",
+                    &[dependency.source_relid.into()],
+                )
+                .map_err(|e| PgTrickleError::SpiError(e.to_string()))?
+                .unwrap_or(false);
+            if keyed {
+                // nosemgrep: rust.spi.run.dynamic-format — qualified_name is a quoted internal identifier.
+                Spi::run(&crate::cdc::net_change_reduction_sql(&qualified_name, ""))
+                    .map_err(|e| PgTrickleError::SpiError(e.to_string()))?;
+            } else {
+                // nosemgrep: rust.spi.run.dynamic-format — qualified_name is a quoted internal identifier.
+                Spi::run(&format!(
+                    "DELETE FROM {qualified_name} WHERE change_id IN (\
+                       SELECT change_id FROM (\
+                         SELECT change_id, \
+                                ROW_NUMBER() OVER (PARTITION BY __pgt_row_id ORDER BY change_id) AS rn_asc, \
+                                ROW_NUMBER() OVER (PARTITION BY __pgt_row_id ORDER BY change_id DESC) AS rn_desc, \
+                                FIRST_VALUE(action) OVER (\
+                                  PARTITION BY __pgt_row_id ORDER BY change_id\
+                                ) AS first_act, \
+                                LAST_VALUE(action) OVER (\
+                                  PARTITION BY __pgt_row_id ORDER BY change_id \
+                                  ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING\
+                                ) AS last_act \
+                         FROM {qualified_name} WHERE action IN ('I', 'D')\
+                       ) __pgt_ranked \
+                       WHERE (first_act = 'I' AND last_act = 'D') \
+                          OR (rn_asc > 1 AND rn_desc > 1)\
+                     )"
+                ))
+                .map_err(|e| PgTrickleError::SpiError(e.to_string()))?;
+            }
         }
 
         let access_sql = format!("SELECT 1 FROM {source_table} LIMIT 0");

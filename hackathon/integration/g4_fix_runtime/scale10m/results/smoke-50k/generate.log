@@ -1,0 +1,23 @@
+CREATE SCHEMA
+REVOKE
+CREATE TABLE
+CREATE TABLE
+INSERT 0 1
+CREATE FUNCTION
+CREATE FUNCTION
+INSERT 0 10
+INSERT 0 2000
+INSERT 0 10000
+CREATE PROCEDURE
+DROP INDEX
+psql:/Users/shridharbhat/Downloads/mitigata/AgrregateX-fix54/hackathon/integration/scale/gen_synthetic.sql:157: NOTICE:  ax_gen: orders 1 .. 50000 of 50000 (50000 rows, 0.1 s)
+CALL
+CREATE INDEX
+DO
+VACUUM
+ generated_ids | tenants | seed | zipf_s | shard_tenants | orders_rows | load_s 
+---------------+---------+------+--------+---------------+-------------+--------
+         50000 |      10 |   42 |      1 |               |       50000 |    0.2
+(1 row)
+
+[04:49:31]   took 0s
