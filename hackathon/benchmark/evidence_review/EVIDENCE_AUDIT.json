@@ -1,0 +1,321 @@
+{
+  "source_pr": 57,
+  "source_commit": "b0f360685c33f67516c6ef0c1c6170b1575d14ee",
+  "official_pass": false,
+  "classifications": {
+    "1m_scenario_artifact_consistency": "VALIDATED FROM ARTIFACT",
+    "10m_scenario_artifact_consistency": "VALIDATED FROM ARTIFACT",
+    "10m_dataset_snapshot_consistency": "VALIDATED FROM ARTIFACT",
+    "dataset_execution_authenticity": "REPORTED BUT NOT INDEPENDENTLY RECOMPUTABLE",
+    "matched_run_provenance": "INSUFFICIENT EVIDENCE",
+    "g1_threshold_arithmetic": "VALIDATED FROM ARTIFACT",
+    "g1_percentile_source": "REPORTED BUT NOT INDEPENDENTLY RECOMPUTABLE",
+    "g1_official_qualification": "INSUFFICIENT EVIDENCE",
+    "g2_10m_freshness": "NOT TESTED",
+    "g3_10m_write_safety": "NOT TESTED",
+    "g4_10m_post_mutation": "NOT TESTED",
+    "g5_official_qualification": "INSUFFICIENT EVIDENCE",
+    "growth_arithmetic": "VALIDATED FROM ARTIFACT",
+    "growth_percentile_recomputation": "REPORTED BUT NOT INDEPENDENTLY RECOMPUTABLE",
+    "initial_load_oracle_values": "VALIDATED FROM ARTIFACT",
+    "oracle_execution_authenticity": "REPORTED BUT NOT INDEPENDENTLY RECOMPUTABLE"
+  },
+  "g1": {
+    "1m": {
+      "summary": {
+        "api": "http://127.0.0.1:8095",
+        "orders_total": 1000000,
+        "tenants": 10,
+        "data_end": "2026-10-31T00:00:00Z",
+        "roles": {
+          "largest": [
+            1,
+            340560
+          ],
+          "median": [
+            6,
+            56965
+          ],
+          "smallest": [
+            10,
+            34091
+          ]
+        },
+        "requests": 3600,
+        "errors": 0,
+        "worst_p95_ms": 60.77,
+        "worst_p99_ms": 173.52,
+        "worst_max_ms": 173.52,
+        "scenarios_p95_under_200ms": 72,
+        "scenarios_p95_under_1000ms": 72,
+        "scenarios": 72,
+        "versions": "PostgreSQL 18.6 (Debian 18.6-1.pgdg12+2) on aarch64-unknown-linux-gnu, compiled by gcc (Debian 12.2.0-14+deb12u1) 12.2.0, 64-bit | pg_trickle 0.108.3"
+      },
+      "computed_from_scenarios": {
+        "scenarios": 72,
+        "requests": 3600,
+        "errors": 0,
+        "great": 72,
+        "good": 72,
+        "worst": {
+          "scenario": [
+            "summary",
+            "largest",
+            "90d"
+          ],
+          "p95_ms": 60.77,
+          "tenant_id": 1,
+          "tenant_orders": 340560
+        }
+      },
+      "scenario_findings": [
+        {
+          "status": "VALIDATED FROM ARTIFACT",
+          "detail": "Scenario dimensions, status counters and aggregate latency values are internally consistent; raw request samples are not present.",
+          "scenarios": 72,
+          "requests": 3600,
+          "expected_requests_at_50_each": 3600,
+          "errors": 0,
+          "p95_under_200ms": 72,
+          "p95_under_1000ms": 72,
+          "worst": {
+            "scenario": [
+              "summary",
+              "largest",
+              "90d"
+            ],
+            "p95_ms": 60.77,
+            "tenant_id": 1,
+            "tenant_orders": 340560
+          }
+        }
+      ],
+      "expected_requests_from_n": 3600
+    },
+    "10m": {
+      "summary": {
+        "api": "http://127.0.0.1:8096",
+        "orders_total": 10000000,
+        "tenants": 100,
+        "data_end": "2026-10-31T00:00:00Z",
+        "roles": {
+          "largest": [
+            1,
+            1930247
+          ],
+          "median": [
+            51,
+            37901
+          ],
+          "smallest": [
+            100,
+            19471
+          ]
+        },
+        "requests": 3600,
+        "errors": 0,
+        "worst_p95_ms": 240.56,
+        "worst_p99_ms": 457.32,
+        "worst_max_ms": 457.32,
+        "scenarios_p95_under_200ms": 71,
+        "scenarios_p95_under_1000ms": 72,
+        "scenarios": 72,
+        "versions": "PostgreSQL 18.6 (Debian 18.6-1.pgdg12+2) on aarch64-unknown-linux-gnu, compiled by gcc (Debian 12.2.0-14+deb12u1) 12.2.0, 64-bit | pg_trickle 0.108.3"
+      },
+      "computed_from_scenarios": {
+        "scenarios": 72,
+        "requests": 3600,
+        "errors": 0,
+        "great": 71,
+        "good": 72,
+        "worst": {
+          "scenario": [
+            "top_products",
+            "largest",
+            "90d"
+          ],
+          "p95_ms": 240.56,
+          "tenant_id": 1,
+          "tenant_orders": 1930247
+        }
+      },
+      "scenario_findings": [
+        {
+          "status": "VALIDATED FROM ARTIFACT",
+          "detail": "Scenario dimensions, status counters and aggregate latency values are internally consistent; raw request samples are not present.",
+          "scenarios": 72,
+          "requests": 3600,
+          "expected_requests_at_50_each": 3600,
+          "errors": 0,
+          "p95_under_200ms": 71,
+          "p95_under_1000ms": 72,
+          "worst": {
+            "scenario": [
+              "top_products",
+              "largest",
+              "90d"
+            ],
+            "p95_ms": 240.56,
+            "tenant_id": 1,
+            "tenant_orders": 1930247
+          }
+        }
+      ],
+      "expected_requests_from_n": 3600
+    }
+  },
+  "g5": {
+    "matched_scenarios": 72,
+    "computed": {
+      "under_2x": 66,
+      "under_5x": 71,
+      "median_ratio_from_stored_p95": 1.18,
+      "min_ratio": 0.41,
+      "max_ratio": 5.18,
+      "at_or_over_2x": [
+        [
+          "top_products",
+          "median",
+          "30d"
+        ],
+        [
+          "trends",
+          "largest",
+          "90d"
+        ],
+        [
+          "top_products",
+          "largest",
+          "partial_7d"
+        ],
+        [
+          "summary",
+          "largest",
+          "partial_7d"
+        ],
+        [
+          "breakdown",
+          "largest",
+          "partial_7d"
+        ],
+        [
+          "top_products",
+          "largest",
+          "90d"
+        ]
+      ],
+      "at_or_over_5x": [
+        [
+          "top_products",
+          "largest",
+          "90d"
+        ]
+      ]
+    },
+    "stored_summary_consistent": true,
+    "classification": "VALIDATED FROM ARTIFACT"
+  },
+  "g4": {
+    "initial_load_oracle_lines": [
+      [
+        "st_day_product_status",
+        "0",
+        "0"
+      ],
+      [
+        "st_day_category_status",
+        "0",
+        "0"
+      ],
+      [
+        "st_hour_category_status",
+        "0",
+        "0"
+      ]
+    ],
+    "initial_load_exact_oracle_consistent": true,
+    "api_vs_db_100_tenants": {
+      "all_match": true,
+      "rows": 100,
+      "api_total": 10000000,
+      "db_total": 10000000
+    },
+    "api_oracle_artifact_consistent": true,
+    "post_mutation_correctness": "NOT TESTED \u2014 unresolved G4 reducer defect"
+  },
+  "dataset": {
+    "ten_million_snapshot": {
+      "captured_at": "2026-10-31T23:52:57Z",
+      "version": "PostgreSQL 18.6 (Debian 18.6-1.pgdg12+2) on aarch64-unknown-linux-gnu, compiled by gcc (Debian 12.2.0-14+deb12u1) 12.2.0, 64-bit",
+      "pg_trickle": "0.108.3",
+      "total_orders": 10000000,
+      "generated_orders": 10000000,
+      "distinct_ids": 10000000,
+      "date_min": "2026-08-02",
+      "date_max": "2026-10-30",
+      "days": 90,
+      "db_size": "5674 MB",
+      "gen_params": {
+        "orders": 10000000,
+        "tenants": 100,
+        "seed": 42,
+        "zipf_s": 1,
+        "started_at": "2026-10-31T23:27:13.613784+00:00"
+      },
+      "gen_chunks": {
+        "chunks": 40,
+        "rows": 10000000,
+        "load_s": 40.2
+      }
+    },
+    "tenant_count": 100,
+    "tenant_size_min": 19471,
+    "tenant_size_max": 1930247,
+    "stream_tables": [
+      {
+        "name": "st_day_category_status",
+        "status": "ACTIVE",
+        "mode": "DIFFERENTIAL",
+        "size": "187 MB",
+        "rows": 529273
+      },
+      {
+        "name": "st_day_product_status",
+        "status": "ACTIVE",
+        "mode": "DIFFERENTIAL",
+        "size": "1225 MB",
+        "rows": 3434989
+      },
+      {
+        "name": "st_hour_category_status",
+        "status": "ACTIVE",
+        "mode": "DIFFERENTIAL",
+        "size": "1550 MB",
+        "rows": 4349680
+      }
+    ]
+  },
+  "qualification_gaps": [
+    "Representative synthetic data (seed 42), not organizer data.",
+    "50 stored requests per scenario; acceptance protocol requires at least 200 successful HTTP samples per scenario.",
+    "Only aggregate p50/p95/p99/max/mean are stored; raw per-request timing samples are absent, so nearest-rank percentiles cannot be independently recomputed.",
+    "The 72-case six-window matrix does not itself establish the protocol's complete, exact acceptance matrix unless each named requirement is mapped and approved.",
+    "Stored JSON, host logs, counts, and hashes do not independently authenticate database execution or immutable image provenance.",
+    "G2 sustained commit-to-visible at 10M: NOT TESTED; G3 write safety at 10M: NOT TESTED.",
+    "G4 post-mutation correctness at 10M: NOT TESTED; initial-load oracle does not test incremental updates/cancellations.",
+    "G5 is representative synthetic growth evidence, not qualified official acceptance. Tenant matching is by size rank, not same tenant IDs; the largest tenant grew about 5.7x."
+  ],
+  "limitations": [
+    "The auditor checked artifact relationships and recomputed threshold counts/ratio arithmetic only. It did not contact the database, API, Docker or GitHub Actions.",
+    "G1 shows 71/72 stored p95 values below 200 ms and 72/72 below 1,000 ms with 0 stored errors (50 per scenario).",
+    "G5 summary arithmetic is recomputable from the stored per-scenario p95 values; percentile derivation from raw request samples is not."
+  ],
+  "recommended_demo_statement": "On representative synthetic data, the recorded 10M/100 run completed 3,600 serial HTTP requests across 72 scenarios with 50 samples each and no recorded errors; 71 stored p95 values were below 200 ms and all 72 below 1 s. Stored 10M/1M p95 ratios had median 1.18x, 66 below 2x and 71 below 5x. This is not organizer-data qualification, does not include raw timing samples, and does not establish post-mutation G4 correctness.",
+  "do_not_claim": [
+    "Official G1/G5 acceptance passed",
+    "All scenarios meet the Great threshold",
+    "10M incremental correctness passed after writes/cancellations",
+    "G2 or G3 passed at 10M",
+    "10M organizer-data compatibility"
+  ]
+}
