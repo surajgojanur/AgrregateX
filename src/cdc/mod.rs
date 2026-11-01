@@ -1508,38 +1508,16 @@ pub fn compact_change_buffer(
         return Ok(CompactionResult::Contended);
     }
 
-    // Compact: remove net-zero groups (INSERT→DELETE) and intermediate rows.
-    //
-    // For each __pgt_row_id in the pending LSN range:
-    // - If first_action='I' and last_action='D' → all rows are net no-op
-    // - For remaining groups, keep only first (rn_asc=1) and last (rn_desc=1)
-    //   rows, removing intermediates.
-    //
-    // The delta query pipeline handles 2-row groups (first + last) correctly
-    // via FIRST_VALUE/LAST_VALUE window functions.
-    let compact_sql = format!(
-        "DELETE FROM \"{schema}\".{buf} \
-         WHERE change_id IN (\
-           SELECT change_id FROM (\
-             SELECT change_id, \
-                    ROW_NUMBER() OVER (PARTITION BY __pgt_row_id ORDER BY change_id) AS rn_asc, \
-                    ROW_NUMBER() OVER (PARTITION BY __pgt_row_id ORDER BY change_id DESC) AS rn_desc, \
-                    FIRST_VALUE(action) OVER (\
-                      PARTITION BY __pgt_row_id ORDER BY change_id\
-                    ) AS first_act, \
-                    LAST_VALUE(action) OVER (\
-                      PARTITION BY __pgt_row_id ORDER BY change_id \
-                      ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING\
-                    ) AS last_act \
-             FROM \"{schema}\".{buf} \
-             WHERE action IN ('I', 'D') \
-               AND lsn > '{prev_lsn}'::pg_lsn AND lsn <= '{new_lsn}'::pg_lsn\
-           ) __pgt_ranked \
-           WHERE (first_act = 'I' AND last_act = 'D') \
-              OR (rn_asc > 1 AND rn_desc > 1)\
-         )",
-        schema = change_schema,
-        buf = buf_name,
+    // Compact each keyed row's history to its net change over the window (#54):
+    // keep the earliest D only if the history starts with D (the row existed before)
+    // and the latest I only if it ends with I (the row exists after); delete the rest.
+    // The previous rule kept first + last of every history, which direct aggregates
+    // summed as extra images (I,D,I left a ghost old-group row; D,I,D decremented twice).
+    // This buffer only compacts sources with a non-deferrable primary key (guard above),
+    // so every __pgt_row_id is one row's timeline.
+    let compact_sql = net_change_reduction_sql(
+        &format!("\"{change_schema}\".{buf_name}"),
+        &format!(" AND lsn > '{prev_lsn}'::pg_lsn AND lsn <= '{new_lsn}'::pg_lsn"),
     );
 
     let deleted = Spi::connect_mut(|client| {
@@ -1698,35 +1676,55 @@ pub fn compact_st_change_buffer(
     Ok(deleted)
 }
 
-/// DAG-5: Build the compaction SQL for an ST change buffer.
+/// #54: SQL that reduces each keyed row's change history inside `target` to its net
+/// effect over the window. The earliest `D` survives only if the history starts with `D`
+/// (the row existed before the window); the latest `I` survives only if the history ends
+/// with `I` (the row exists after it). Every other image is deleted.
 ///
-/// Pure function for unit-testability. Generates a DELETE that removes:
-/// - Net-zero groups: first_action='I' and last_action='D' for the same __pgt_row_id.
-/// - Intermediate rows: all rows except the first and last per __pgt_row_id group.
-fn build_st_compact_sql(change_schema: &str, pgt_id: i64, prev_lsn: &str, new_lsn: &str) -> String {
+/// The previous positional rule kept the first and last image of every history. That is
+/// enough for consumers that re-derive the net change from the first/last action
+/// (`diff_scan_change_buffer`), but direct aggregates sum every staged image, so an
+/// `I,D,I` history (insert then update in one window) left a ghost row in the old group
+/// and `D,I,D` (update then delete) decremented twice.
+///
+/// Only valid for keyed identities (`__pgt_row_id` derived from a non-deferrable primary
+/// key or a stream-table row id). Keyless sources hash row content, so identical rows
+/// share an identity and their history is a multiset; they must not use this rule.
+pub(crate) fn net_change_reduction_sql(target: &str, window_filter: &str) -> String {
     format!(
-        "DELETE FROM \"{schema}\".changes_pgt_{id} \
+        "DELETE FROM {target} \
          WHERE change_id IN (\
            SELECT change_id FROM (\
-             SELECT change_id, \
+             SELECT change_id, action, \
                     ROW_NUMBER() OVER (PARTITION BY __pgt_row_id ORDER BY change_id) AS rn_asc, \
-                    ROW_NUMBER() OVER (PARTITION BY __pgt_row_id ORDER BY change_id DESC) AS rn_desc, \
-                    FIRST_VALUE(action) OVER (\
-                      PARTITION BY __pgt_row_id ORDER BY change_id\
-                    ) AS first_act, \
-                    LAST_VALUE(action) OVER (\
-                      PARTITION BY __pgt_row_id ORDER BY change_id \
-                      ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING\
-                    ) AS last_act \
-             FROM \"{schema}\".changes_pgt_{id} \
-             WHERE action IN ('I', 'D') \
-               AND lsn > '{prev_lsn}'::pg_lsn AND lsn <= '{new_lsn}'::pg_lsn\
+                    ROW_NUMBER() OVER (PARTITION BY __pgt_row_id ORDER BY change_id DESC) AS rn_desc \
+             FROM {target} \
+             WHERE action IN ('I', 'D'){window_filter}\
            ) __pgt_ranked \
-           WHERE (first_act = 'I' AND last_act = 'D') \
-              OR (rn_asc > 1 AND rn_desc > 1)\
-         )",
-        schema = change_schema,
-        id = pgt_id,
+           WHERE NOT ((rn_asc = 1 AND action = 'D') OR (rn_desc = 1 AND action = 'I'))\
+         )"
+    )
+}
+
+/// #54: Pure model of [`net_change_reduction_sql`] for one keyed row's history, given in
+/// `change_id` order (`'I'` or `'D'`). Returns which events survive the reduction.
+pub(crate) fn net_change_keep(actions: &[char]) -> Vec<bool> {
+    let last = actions.len().saturating_sub(1);
+    actions
+        .iter()
+        .enumerate()
+        .map(|(i, &a)| (i == 0 && a == 'D') || (i == last && a == 'I'))
+        .collect()
+}
+
+/// DAG-5: Build the compaction SQL for an ST change buffer.
+///
+/// Pure function for unit-testability. Stream-table buffers are keyed by the stream
+/// table's row id, so the keyed net-change reduction applies (#54).
+fn build_st_compact_sql(change_schema: &str, pgt_id: i64, prev_lsn: &str, new_lsn: &str) -> String {
+    net_change_reduction_sql(
+        &format!("\"{change_schema}\".changes_pgt_{pgt_id}"),
+        &format!(" AND lsn > '{prev_lsn}'::pg_lsn AND lsn <= '{new_lsn}'::pg_lsn"),
     )
 }
 
@@ -4334,21 +4332,97 @@ mod tests {
     }
 
     #[test]
-    fn test_build_st_compact_sql_removes_net_zero_groups() {
+    fn test_build_st_compact_sql_keeps_only_net_images() {
         let sql = build_st_compact_sql("pgtrickle_changes", 1, "0/0", "0/FFFF");
         assert!(
-            sql.contains("first_act = 'I' AND last_act = 'D'"),
-            "Should remove net-zero INSERT→DELETE groups, got: {sql}"
+            sql.contains("NOT ((rn_asc = 1 AND action = 'D') OR (rn_desc = 1 AND action = 'I'))"),
+            "Should keep only the earliest D and the latest I per row, got: {sql}"
         );
     }
 
     #[test]
-    fn test_build_st_compact_sql_removes_intermediates() {
+    fn test_build_st_compact_sql_drops_positional_first_last_rule() {
         let sql = build_st_compact_sql("pgtrickle_changes", 1, "0/0", "0/FFFF");
         assert!(
-            sql.contains("rn_asc > 1 AND rn_desc > 1"),
-            "Should remove intermediate rows, got: {sql}"
+            !sql.contains("rn_asc > 1 AND rn_desc > 1"),
+            "The positional first/last rule leaves extra images for direct aggregates (#54), got: {sql}"
         );
+    }
+
+    #[test]
+    fn test_net_change_reduction_sql_scopes_target_and_window() {
+        let sql = net_change_reduction_sql("pg_temp.\"__pgt_cdc_1_2\"", " AND lsn > '0/1'::pg_lsn");
+        assert!(sql.starts_with("DELETE FROM pg_temp.\"__pgt_cdc_1_2\" "), "got: {sql}");
+        assert!(sql.contains("FROM pg_temp.\"__pgt_cdc_1_2\" WHERE action IN ('I', 'D') AND lsn > '0/1'::pg_lsn"), "got: {sql}");
+        assert!(sql.contains("PARTITION BY __pgt_row_id ORDER BY change_id)"), "got: {sql}");
+    }
+
+    /// Signed group images that survive the reduction for one keyed history.
+    fn surviving_delta(hist: &[(char, &'static str)]) -> Vec<(i64, &'static str)> {
+        let actions: Vec<char> = hist.iter().map(|(a, _)| *a).collect();
+        let mut out: Vec<(i64, &'static str)> = hist
+            .iter()
+            .zip(net_change_keep(&actions))
+            .filter(|(_, keep)| *keep)
+            .map(|((a, g), _)| (if *a == 'I' { 1 } else { -1 }, *g))
+            .collect();
+        out.sort();
+        out
+    }
+
+    #[test]
+    fn test_net_change_keep_truth_table() {
+        // (history, expected surviving signed images) -- mirrors reducer_model.py (#54).
+        let cases: Vec<(Vec<(char, &'static str)>, Vec<(i64, &'static str)>)> = vec![
+            (vec![('I', "paid")], vec![(1, "paid")]),
+            (vec![('D', "paid")], vec![(-1, "paid")]),
+            (vec![('I', "paid"), ('D', "paid")], vec![]),
+            (vec![('D', "paid"), ('I', "cancelled")], vec![(-1, "paid"), (1, "cancelled")]),
+            // #50 Case A / Fedora: insert then update in one window -> no ghost "paid".
+            (vec![('I', "paid"), ('D', "paid"), ('I', "cancelled")], vec![(1, "cancelled")]),
+            (vec![('I', "paid"), ('D', "paid"), ('I', "paid")], vec![(1, "paid")]),
+            // update then delete -> exactly one decrement of the original group.
+            (vec![('D', "paid"), ('I', "shipped"), ('D', "shipped")], vec![(-1, "paid")]),
+            (
+                vec![('D', "paid"), ('I', "shipped"), ('D', "shipped"), ('I', "cancelled")],
+                vec![(-1, "paid"), (1, "cancelled")],
+            ),
+            (
+                vec![('I', "paid"), ('D', "paid"), ('I', "shipped"), ('D', "shipped")],
+                vec![],
+            ),
+        ];
+        for (hist, mut want) in cases {
+            want.sort();
+            assert_eq!(surviving_delta(&hist), want, "history {hist:?}");
+        }
+    }
+
+    #[test]
+    fn test_net_change_keep_matches_net_effect_for_all_keyed_histories() {
+        // A keyed row's history alternates I/D. For every such history up to length 8,
+        // the survivors must be exactly: -before (iff it existed before) +after (iff it exists after).
+        let labels = ["g0", "g1", "g2", "g3", "g4", "g5", "g6", "g7"];
+        for len in 1..=8usize {
+            for start in ['I', 'D'] {
+                let hist: Vec<(char, &'static str)> = (0..len)
+                    .map(|i| {
+                        let a = if (i % 2 == 0) == (start == 'I') { 'I' } else { 'D' };
+                        // a D carries the image the previous I created; a fresh I starts a new image
+                        (a, labels[if a == 'D' && i > 0 { i - 1 } else { i }])
+                    })
+                    .collect();
+                let mut want = Vec::new();
+                if hist[0].0 == 'D' {
+                    want.push((-1, hist[0].1));
+                }
+                if hist[len - 1].0 == 'I' {
+                    want.push((1, hist[len - 1].1));
+                }
+                want.sort();
+                assert_eq!(surviving_delta(&hist), want, "history {hist:?}");
+            }
+        }
     }
 
     #[test]
