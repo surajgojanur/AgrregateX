@@ -35,6 +35,8 @@ services:
       AX_DEMO_PASSWORD: ${AX_DEMO_PASSWORD:-demo1234}
       AX_ENABLE_DEMO_WRITES: "1"
       AX_AUTH_DISABLED: ${AX_AUTH_DISABLED:-1}   # 1 = no login (operator view). Set 0 to demo tenant isolation.
+    volumes:
+      - ./app/config:/srv/config:ro   # B-4 metric registry, editable live
     ports: ["127.0.0.1:8090:8000"]
     depends_on: { db: { condition: service_healthy } }
   writer:

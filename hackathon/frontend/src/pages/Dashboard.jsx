@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { api } from '../api/client'
 import Icon from '../components/ui/Icon'
 import { DataSourceIndicator, PanelSourceBadge, QueryFreshness } from '../components/analytics/AnalyticsProvenance'
+import ConfigMetrics from '../components/analytics/ConfigMetrics'
 import { ANALYTICS_FAMILIES, classifyAnalyticsSet, dashboardQueryKey } from '../lib/analyticsProvenance'
 import { createDashboardRequestGate } from '../lib/dashboardRequestGate'
 import { buildDashboardResults, createLoadingPanels } from '../lib/dashboardState'
@@ -431,6 +432,11 @@ export default function Dashboard() {
           {b?.status === 'success' && b.data.by === 'status' && <p className="faint ax-note">Status view shows gross order value per status, including cancelled and refunded.</p>}
         </section>
       </div>
+
+      <section className="panel ax-panel">
+        <div className="panel__head"><span className="panel__title">Config-driven metrics (B-4)</span></div>
+        <ConfigMetrics tenant={tenant} range={range} refreshKey={state.receivedAt} />
+      </section>
 
       <div className="ax-grid2">
         <section className="panel ax-panel">

@@ -10,7 +10,7 @@ from fastapi.responses import FileResponse, JSONResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 
-from . import auth, config, db, engine, limits, queries, raw_queries
+from . import auth, config, db, engine, limits, metric_registry, queries, raw_queries
 
 UTC = timezone.utc
 
@@ -71,7 +71,7 @@ def window(from_: str | None = Query(None, alias="from"), to: str | None = Query
 
 
 def _meta(tenant_id: int, start: datetime, end: datetime, w: queries.Window,
-          *, family: str, breakdown_by: str | None = None, **extra) -> dict:
+          *, family: str, breakdown_by: str | None = None, tables: list[str] | None = None, **extra) -> dict:
     mode = config.ANALYTICS_READ_MODE
     rollup_sources = {
         "summary": ["ax.st_day_product_status", "ax.orders"],
@@ -85,7 +85,7 @@ def _meta(tenant_id: int, start: datetime, end: datetime, w: queries.Window,
         source = {"stream_table_range": None,
                   "raw_edge_ranges": [[start.isoformat(), end.isoformat()]]}
         needs_products = family == "top_products" or (family == "breakdown" and breakdown_by == "category")
-        source_tables = ["ax.orders", "ax.products"] if needs_products else ["ax.orders"]
+        source_tables = tables or (["ax.orders", "ax.products"] if needs_products else ["ax.orders"])
         provenance = {"source_tables": source_tables, "uses_stream_tables": False,
                       "consistency": "single_sql_statement_snapshot",
                       "consistency_scope": "per_http_response_only"}
@@ -97,9 +97,9 @@ def _meta(tenant_id: int, start: datetime, end: datetime, w: queries.Window,
         source = {"stream_table_range": [w.full_lo.replace(tzinfo=UTC).isoformat(),
                                          w.full_hi.replace(tzinfo=UTC).isoformat()] if has_full else None,
                   "raw_edge_ranges": edges}
-        source_key = f"trends_{extra.get('grain')}" if family == "trends" else \
+        source_key = None if tables else f"trends_{extra.get('grain')}" if family == "trends" else \
                      f"breakdown_{breakdown_by}" if family == "breakdown" else family
-        provenance = {"source_tables": rollup_sources[source_key],
+        provenance = {"source_tables": tables or rollup_sources[source_key],
                       "uses_stream_tables": True, "consistency": "single_sql_statement_snapshot",
                       "consistency_scope": "per_http_response_only"}
     return {"tenant_id": tenant_id, "shard": db.shard_for(tenant_id).name,
@@ -248,6 +248,52 @@ async def live_write(body: LiveWrite, tenant_id: int = Depends(tenant_path)):
     if "error" in result:
         raise HTTPException(404, result["error"])
     return {"tenant_id": tenant_id, **result}
+
+
+# ── B-4: config-driven metrics (derived from the existing stream tables) ────
+def _registry():
+    try:
+        return metric_registry.REGISTRY.get()
+    except metric_registry.ConfigError as exc:  # fail closed: no metric is served from an invalid config
+        raise HTTPException(503, {"message": "The metric registry config is invalid, so no config-driven metric "
+                                             "is served until it is fixed. Other endpoints are unaffected.",
+                                  "errors": exc.errors}) from None
+
+
+@app.get("/api/metrics")
+def list_metrics(_user: auth.User = Depends(auth.current_user)):
+    reg = _registry()
+    return {"schema": metric_registry.SCHEMA, "registry_version": reg.version,
+            "kind": "derived_from_existing_stream_tables", "metrics": [m.public() for m in reg.metrics.values()]}
+
+
+def _run_metric(tenant_id: int, w: queries.Window, group_by: str) -> tuple[list, dict | None]:
+    mode = config.ANALYTICS_READ_MODE
+    with limits.LIMITER.slot(tenant_id), db.tenant_tx("api", tenant_id) as conn:
+        rows = metric_registry.fetch(conn, tenant_id, w, group_by, mode)
+    fresh = engine.freshness_brief(db.shard_for(tenant_id)) if mode == "rollup" else None
+    return rows, fresh
+
+
+@app.get("/api/tenants/{tenant_id}/metrics/{metric_id}")
+async def metric_value(metric_id: str, tenant_id: int = Depends(tenant_path), win=Depends(window),
+                       group_by: str = "total", limit: int = Query(20, ge=1, le=50)):
+    reg = _registry()
+    m = reg.metrics.get(metric_id)
+    if m is None:
+        raise HTTPException(404, f"Unknown metric {metric_id!r}. GET /api/metrics lists the configured metrics.")
+    if group_by not in m.group_by:
+        raise HTTPException(422, f"Metric {m.id!r} supports group_by: {', '.join(m.group_by)}.")
+    unit = metric_registry.GROUPINGS[group_by].unit
+    if unit == "hour" and win[1] - win[0] > timedelta(days=config.MAX_HOURLY_RANGE_DAYS):
+        raise HTTPException(422, f"Hourly grouping is limited to {config.MAX_HOURLY_RANGE_DAYS} days.")
+    w = queries.split(*win, unit)
+    rows, fresh = await run_in_threadpool(_run_metric, tenant_id, w, group_by)
+    result = metric_registry.evaluate(m, rows, group_by, limit)
+    return _meta(tenant_id, *win, w, family="metric",
+                 tables=metric_registry.source_tables(group_by, config.ANALYTICS_READ_MODE),
+                 freshness=fresh, registry_version=reg.version, metric=m.public(), group_by=group_by,
+                 **result)
 
 
 # ── operator ───────────────────────────────────────────────────────────────
