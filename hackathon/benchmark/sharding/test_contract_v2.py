@@ -4,7 +4,7 @@ import unittest
 from pathlib import Path
 from unittest.mock import patch
 import session
-from preflight import check
+from preflight import check, disposable_volume_free_bytes
 from verify_oracles import clean, TABLES
 
 class ContractV2(unittest.TestCase):
@@ -16,6 +16,19 @@ class ContractV2(unittest.TestCase):
     def test_resource_or_ownership_gate_fails(self):
         for rows,ram,swap in [([],4000,0),([{'Labels':{}}],4000,0),([],1000,5000)]:
             with self.assertRaises(ValueError):check(rows,ram,swap,10*1024**3)
+    def test_disk_gate_measures_each_database_volume_mountpoint(self):
+        volumes = [{'Mountpoint': '/data/a'}, {'Mountpoint': '/data/b'}]
+        sizes = {'/data/a': 8 * 1024**3, '/data/b': 4 * 1024**3}
+        measured = disposable_volume_free_bytes(volumes, lambda path: type('Usage', (), {'free': sizes[path]})())
+        self.assertEqual(measured, 4 * 1024**3)
+        owned = [{'Labels': {'io.aggregatex.disposable': 'true',
+                             'com.docker.compose.project': 'aggregatex-sharded'}} for _ in volumes]
+        with self.assertRaisesRegex(ValueError, '5GiB'):
+            check(owned, 4096, 0, measured)
+
+    def test_disk_gate_fails_closed_when_volume_mountpoint_is_missing(self):
+        with self.assertRaisesRegex(ValueError, 'mountpoint'):
+            disposable_volume_free_bytes([{'Name': 'shard-data'}], lambda _path: None)
     def test_oracle_missing_duplicate_nonzero_rejected(self):
         good=[{'stream_table':t,'missing_in_st':0,'extra_in_st':0} for t in TABLES]
         self.assertTrue(clean(good));self.assertFalse(clean([]));self.assertFalse(clean(good[:2]));self.assertFalse(clean([good[0]]*3))
