@@ -4368,10 +4368,15 @@ mod tests {
         );
     }
 
+    /// One change event of a keyed row: action ('I' or 'D') and the group its image falls into.
+    type Event = (char, &'static str);
+    /// A signed group image left after reduction: +1 for an I image, -1 for a D image.
+    type SignedImage = (i64, &'static str);
+
     /// Signed group images that survive the reduction for one keyed history.
-    fn surviving_delta(hist: &[(char, &'static str)]) -> Vec<(i64, &'static str)> {
+    fn surviving_delta(hist: &[Event]) -> Vec<SignedImage> {
         let actions: Vec<char> = hist.iter().map(|(a, _)| *a).collect();
-        let mut out: Vec<(i64, &'static str)> = hist
+        let mut out: Vec<SignedImage> = hist
             .iter()
             .zip(net_change_keep(&actions))
             .filter(|(_, keep)| *keep)
@@ -4384,7 +4389,7 @@ mod tests {
     #[test]
     fn test_net_change_keep_truth_table() {
         // (history, expected surviving signed images) -- mirrors reducer_model.py (#54).
-        let cases: Vec<(Vec<(char, &'static str)>, Vec<(i64, &'static str)>)> = vec![
+        let cases: Vec<(Vec<Event>, Vec<SignedImage>)> = vec![
             (vec![('I', "paid")], vec![(1, "paid")]),
             (vec![('D', "paid")], vec![(-1, "paid")]),
             (vec![('I', "paid"), ('D', "paid")], vec![]),
@@ -4438,7 +4443,7 @@ mod tests {
         let labels = ["g0", "g1", "g2", "g3", "g4", "g5", "g6", "g7"];
         for len in 1..=8usize {
             for start in ['I', 'D'] {
-                let hist: Vec<(char, &'static str)> = (0..len)
+                let hist: Vec<Event> = (0..len)
                     .map(|i| {
                         let a = if (i % 2 == 0) == (start == 'I') {
                             'I'
